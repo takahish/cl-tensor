@@ -21,19 +21,21 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with gsl-examples. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL"
-  (:use "CL" "SB-ALIEN" "SB-C-CALL")
-  (:export 'gsl-stats-mean
-           'gsl-stats-variance
-           'gsl-stats-variance-m
-           'gsl-stats-sd
-           'gsl-stats-sd-m
-           'gsl-stats-tss
-           'gsl-stats-tss-m
-           'gsl-stats-variance-with-fixed-mean
-           'gsl-stats-sd-with-fixed-mean)))
+(cl:defpackage "SB-GSL-STATS"
+  (:use "CL"
+        "SB-ALIEN"
+        "SB-C-CALL")
+  (:export "GSL-STATS-MEAN"
+           "GSL-STATS-VARIANCE"
+           "GSL-STATS-VARIANCE-M"
+           "GSL-STATS-SD"
+           "GSL-STATS-SD-M"
+           "GSL-STATS-TSS"
+           "GSL-STATS-TSS-M"
+           "GSL-STATS-VARIANCE-WITH-FIXED-MEAN"
+           "GSL-STATS-SD-WITH-FIXED-MEAN"))
 
-(cl:in-package "SB-GSL")
+(cl:in-package "SB-GSL-STATS")
 
 ;;; (gsl-stats-mean data stride n)
 ;;;   This function retruns the arithmetic mean of data, a dataset of length n with stride
