@@ -1,4 +1,4 @@
-;;;; sbcl-gsl/random-number-distributions.lisp
+;;;; sbcl-gsl/random-number-generation.lisp
 ;;;;
 ;;;; The library provides a large collection of random number generations which
 ;;;; can be accessed through a uniform interface. Environment variables allow
@@ -18,7 +18,7 @@
 ;;;; GNU General Public License for more details.
 ;;;;
 ;;;; You should have received a copy of the GNU General Public License
-;;;; along with gsl-examples. If not, see http://www.gnu.org/licenses/.
+;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
 (cl:defpackage "SB-GSL-RNG"
   (:use "CL"
@@ -26,6 +26,68 @@
         "SB-C-CALL")
   (:export "GSL-RNG-TYPE"
            "GSL-RNG"
+           "GSL-RNG-BOROSH13"
+           "GSL-RNG-COVEYOU"
+           "GSL-RNG-CMRG"
+           "GSL-RNG-FISHMAN18"
+           "GSL-RNG-FISHMAN20"
+           "GSL-RNG-FISHMAN2X"
+           "GSL-RNG-GFSR4"
+           "GSL-RNG-KNUTHRAN"
+           "GSL-RNG-KNUTHRAN2"
+           "GSL-RNG-KNUTHRAN2002"
+           "GSL-RNG-LECUYER21"
+           "GSL-RNG-MINSTD"
+           "GSL-RNG-MRG"
+           "GSL-RNG-MT19937"
+           "GSL-RNG-MT19937_1999"
+           "GSL-RNG-MT19937_1998"
+           "GSL-RNG-R250"
+           "GSL-RNG-RAN0"
+           "GSL-RNG-RAN1"
+           "GSL-RNG-RAN2"
+           "GSL-RNG-RAN3"
+           "GSL-RNG-RAND"
+           "GSL-RNG-RAND48"
+           "GSL-RNG-RANDOM128_BSD"
+           "GSL-RNG-RANDOM128_GLIBC2"
+           "GSL-RNG-RANDOM128_LIBC5"
+           "GSL-RNG-RANDOM256_BSD"
+           "GSL-RNG-RANDOM256_GLIBC2"
+           "GSL-RNG-RANDOM256_LIBC5"
+           "GSL-RNG-RANDOM32_BSD"
+           "GSL-RNG-RANDOM32_GLIBC2"
+           "GSL-RNG-RANDOM32_LIBC5"
+           "GSL-RNG-RANDOM64_BSD"
+           "GSL-RNG-RANDOM64_GLIBC2"
+           "GSL-RNG-RANDOM64_LIBC5"
+           "GSL-RNG-RANDOM8_BSD"
+           "GSL-RNG-RANDOM8_GLIBC2"
+           "GSL-RNG-RANDOM8_LIBC5"
+           "GSL-RNG-RANDOM_BSD"
+           "GSL-RNG-RANDOM_GLIBC2"
+           "GSL-RNG-RANDOM_LIBC5"
+           "GSL-RNG-RANDU"
+           "GSL-RNG-RANF"
+           "GSL-RNG-RANLUX"
+           "GSL-RNG-RANLUX389"
+           "GSL-RNG-RANLXD1"
+           "GSL-RNG-RANLXD2"
+           "GSL-RNG-RANLXS0"
+           "GSL-RNG-RANLXS1"
+           "GSL-RNG-RANLXS2"
+           "GSL-RNG-RANMAR"
+           "GSL-RNG-SLATEC"
+           "GSL-RNG-TAUS"
+           "GSL-RNG-TAUS2"
+           "GSL-RNG-TAUS113"
+           "GSL-RNG-TRANSPUTER"
+           "GSL-RNG-TT800"
+           "GSL-RNG-UNI"
+           "GSL-RNG-UNI32"
+           "GSL-RNG-VAX"
+           "GSL-RNG-WATERMAN14"
+           "GSL-RNG-ZUF"
            "GSL-RNG-DEFAULT"
            "GSL-RNG-DEFAULT-SEED"
            "GSL-RNG-ALLOC"
@@ -66,6 +128,72 @@
     (struct gsl-rng
             (type (* (struct gsl-rng-type)))
             (state (* t))))
+
+;;; The library provides a large number of generators of different types, including
+;;; simulation quality generators, generators provided for compatibility with other
+;;; libraries and historical generators from the past.
+(define-alien-variable gsl-rng-borosh13 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-coveyou (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-cmrg (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-fishman18 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-fishman20 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-fishman2x (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-gfsr4 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-knuthran (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-knuthran2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-knuthran2002 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-lecuyer21 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-minstd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-mrg (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-mt19937 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-mt19937_1999 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-mt19937_1998 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-r250 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ran0 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ran1 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ran2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ran3 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-rand (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-rand48 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random128_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random128_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random128_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random256_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random256_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random256_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random32_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random32_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random32_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random64_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random64_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random64_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random8_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random8_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random8_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random_bsd (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random_glibc2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-random_libc5 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-randu (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranf (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlux (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlux389 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlxd1 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlxd2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlxs0 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlxs1 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranlxs2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-ranmar (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-slatec (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-taus (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-taus2 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-taus113 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-transputer (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-tt800 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-uni (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-uni32 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-vax (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-waterman14 (* (struct gsl-rng-type)))
+(define-alien-variable gsl-rng-zuf (* (struct gsl-rng-type)))
 
 ;;; gsl-rng-default
 ;;; gsl-rng-default-seed
@@ -176,7 +304,7 @@
     (array (* (struct gsl-rng-type)) nil))
 
 ;;; (gsl-rng-env-setup)
-;;;   This function reads the environment variables gsl-rng-type and gsl-rng-seed and
+;;;   This function reads the environment variables GSL_RNG_TYPE and GSL_RNG_SEED and
 ;;;   uses their values to set the corresponding library variables gsl-rng-default and
 ;;;   gsl-rng-default-seed. These globa variables are defined as follows,
 ;;;
@@ -184,10 +312,10 @@
 ;;;     (gsl-rng-default-seed unsigned-long)
 ;;;
 ;;;   The environment variable GSL_RNG_TYPE should be the name of a generator, such
-;;;   as taus or mt19937. The environment variable GSL_RNG_TYPE should contain the
+;;;   as taus or mt19937. The environment variable GSL_RNG_SEED should contain the
 ;;;   desired seed value. It is converted to an unsigned-long using the C library
 ;;;   function strtoul.
-;;;   If you don't specify a generator for gsl-rng-type then gsl-rng-mt19937 is used as
+;;;   If you don't specify a generator for GSL_RNG_TYPE then gsl-rng-mt19937 is used as
 ;;;   the default. The initial value of gsl-rng-default-seed is zero.
 (define-alien-routine gsl-rng-env-setup
     (* (struct gsl-rng-type)))
