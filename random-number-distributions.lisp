@@ -65,7 +65,17 @@
            "GSL-CDF-TDIST-PINV"
            "GSL-CDF-TDIST-QINV"
            "GSL-RAN-DIR-2D"
-           "GSL-RAN-DIR-2D-TRIG-METHOD"))
+           "GSL-RAN-DIR-2D-TRIG-METHOD"
+           "GSL-RAN-POISSON"
+           "GSL-RAN-POISSON-PDF"
+           "GSL-CDF-POISSON-P"
+           "GSL-CDF-POISSON-Q"
+           "GSL-RAN-BERNOULLI"
+           "GSL-RAN-BERNOULLI-PDF"
+           "GSL-RAN-BINOMIAL"
+           "GSL-RAN-BINOMIAL-PDF"
+           "GSL-CDF-BINOMIAL-P"
+           "GSL-CDF-BINOMIAL-Q"))
 
 (cl:in-package "SB-GSL-RAN")
 
@@ -448,6 +458,101 @@
   (rng (* (struct gsl-rng)))
   (x (* double))
   (y (* double)))
+
+;;; The Poission Distribution
+
+;;; (gsl-ran-poisson rng mu)
+;;;   This function returns a random integer from the Poisson distribution with mean mu.
+(define-alien-routine gsl-ran-poisson
+    unsigned-int
+  (rng (* (struct gsl-rng)))
+  (mu double))
+
+;;; (gsl-ran-possion-pdf k mu)
+;;;   This function computes the probability p(k) of obtaining k from a Poisson distribution
+;;;   with mean mu.
+(define-alien-routine gsl-ran-poisson-pdf
+    double
+  (k unsigned-int)
+  (mu double))
+
+;;; (gsl-cdf-poisson-p k mu)
+;;; (gsl-cdf-poisson-q k mu)
+;;;   These functions compute the cumulative distribution function P(k), Q(k) for the
+;;;   Poisson distribution with parameter mu.
+;;;
+;;; define-alien-routine macro automatically try to find c-function name with lower case
+;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
+;;; But cdf functions have partially upper case letter, so these functions are directly
+;;; difined by defun.
+(progn
+  ;; function gsl-cdf-poisson-p for c-function "gsl_cdf_poisson_P".
+  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-p))
+  (defun gsl-cdf-poisson-p (k mu)
+    (with-alien ((gsl-cdf-poisson-p (function double unsigned-int double)
+                                    :extern "gsl_cdf_poisson_P"))
+      (values (alien-funcall gsl-cdf-poisson-p k mu))))
+  ;; function gsl-cdf-poisson-q for c-function "gsl_cdf_poisson_Q".
+  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-q))
+  (defun gsl-cdf-poisson-q (k mu)
+    (with-alien ((gsl-cdf-poisson-q (function double unsigned-int double)
+                                    :extern "gsl_cdf_poisson_Q"))
+      (values (alien-funcall gsl-cdf-poisson-q k mu)))))
+
+;;; The Bernoulli Distribution
+
+;;; (gsl-ran-bernoulli rng p)
+;;;   This function returns either 0 or 1, the result of a Bernoulli trial with probability p.
+(define-alien-routine gsl-ran-bernoulli
+    unsigned-int
+  (rng (* (struct gsl-rng)))
+  (p double))
+
+;;; (gsl-ran-bernoulli-pdf k p)
+;;;   This function computes the probability p(k) of obtaining k from a Bernoulli distribution
+;;;   with probability parameter p.
+(define-alien-routine gsl-ran-bernoulli-pdf
+    double
+  (k unsigned-int)
+  (p double))
+
+;;; The Binomial Distribution
+
+;;; (gsl-ran-binomial rng p n)
+;;;   This function returns a random integer from the binomial distribution, the number
+;;;   of successes in n independent trials with probability p.
+(define-alien-routine gsl-ran-binomial
+    unsigned-int
+  (rng (* (struct gsl-rng)))
+  (p double)
+  (n unsigned-int))
+
+;;; (gsl-ran-binomial-pdf k p n)
+;;;   This function computes the probability p(k) of obtaining k from a binomial distribution
+;;;   with parameters p and n.
+(define-alien-routine gsl-ran-binomial-pdf
+    double
+  (k unsigned-int)
+  (p double)
+  (n unsigned-int))
+
+;;; (gsl-cdf-binomial-p k p n)
+;;; (gsl-cdf-binomial-q k p n)
+;;;   These functions compute the cumulative distribution functions P(k), Q(k) for the
+;;;   binomial distribution with parameters p and n.
+(progn
+  ;; function gsl-cdf-binomial-p for c-function "gsl_cdf_binomial_P".
+  (declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-p))
+  (defun gsl-cdf-binomial-p (k p n)
+   (with-alien ((gsl-cdf-binomial-p (function double unsigned-int double unsigned-int)
+                                    :extern "gsl_cdf_binomial_P"))
+     (values (alien-funcall gsl-cdf-binomial-p k p n))))
+  ;; function gsl-cdf-binomial-q for c-function "gsl_cdf_binomial_Q".
+  (declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-q))
+  (defun gsl-cdf-binomial-q (k p n)
+    (with-alien ((gsl-cdf-binomial-q (function double unsigned-int double unsigned-int)
+                                     :extern "gsl_cdf_binomial_Q"))
+      (values (alien-funcall gsl-cdf-binomial-q k p n)))))
 
 ;;; (test-gsl-ran)
 ;;;   This function do tests.
