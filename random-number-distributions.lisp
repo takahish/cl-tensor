@@ -31,7 +31,7 @@
            "GSL-RAN-GAUSSIAN-RATIO-METHOD"
            "GSL-RAN-UGAUSSIAN"
            "GSL-RAN-UGAUSSIAN-PDF"
-           "GSL-RAN-UGAUSSIAN-RATIO-METHODN"
+           "GSL-RAN-UGAUSSIAN-RATIO-METHOD"
            "GSL-CDF-GAUSSIAN-P"
            "GSL-CDF-GAUSSIAN-Q"
            "GSL-CDF-GAUSSIAN-PINV"
@@ -75,14 +75,65 @@
            "GSL-RAN-BINOMIAL"
            "GSL-RAN-BINOMIAL-PDF"
            "GSL-CDF-BINOMIAL-P"
-           "GSL-CDF-BINOMIAL-Q"))
+           "GSL-CDF-BINOMIAL-Q"
+           "RAN-GAUSSIAN"
+           "RAN-GAUSSIAN-PDF"
+           "RAN-GAUSSIAN-ZIGGURAT"
+           "RAN-GAUSSIAN-RATIO-METHOD"
+           "RAN-UGAUSSIAN"
+           "RAN-UGAUSSIAN-PDF"
+           "RAN-UGAUSSIAN-RATIO-METHOD"
+           "CDF-GAUSSIAN-P"
+           "CDF-GAUSSIAN-Q"
+           "CDF-GAUSSIAN-PINV"
+           "CDF-GAUSSIAN-QINV"
+           "CDF-UGAUSSIAN-P"
+           "CDF-UGAUSSIAN-Q"
+           "CDF-UGAUSSIAN-PINV"
+           "CDF-UGAUSSIAN-QINV"
+           "RAN-GAUSSIAN-TAIL"
+           "RAN-GAUSSIAN-TAIL-PDF"
+           "RAN-UGAUSSIAN-TAIL"
+           "RAN-UGAUSSIAN-TAIL-PDF"
+           "RAN-BIVARIATE-GAUSSIAN"
+           "RAN-BIVARIATE-GAUSSIAN-PDF"
+           "RAN-EXPONENTIAL"
+           "RAN-EXPONENTIAL-PDF"
+           "CDF-EXPONENTIAL-P"
+           "CDF-EXPONENTIAL-Q"
+           "CDF-EXPONENTIAL-PINV"
+           "CDF-EXPONENTIAL-QINV"
+           "RAN-LAPLACE"
+           "RAN-LAPLACE-PDF"
+           "CDF-LAPLACE-P"
+           "CDF-LAPLACE-Q"
+           "CDF-LAPLACE-PINV"
+           "CDF-LAPLACE-QINV"
+           "RAN-TDIST"
+           "RAN-TDIST-PDF"
+           "CDF-TDIST-P"
+           "CDF-TDIST-Q"
+           "CDF-TDIST-PINV"
+           "CDF-TDIST-QINV"
+           "RAN-DIR-2D"
+           "RAN-DIR-2D-TRIG-METHOD"
+           "RAN-POISSON"
+           "RAN-POISSON-PDF"
+           "CDF-POISSON-P"
+           "CDF-POISSON-Q"
+           "RAN-BERNOULLI"
+           "RAN-BERNOULLI-PDF"
+           "RAN-BINOMIAL"
+           "RAN-BINOMIAL-PDF"
+           "CDF-BINOMIAL-P"
+           "CDF-BINOMIAL-Q"))
 
 (cl:in-package "SB-GSL-RAN")
 
 ;;; The Gaussian Distribution
 
 ;;; (gsl-ran-gaussian rng sigma)
-;;;   This function returns a Gaussian random rariate, with mean zero and standard
+;;;   This function returns a Gaussian random variate, with mean zero and standard
 ;;;   deviation sigma. Use the transformation z = mu + x on the numbers returned
 ;;;   by gsl-ran-gaussian to obtain a Gaussian distribution with mean mu. This
 ;;;   function uses the Box-Muller algorithm which requires two calls to the random
@@ -92,13 +143,39 @@
   (rng (* (struct gsl-rng)))
   (sigma double))
 
-;;; (gsl-ran-gaussian-pdf rng sigma)
+(defun gen-ran (n fn &rest args)
+  "This function returns n random variates using gsl random umber generation.
+If it is needed to chage type and seed, set the environment variables
+GSL_RNG_TYPE and GSL_RNG_SEED."
+  (let ((acc (make-array n :initial-element 0.0d0 :element-type 'double-float)))
+    (with-alien ((rng-type (* (struct gsl-rng-type)))
+                 (rng (* (struct gsl-rng))))
+      (gsl-rng-env-setup)
+      (setf rng-type gsl-rng-default)
+      (setf rng (gsl-rng-alloc rng-type))
+      (dotimes (i n)
+        (setf (aref acc i) (coerce (apply fn (cons rng args)) 'double-float)))
+      (gsl-rng-free rng)
+      acc)))
+
+(defun ran-gaussian (n sigma)
+  "This function returns n Gaussian random variates, with mean zero and standard
+deviation sigma. Use the transformation z = mu + x on the numbers returned
+by ran-gaussian to obtain a Gaussian distribution with mean mu."
+  (gen-ran n #'gsl-ran-gaussian (coerce sigma 'double-float)))
+
+;;; (gsl-ran-gaussian-pdf x sigma)
 ;;;   This function computes the probability density p(x) at x for a Gaussian distribution
 ;;;   with standard deviation sigma.
 (define-alien-routine gsl-ran-gaussian-pdf
     double
   (x double)
   (sigma double))
+
+(defun ran-gaussian-pdf (x sigma)
+  "This function computes the probability density p(x) at x for a Gaussian distribution
+with standard deviation sigma."
+  (gsl-ran-gaussian-pdf (coerce x 'double-float) (coerce sigma 'double-float)))
 
 ;;; (gsl-ran-gaussian-ziggurat rng sigma)
 ;;; (gsl-ran-gaussian-ratio-method rng sigma)
@@ -115,9 +192,20 @@
   (rng (* (struct gsl-rng)))
   (sigma double))
 
+(defun ran-gaussian-ziggurat (n sigma)
+  "This function computes n Gaussian random variates using the alternative Marsaglia-
+Tsang ziggurat methods. The Ziggurat algorithm is the fastest available algorithm
+in most cases."
+  (gen-ran n #'gsl-ran-gaussian-ziggurat (coerce sigma 'double-float)))
+
+(defun ran-gaussian-ratio-method (n sigma)
+  "This function computes n Gaussian random variates using the alternative Kinderman-
+Monahoan-Leva ratio methods."
+  (gen-ran n #'gsl-ran-gaussian-ratio-method (coerce sigma 'double-float)))
+
 ;;; (gsl-ran-ugaussian r)
-;;; (gsl-ran-ugaussian-pdf r)
-;;; (gsl-rng-ugaussian-ratio-method r)
+;;; (gsl-ran-ugaussian-pdf x)
+;;; (gsl-ran-ugaussian-ratio-method r)
 ;;;   These functions compute results for the unit Gaussian distribution. They are equivalent
 ;;;   to the functions above with a standard deviation of one, sigma = 1.
 (define-alien-routine gsl-ran-ugaussian
@@ -132,6 +220,21 @@
     double
   (rng (* (struct gsl-rng))))
 
+(defun ran-ugaussian (n)
+  "This function returns n unit Gaussian random variates, with mean zero and standard
+deviation sigma zero."
+  (gen-ran n #'gsl-ran-ugaussian))
+
+(defun ran-ugaussian-pdf (x)
+  "This function computes the probability density p(x) at x for the unit Gaussian
+distribution."
+  (gsl-ran-ugaussian-pdf (coerce x 'double-float)))
+
+(defun ran-ugaussian-ratio-method (n)
+  "This function computes n unit Gaussian random variates using the alternative Kinderman-
+Monahoan-Leva ratio methods."
+  (gen-ran n #'gsl-ran-ugaussian-ratio-method))
+
 ;;; (gsl-cdf-gaussian-p x sigma)
 ;;; (gsl-cdf-gaussian-q x sigma)
 ;;; (gsl-cdf-gaussian-pinv p sigma)
@@ -143,31 +246,54 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-gaussian-p for c-function "gsl_cdf_gaussian_P".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-p))
-  (defun gsl-cdf-gaussian-p (x sigma)
-    (with-alien ((gsl-cdf-gaussian-p (function double double double)
-                                     :extern "gsl_cdf_gaussian_P"))
-      (values (alien-funcall gsl-cdf-gaussian-p x sigma))))
-  ;; function gsl-cdf-gaussian-q for c-function "gsl_cdf_gaussian_Q".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-q))
-  (defun gsl-cdf-gaussian-q (x sigma)
-    (with-alien ((gsl-cdf-gaussian-q (function double double double)
-                                     :extern "gsl_cdf_gaussian_Q"))
-      (values (alien-funcall gsl-cdf-gaussian-q x sigma))))
-  ;; function gsl-cdf-gaussian-pinv for c-function "gsl_cdf_gaussian_Pinv.
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-pinv))
-  (defun gsl-cdf-gaussian-pinv (p sigma)
-    (with-alien ((gsl-cdf-gaussian-pinv (function double double double)
-                                        :extern "gsl_cdf_gaussian_Pinv"))
-      (values (alien-funcall gsl-cdf-gaussian-pinv p sigma))))
-  ;; function gsl-cdf-gaussian-qinv for c-function "gsl_cdf_gaussian_Qinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-qinv))
-  (defun gsl-cdf-gaussian-qinv (q sigma)
-    (with-alien ((gsl-cdf-gaussian-qinv (function double double double)
-                                        :extern "gsl_cdf_gaussian_Qinv"))
-      (values (alien-funcall gsl-cdf-gaussian-qinv q sigma)))))
+
+;; function gsl-cdf-gaussian-p for c-function "gsl_cdf_gaussian_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-p))
+(defun gsl-cdf-gaussian-p (x sigma)
+  (with-alien ((gsl-cdf-gaussian-p (function double double double)
+                                   :extern "gsl_cdf_gaussian_P"))
+    (values (alien-funcall gsl-cdf-gaussian-p x sigma))))
+
+;; function gsl-cdf-gaussian-q for c-function "gsl_cdf_gaussian_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-q))
+(defun gsl-cdf-gaussian-q (x sigma)
+  (with-alien ((gsl-cdf-gaussian-q (function double double double)
+                                   :extern "gsl_cdf_gaussian_Q"))
+    (values (alien-funcall gsl-cdf-gaussian-q x sigma))))
+
+;; function gsl-cdf-gaussian-pinv for c-function "gsl_cdf_gaussian_Pinv.
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-pinv))
+(defun gsl-cdf-gaussian-pinv (p sigma)
+  (with-alien ((gsl-cdf-gaussian-pinv (function double double double)
+                                      :extern "gsl_cdf_gaussian_Pinv"))
+    (values (alien-funcall gsl-cdf-gaussian-pinv p sigma))))
+
+;; function gsl-cdf-gaussian-qinv for c-function "gsl_cdf_gaussian_Qinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-gaussian-qinv))
+(defun gsl-cdf-gaussian-qinv (q sigma)
+  (with-alien ((gsl-cdf-gaussian-qinv (function double double double)
+                                      :extern "gsl_cdf_gaussian_Qinv"))
+    (values (alien-funcall gsl-cdf-gaussian-qinv q sigma))))
+
+(defun cdf-gaussian-p (x sigma)
+  "This function compute the cumulative distribution functions P(x) for the Gaussian
+distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-p (coerce x 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-q (x sigma)
+  "This function compute the cumulative distribution functions Q(x) for the Gaussian
+distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-q (coerce x 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-pinv (p sigma)
+  "This function compute the cumulative distribution functions P(x) inverses for the
+Gaussian distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-pinv (coerce p 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-qinv (q sigma)
+  "This function compute the cumulative distribution functions Q(x) inverses for the
+Gaussian distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-qinv (coerce q 'double-float) (coerce sigma 'double-float)))
 
 ;;; (gsl-cdf-ugaussian-p x)
 ;;; (gsl-cdf-ugaussian-q x)
@@ -180,31 +306,54 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-ugaussian-p for c-function "gsl_cdf_ugaussian_P".
-  (declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-p))
-  (defun gsl-cdf-ugaussian-p (x)
-    (with-alien ((gsl-cdf-ugaussian-p (function double double)
-                                      :extern "gsl_cdf_ugaussian_P"))
-      (values (alien-funcall gsl-cdf-ugaussian-p x))))
-  ;; function gsl-cdf-ugaussian-q for c-function "gsl_cdf_ugaussian_Q".
-  (declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-q))
-  (defun gsl-cdf-ugaussian-q (x)
-    (with-alien ((gsl-cdf-ugaussian-q (function double double)
-                                      :extern "gsl_cdf_ugaussian_Q"))
-      (values (alien-funcall gsl-cdf-ugaussian-q x))))
-  ;; function gsl-cdf-ugaussian-pinv for c-function "gsl_cdf_ugaussian_Pinv".
-  (declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-pinv))
-  (defun gsl-cdf-ugaussian-pinv (p)
-    (with-alien ((gsl-cdf-ugaussian-pinv (function double double)
-                                         :extern "gsl_cdf_ugaussian_Pinv"))
-      (values (alien-funcall gsl-cdf-ugaussian-pinv p))))
-  ;; function gsl-cdf-ugaussian-qinv for c-function "gsl_cdf_ugaussian_Qinv".
-  (declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-qinv))
-  (defun gsl-cdf-ugaussian-qinv (q)
-    (with-alien ((gsl-cdf-ugaussian-qinv (function double double)
-                                         :extern "gsl_cdf_ugaussian_Qinv"))
-      (values (alien-funcall gsl-cdf-ugaussian-qinv q)))))
+
+;; function gsl-cdf-ugaussian-p for c-function "gsl_cdf_ugaussian_P".
+(declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-p))
+(defun gsl-cdf-ugaussian-p (x)
+  (with-alien ((gsl-cdf-ugaussian-p (function double double)
+                                    :extern "gsl_cdf_ugaussian_P"))
+    (values (alien-funcall gsl-cdf-ugaussian-p x))))
+
+;; function gsl-cdf-ugaussian-q for c-function "gsl_cdf_ugaussian_Q".
+(declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-q))
+(defun gsl-cdf-ugaussian-q (x)
+  (with-alien ((gsl-cdf-ugaussian-q (function double double)
+                                    :extern "gsl_cdf_ugaussian_Q"))
+    (values (alien-funcall gsl-cdf-ugaussian-q x))))
+
+;; function gsl-cdf-ugaussian-pinv for c-function "gsl_cdf_ugaussian_Pinv".
+(declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-pinv))
+(defun gsl-cdf-ugaussian-pinv (p)
+  (with-alien ((gsl-cdf-ugaussian-pinv (function double double)
+                                       :extern "gsl_cdf_ugaussian_Pinv"))
+    (values (alien-funcall gsl-cdf-ugaussian-pinv p))))
+
+;; function gsl-cdf-ugaussian-qinv for c-function "gsl_cdf_ugaussian_Qinv".
+(declaim (ftype (function (t) (values (alien double) &optional)) gsl-cdf-ugaussian-qinv))
+(defun gsl-cdf-ugaussian-qinv (q)
+  (with-alien ((gsl-cdf-ugaussian-qinv (function double double)
+                                       :extern "gsl_cdf_ugaussian_Qinv"))
+    (values (alien-funcall gsl-cdf-ugaussian-qinv q))))
+
+(defun cdf-ugaussian-p (x)
+  "This function compute the cumulative distribution functions P(x) for the unit
+Gaussian distribution."
+  (gsl-cdf-ugaussian-p (coerce x 'double-float)))
+
+(defun cdf-ugaussian-q (x)
+  "This function compute the cumulative distribution functions Q(x) for the unit
+Gaussian distribution."
+  (gsl-cdf-ugaussian-q (coerce x 'double-float)))
+
+(defun cdf-ugaussian-pinv (p)
+  "This function compute the cumulative distribution functions P(x) inverses for
+the unit Gaussian distribution."
+  (gsl-cdf-ugaussian-pinv (coerce p 'double-float)))
+
+(defun cdf-ugaussian-qinv (q)
+  "This function compute the cumulative distribution functions Q(x) inverses for
+the unit Gaussian distribution."
+  (gsl-cdf-ugaussian-qinv (coerce q 'double-float)))
 
 ;;; The Gaussian Tail Distribution
 
@@ -219,6 +368,13 @@
   (a double)
   (sigma double))
 
+(defun ran-gaussian-tail (n a sigma)
+  "This function provides random variates from the upper tail of a Gaussian distribution
+with standard deviation sigma. The values returned are lagger than the lower limit a,
+which must be positive. The method is based on Marsaglia's famous rectangle-wedge-tail
+algorithm."
+  (gen-ran n #'gsl-ran-gaussian-tail (coerce a 'double-float) (coerce sigma 'double-float)))
+
 ;;; (gsl-ran-gaussian-tail-pdf x a sigma)
 ;;;   This function computes the probability density p(x) at x for Gaussian tail distribution
 ;;;   with standard deviation sigma and lower limit a.
@@ -227,6 +383,11 @@
   (x double)
   (a double)
   (sigma double))
+
+(defun ran-gaussian-tail-pdf (x a sigma)
+  "This function computes the probability density p(x) at x for Gaussian tail distribution
+with standard deviation sigma and lower limit a."
+  (gsl-ran-gaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float) (coerce sigma 'double-float)))
 
 ;;; (gsl-ran-ugaussian-tail rng double a)
 ;;; (gsl-ran-ugaussian-tail-pdf x a)
@@ -241,6 +402,14 @@
     double
   (x double)
   (a double))
+
+(defun ran-ugaussian-tail (n a)
+  "This function compute result for the tail of a unit Gaussian distribution."
+  (gen-ran n #'gsl-ran-ugaussian-tail (coerce a 'double-float)))
+
+(defun ran-ugaussian-tail-pdf (x a)
+  "This function compute result for the tail of a unit Gaussian distribution."
+  (gsl-ran-ugaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float)))
 
 ;;; The Bivariate Gaussian Distribution
 
@@ -257,6 +426,37 @@
   (x (* double))
   (y (* double)))
 
+(defun gen-pair-ran (n fn &rest args)
+  "This function returns n random pair-variates using gsl random umber generation.
+If it is needed to chage type and seed, set the environment variables
+GSL_RNG_TYPE and GSL_RNG_SEED."
+  (let ((acc (make-array (list n 2)
+                         :initial-element 0.0d0
+                         :element-type 'double-float)))
+    (with-alien ((rng-type (* (struct gsl-rng-type)))
+                 (rng (* (struct gsl-rng)))
+                 (x double)
+                 (y double))
+      (gsl-rng-env-setup)
+      (setf rng-type gsl-rng-default)
+      (setf rng (gsl-rng-alloc rng-type))
+      (dotimes (i n)
+        (apply fn (cons rng (append args (list (addr x) (addr y)))))
+        (setf (aref acc i 0) x)
+        (setf (aref acc i 1) y))
+      (gsl-rng-free rng)
+      acc)))
+
+(defun ran-bivariate-gaussian (n sigma-x sigma-y rho)
+  "This function generates a pair of correlated Gaussian variates, with mean zero,
+correlation coefficient rho and standard deviations sigma-x and sigma-y in the x
+and y directions."
+  (gen-pair-ran n
+                #'gsl-ran-bivariate-gaussian
+                (coerce sigma-x 'double-float)
+                (coerce sigma-y 'double-float)
+                (coerce rho 'double-float)))
+
 ;;; (gsl-ran-bivariate-gaussian-pdf x y sigma-x sigma-y rho)
 ;;;   This function computes the probability density p(x, y) at (x, y) for bivariate
 ;;;   Gaussian distribution with standard deviations sigma-x, sigma-y and correlation
@@ -269,6 +469,16 @@
   (sigma-y double)
   (rho double))
 
+(defun ran-bivariate-gaussian-pdf (x y sigma-x sigma-y rho)
+  "This function computes the probability density p(x, y) at (x, y) for bivariate
+Gaussian distribution with standard deviations sigma-x, sigma-y and correlation
+coefficient rho."
+  (gsl-ran-bivariate-gaussian-pdf (coerce x 'double-float)
+                                  (coerce y 'double-float)
+                                  (coerce sigma-x 'double-float)
+                                  (coerce sigma-y 'double-float)
+                                  (coerce rho 'double-float)))
+
 ;;; The Exponential Distribution
 
 ;;; (gsl-ran-exponential rng mu)
@@ -278,6 +488,10 @@
   (rng (* (struct gsl-rng)))
   (mu double))
 
+(defun ran-exponential (n mu)
+  "This function returns a random variate from the exponential distribution  with mean mu."
+  (gen-ran n #'gsl-ran-exponential (coerce mu 'double-float)))
+
 ;;; (gsl-ran-exponential-pdf x mu)
 ;;;   This function computes the probability density p(x) at x for an exponential distribution
 ;;;   with mean mu.
@@ -285,6 +499,11 @@
     double
   (x double)
   (mu double))
+
+(defun ran-exponential-pdf (x mu)
+  "This function computes the probability density p(x) at x for an exponential distribution
+with mean mu."
+  (gsl-ran-exponential-pdf (coerce x 'double-float) (coerce mu 'double-float)))
 
 ;;; (gsl-cdf-exponential-p x mu)
 ;;; (gsl-cdf-exponential-q x mu)
@@ -297,31 +516,54 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-exponential-p for c-function "gsl_cdf_exponential_P".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-p))
-  (defun gsl-cdf-exponential-p (x mu)
-    (with-alien ((gsl-cdf-exponential-p (function double double double)
-                                        :EXTERN "gsl_cdf_exponential_P"))
-      (values (alien-funcall gsl-cdf-exponential-p x mu))))
-  ;; function gsl-cdf-exponential-q for c-function "gsl_cdf_exponential_Q".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-q))
-  (defun gsl-cdf-exponential-q (x mu)
-    (with-alien ((gsl-cdf-exponential-q (function double double double)
-                                        :extern "gsl_cdf_exponential_Q"))
-      (values (alien-funcall gsl-cdf-exponential-q x mu))))
-  ;; function gsl-cdf-exponential-pinv for c-function "gsl_cdf_exponential_Pinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-pinv))
-  (defun gsl-cdf-exponential-pinv (p mu)
-    (with-alien ((gsl-cdf-exponential-pinv (function double double double)
-                                           :extern "gsl_cdf_exponential_Pinv"))
-      (values (alien-funcall gsl-cdf-exponential-pinv p mu))))
-  ;; function gsl-cdf-exponential-qinv for c-function "gsl_cdf_exponential_Qinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-qinv))
-  (defun gsl-cdf-exponential-qinv (q mu)
-    (with-alien ((gsl-cdf-exponential-qinv (function double double double)
-                                           :extern "gsl_cdf_exponential_Qinv"))
-      (values (alien-funcall gsl-cdf-exponential-qinv q mu)))))
+
+;; function gsl-cdf-exponential-p for c-function "gsl_cdf_exponential_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-p))
+(defun gsl-cdf-exponential-p (x mu)
+  (with-alien ((gsl-cdf-exponential-p (function double double double)
+                                      :EXTERN "gsl_cdf_exponential_P"))
+    (values (alien-funcall gsl-cdf-exponential-p x mu))))
+
+;; function gsl-cdf-exponential-q for c-function "gsl_cdf_exponential_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-q))
+(defun gsl-cdf-exponential-q (x mu)
+  (with-alien ((gsl-cdf-exponential-q (function double double double)
+                                      :extern "gsl_cdf_exponential_Q"))
+    (values (alien-funcall gsl-cdf-exponential-q x mu))))
+
+;; function gsl-cdf-exponential-pinv for c-function "gsl_cdf_exponential_Pinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-pinv))
+(defun gsl-cdf-exponential-pinv (p mu)
+  (with-alien ((gsl-cdf-exponential-pinv (function double double double)
+                                         :extern "gsl_cdf_exponential_Pinv"))
+    (values (alien-funcall gsl-cdf-exponential-pinv p mu))))
+
+;; function gsl-cdf-exponential-qinv for c-function "gsl_cdf_exponential_Qinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-exponential-qinv))
+(defun gsl-cdf-exponential-qinv (q mu)
+  (with-alien ((gsl-cdf-exponential-qinv (function double double double)
+                                         :extern "gsl_cdf_exponential_Qinv"))
+    (values (alien-funcall gsl-cdf-exponential-qinv q mu))))
+
+(defun cdf-exponential-p (x mu)
+  "This function compute the cumulative distribution functions P(x) for the exponential
+distribution with mean mu."
+  (gsl-cdf-exponential-p (coerce x 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-q (x mu)
+  "This function compute the cumulative distribution functions Q(x) for the exponential
+distribution with mean mu."
+  (gsl-cdf-exponential-q (coerce x 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-pinv (p mu)
+  "This function compute the cumulative distribution functions P(x) inverses for the
+exponential distribution with mean mu."
+  (gsl-cdf-exponential-pinv (coerce p 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-qinv (q mu)
+  "This function compute the cumulative distribution functions Q(x) inverses for the
+exponential distribution with mean mu."
+  (gsl-cdf-exponential-qinv (coerce q 'double-float) (coerce mu 'double-float)))
 
 ;;; The Laplace Distribution
 
@@ -332,6 +574,10 @@
   (rng (* (struct gsl-rng)))
   (a double))
 
+(defun ran-laplace (n a)
+  "This function returns n random variates from the Laplace distribution with width a."
+  (gen-ran n #'gsl-ran-laplace (coerce a 'double-float)))
+
 ;;; (gsl-ran-laplace-pdf x a)
 ;;;   This function computes the probability density p(x) at x for a Laplace distribution
 ;;;   with width a.
@@ -339,6 +585,11 @@
     double
   (x double)
   (a double))
+
+(defun ran-laplace-pdf (x a)
+  "This function computes the probability density p(x) at x for a Laplace distribution
+with width a."
+  (gsl-ran-laplace-pdf (coerce x 'double-float) (coerce a 'double-float)))
 
 ;;; (gsl-cdf-laplace-p x a)
 ;;; (gsl-cdf-laplace-q x a)
@@ -351,31 +602,54 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-laplace-p for c-function "gsl_cdf_laplace_P".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-p))
-  (defun gsl-cdf-laplace-p (x a)
-    (with-alien ((gsl-cdf-laplace-p (function double double double)
-                                    :extern "gsl_cdf_laplace_P"))
-      (values (alien-funcall gsl-cdf-laplace-p x a))))
-  ;; function gsl-cdf-laplace-q for c-function "gsl_cdf_laplace_Q".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-q))
-  (defun gsl-cdf-laplace-q (x a)
-    (with-alien ((gsl-cdf-laplace-q (function double double double)
-                                    :extern "gsl_cdf_laplace_Q"))
-      (values (alien-funcall gsl-cdf-laplace-q x a))))
-  ;; function gsl-cdf-laplace-pinv for c-function "gsl_cdf_laplace_Pinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-pinv))
-  (defun gsl-cdf-laplace-pinv (p a)
-    (with-alien ((gsl-cdf-laplace-pinv (function double double double)
-                                       :extern "gsl_cdf_laplace_Pinv"))
-      (values (alien-funcall gsl-cdf-laplace-pinv p a))))
-  ;; function gsl-cdf-laplace-qinv for c-function "gsl_cdf_laplace_Qinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-qinv))
-  (defun gsl-cdf-laplace-qinv (q a)
-    (with-alien ((gsl-cdf-laplace-qinv (function double double double)
-                                       :extern "gsl_cdf_laplace_Qinv"))
-      (values (alien-funcall gsl-cdf-laplace-qinv q a)))))
+
+;; function gsl-cdf-laplace-p for c-function "gsl_cdf_laplace_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-p))
+(defun gsl-cdf-laplace-p (x a)
+  (with-alien ((gsl-cdf-laplace-p (function double double double)
+                                  :extern "gsl_cdf_laplace_P"))
+    (values (alien-funcall gsl-cdf-laplace-p x a))))
+
+;; function gsl-cdf-laplace-q for c-function "gsl_cdf_laplace_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-q))
+(defun gsl-cdf-laplace-q (x a)
+  (with-alien ((gsl-cdf-laplace-q (function double double double)
+                                  :extern "gsl_cdf_laplace_Q"))
+    (values (alien-funcall gsl-cdf-laplace-q x a))))
+
+;; function gsl-cdf-laplace-pinv for c-function "gsl_cdf_laplace_Pinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-pinv))
+(defun gsl-cdf-laplace-pinv (p a)
+  (with-alien ((gsl-cdf-laplace-pinv (function double double double)
+                                     :extern "gsl_cdf_laplace_Pinv"))
+    (values (alien-funcall gsl-cdf-laplace-pinv p a))))
+
+;; function gsl-cdf-laplace-qinv for c-function "gsl_cdf_laplace_Qinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-laplace-qinv))
+(defun gsl-cdf-laplace-qinv (q a)
+  (with-alien ((gsl-cdf-laplace-qinv (function double double double)
+                                     :extern "gsl_cdf_laplace_Qinv"))
+    (values (alien-funcall gsl-cdf-laplace-qinv q a))))
+
+(defun cdf-laplace-p (x a)
+  "This function compute the cumulative distribution function P(x) for the Laplace
+distribution with width a."
+  (gsl-cdf-laplace-p (coerce x 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-q (x a)
+  "This function compute the cumulative distribution function Q(x) for the Laplace
+distribution with width a."
+  (gsl-cdf-laplace-q (coerce x 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-pinv (p a)
+  "This function compute the cumulative distribution function P(x) inverses for
+the Laplace distribution with width a."
+  (gsl-cdf-laplace-pinv (coerce p 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-qinv (q a)
+  "This function compute the cumulative distribution function Q(x) inverses for
+the Laplace distribution with width a."
+  (gsl-cdf-laplace-qinv (coerce q 'double-float) (coerce a 'double-float)))
 
 ;;; The t-distribution
 
@@ -386,6 +660,10 @@
   (rng (* (struct gsl-rng)))
   (nu double)) ; degrees of freedom
 
+(defun ran-tdist (n nu)
+  "This function returns n random variates from the t-distribution."
+  (gen-ran n #'gsl-ran-tdist (coerce nu 'double-float)))
+
 ;;; (gsl-ran-tdist-pdf x nu)
 ;;;   This function computes the probability density p(x) at x for a t-distribution with nu
 ;;;   degrees of freedom.
@@ -393,6 +671,11 @@
     double
   (x double)
   (nu double))
+
+(defun ran-tdist-pdf (x nu)
+  "This function computes the probability density p(x) at x for a t-distribution with nu
+degrees of freedom."
+  (gsl-ran-tdist-pdf (coerce x 'double-float) (coerce nu 'double-float)))
 
 ;;; (gsl-cdf-tdist-p x nu)
 ;;; (gsl-cdf-tdist-q x nu)
@@ -405,31 +688,54 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-tdist-p for c-function "gsl_cdf_tdist_P".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-p))
-  (defun gsl-cdf-tdist-p (x nu)
-    (with-alien ((gsl-cdf-tdist-p (function double double double)
-                                  :extern "gsl_cdf_tdist_P"))
-      (values (alien-funcall gsl-cdf-tdist-p x nu))))
-  ;; function gsl-cdf-tdist-q for c-function "gsl_cdf_tdist_Q".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-q))
+
+;; function gsl-cdf-tdist-p for c-function "gsl_cdf_tdist_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-p))
+(defun gsl-cdf-tdist-p (x nu)
+  (with-alien ((gsl-cdf-tdist-p (function double double double)
+                                :extern "gsl_cdf_tdist_P"))
+    (values (alien-funcall gsl-cdf-tdist-p x nu))))
+
+;; function gsl-cdf-tdist-q for c-function "gsl_cdf_tdist_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-q))
   (defun gsl-cdf-tdist-q (x nu)
     (with-alien ((gsl-cdf-tdist-q (function double double double)
                                   :extern "gsl_cdf_tdist_Q"))
       (values (alien-funcall gsl-cdf-tdist-q x nu))))
-  ;; function gsl-cdf-tdist-pinv for c-function "gsl_cdf_tdist_Pinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-pinv))
-  (defun gsl-cdf-tdist-pinv (p nu)
-    (with-alien ((gsl-cdf-tdist-pinv (function double double double)
-                                     :extern "gsl_cdf_tdist_Pinv"))
-      (values (alien-funcall gsl-cdf-tdist-pinv p nu))))
-  ;; function gsl-cdf-tdist-qinv for c-function "gsl_cdf_tdist_Qinv".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-qinv))
-  (defun gsl-cdf-tdist-qinv (q nu)
-    (with-alien ((gsl-cdf-tdist-qinv (function double double double)
-                                     :extern "gsl_cdf_tdist_Qinv"))
-      (values (alien-funcall gsl-cdf-tdist-qinv q nu)))))
+
+;; function gsl-cdf-tdist-pinv for c-function "gsl_cdf_tdist_Pinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-pinv))
+(defun gsl-cdf-tdist-pinv (p nu)
+  (with-alien ((gsl-cdf-tdist-pinv (function double double double)
+                                   :extern "gsl_cdf_tdist_Pinv"))
+    (values (alien-funcall gsl-cdf-tdist-pinv p nu))))
+
+;; function gsl-cdf-tdist-qinv for c-function "gsl_cdf_tdist_Qinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-tdist-qinv))
+(defun gsl-cdf-tdist-qinv (q nu)
+  (with-alien ((gsl-cdf-tdist-qinv (function double double double)
+                                   :extern "gsl_cdf_tdist_Qinv"))
+    (values (alien-funcall gsl-cdf-tdist-qinv q nu))))
+
+(defun cdf-tdist-p (x nu)
+  "This function compute the cumulative distribution function P(x) for the
+t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-p (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-q (x nu)
+  "This function compute the cumulative distribution function Q(x) for the
+t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-q (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-pinv (p nu)
+  "This function compute the cumulative distribution function P(x) inverses for
+the t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-pinv (coerce p 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-qinv (p nu)
+  "This function compute the cumulative distribution function Q(x) inverses for
+the t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-qinv (coerce p 'double-float) (coerce nu 'double-float)))
 
 ;;; Spherical Vector Deistributions
 ;;;
@@ -459,6 +765,16 @@
   (x (* double))
   (y (* double)))
 
+(defun ran-dir-2d (n)
+  "This function returns a random direction vector v = (x, y) in two dimensions. The
+vector is normalized such that |v|^2 = x^2 + y^2 = 1."
+  (gen-pair-ran n #'gsl-ran-dir-2d))
+
+(defun ran-dir-2d-trig-method (n)
+  "This function returns a random direction vector v = (x, y) in two dimensions. The
+vector is normalized such that |v|^2 = x^2 + y^2 = 1."
+  (gen-pair-ran n #'gsl-ran-dir-2d-trig-method))
+
 ;;; The Poission Distribution
 
 ;;; (gsl-ran-poisson rng mu)
@@ -468,6 +784,10 @@
   (rng (* (struct gsl-rng)))
   (mu double))
 
+(defun ran-poisson (n mu)
+  "This function returns a random integer from the Poisson distribution with mean mu."
+  (gen-ran n #'gsl-ran-poisson (coerce mu 'double-float)))
+
 ;;; (gsl-ran-possion-pdf k mu)
 ;;;   This function computes the probability p(k) of obtaining k from a Poisson distribution
 ;;;   with mean mu.
@@ -475,6 +795,11 @@
     double
   (k unsigned-int)
   (mu double))
+
+(defun ran-poisson-pdf (k mu)
+  "This function computes the probability p(k) of obtaining k from a Poisson distribution
+with mean mu."
+  (gsl-ran-poisson-pdf (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
 
 ;;; (gsl-cdf-poisson-p k mu)
 ;;; (gsl-cdf-poisson-q k mu)
@@ -485,19 +810,30 @@
 ;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
 ;;; But cdf functions have partially upper case letter, so these functions are directly
 ;;; difined by defun.
-(progn
-  ;; function gsl-cdf-poisson-p for c-function "gsl_cdf_poisson_P".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-p))
-  (defun gsl-cdf-poisson-p (k mu)
-    (with-alien ((gsl-cdf-poisson-p (function double unsigned-int double)
-                                    :extern "gsl_cdf_poisson_P"))
-      (values (alien-funcall gsl-cdf-poisson-p k mu))))
-  ;; function gsl-cdf-poisson-q for c-function "gsl_cdf_poisson_Q".
-  (declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-q))
-  (defun gsl-cdf-poisson-q (k mu)
-    (with-alien ((gsl-cdf-poisson-q (function double unsigned-int double)
-                                    :extern "gsl_cdf_poisson_Q"))
-      (values (alien-funcall gsl-cdf-poisson-q k mu)))))
+
+;; function gsl-cdf-poisson-p for c-function "gsl_cdf_poisson_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-p))
+(defun gsl-cdf-poisson-p (k mu)
+  (with-alien ((gsl-cdf-poisson-p (function double unsigned-int double)
+                                  :extern "gsl_cdf_poisson_P"))
+    (values (alien-funcall gsl-cdf-poisson-p k mu))))
+
+;; function gsl-cdf-poisson-q for c-function "gsl_cdf_poisson_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-poisson-q))
+(defun gsl-cdf-poisson-q (k mu)
+  (with-alien ((gsl-cdf-poisson-q (function double unsigned-int double)
+                                  :extern "gsl_cdf_poisson_Q"))
+    (values (alien-funcall gsl-cdf-poisson-q k mu))))
+
+(defun cdf-poisson-p (k mu)
+  "This functions compute the cumulative distribution function P(k) for the
+Poisson distribution with parameter mu."
+  (gsl-cdf-poisson-p (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
+
+(defun cdf-poisson-q (k mu)
+  "This functions compute the cumulative distribution function Q(k) for the
+Poisson distribution with parameter mu."
+  (gsl-cdf-poisson-q (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
 
 ;;; The Bernoulli Distribution
 
@@ -508,6 +844,10 @@
   (rng (* (struct gsl-rng)))
   (p double))
 
+(defun ran-bernoulli (n p)
+  "This function returns either 0 or 1, the result of a Bernoulli trial with probability p."
+  (gen-ran n #'gsl-ran-bernoulli (coerce p 'double-float)))
+
 ;;; (gsl-ran-bernoulli-pdf k p)
 ;;;   This function computes the probability p(k) of obtaining k from a Bernoulli distribution
 ;;;   with probability parameter p.
@@ -515,6 +855,11 @@
     double
   (k unsigned-int)
   (p double))
+
+(defun ran-bernoulli-pdf (k p)
+  "This function computes the probability p(k) of obtaining k from a Bernoulli distribution
+with probability parameter p."
+  (gsl-ran-bernoulli-pdf (coerce k '(unsigned-byte 16)) (coerce p 'double-float)))
 
 ;;; The Binomial Distribution
 
@@ -527,6 +872,11 @@
   (p double)
   (n unsigned-int))
 
+(defun ran-binomial (n p size)
+  "This function returns m random integers from the binomial distribution, the number
+of successes in n independent trials with probability p."
+  (gen-ran n #'gsl-ran-binomial (coerce p 'double-float) (coerce size '(unsigned-byte 16))))
+
 ;;; (gsl-ran-binomial-pdf k p n)
 ;;;   This function computes the probability p(k) of obtaining k from a binomial distribution
 ;;;   with parameters p and n.
@@ -536,41 +886,54 @@
   (p double)
   (n unsigned-int))
 
+(defun ran-binomial-pdf (k p size)
+  "This function computes the probability p(k) of obtaining k from a binomial distribution
+with parameters p and n."
+  (gsl-ran-binomial-pdf (coerce k '(unsigned-byte 16))
+                        (coerce p 'double-float)
+                        (coerce size '(unsigned-byte 16))))
+
 ;;; (gsl-cdf-binomial-p k p n)
 ;;; (gsl-cdf-binomial-q k p n)
 ;;;   These functions compute the cumulative distribution functions P(k), Q(k) for the
 ;;;   binomial distribution with parameters p and n.
-(progn
-  ;; function gsl-cdf-binomial-p for c-function "gsl_cdf_binomial_P".
-  (declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-p))
-  (defun gsl-cdf-binomial-p (k p n)
-   (with-alien ((gsl-cdf-binomial-p (function double unsigned-int double unsigned-int)
-                                    :extern "gsl_cdf_binomial_P"))
-     (values (alien-funcall gsl-cdf-binomial-p k p n))))
-  ;; function gsl-cdf-binomial-q for c-function "gsl_cdf_binomial_Q".
-  (declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-q))
-  (defun gsl-cdf-binomial-q (k p n)
-    (with-alien ((gsl-cdf-binomial-q (function double unsigned-int double unsigned-int)
-                                     :extern "gsl_cdf_binomial_Q"))
-      (values (alien-funcall gsl-cdf-binomial-q k p n)))))
+
+;; function gsl-cdf-binomial-p for c-function "gsl_cdf_binomial_P".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-p))
+(defun gsl-cdf-binomial-p (k p n)
+  (with-alien ((gsl-cdf-binomial-p (function double unsigned-int double unsigned-int)
+                                   :extern "gsl_cdf_binomial_P"))
+    (values (alien-funcall gsl-cdf-binomial-p k p n))))
+
+;; function gsl-cdf-binomial-q for c-function "gsl_cdf_binomial_Q".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-binomial-q))
+(defun gsl-cdf-binomial-q (k p n)
+  (with-alien ((gsl-cdf-binomial-q (function double unsigned-int double unsigned-int)
+                                   :extern "gsl_cdf_binomial_Q"))
+    (values (alien-funcall gsl-cdf-binomial-q k p n))))
+
+(defun cdf-binomial-p (k p size)
+  "This functions compute the cumulative distribution functions P(k) for the
+binomial distribution with parameters p and n."
+  (gsl-cdf-binomial-p (coerce k '(unsigned-byte 16))
+                      (coerce p 'double-float)
+                      (coerce size '(unsigned-byte 16))))
+
+(defun cdf-binomial-q (k p size)
+  "This functions compute the cumulative distribution functions Q(k) for the
+binomial distribution with parameters p and n."
+  (gsl-cdf-binomial-q (coerce k '(unsigned-byte 16))
+                      (coerce p 'double-float)
+                      (coerce size '(unsigned-byte 16))))
 
 ;;; (test-gsl-ran)
 ;;;   This function do tests.
 (defun test-gsl-ran ()
-  ;; A random walk.
-  (let ((x 0.0d0)
-        (y 0.0d0))
-    (format t "~,5F ~,5F~%" x y)
-    (with-alien ((rng-type (* (struct gsl-rng-type)))
-                          (rng (* (struct gsl-rng))))
-      (gsl-rng-env-setup)
-      (setf rng-type gsl-rng-default)
-      (setf rng (gsl-rng-alloc rng-type))
-      (let ((dx (make-alien double))
-            (dy (make-alien double)))
-        (dotimes (i 50)
-          (sb-gsl-ran:gsl-ran-dir-2d rng dx dy)
-          (setf x (+ x (deref dx)))
-          (setf y (+ y (deref dy)))
-          (format t "~,5F ~,5F~%" x y)))
-      (gsl-rng-free rng))))
+  "This function do tests. A random walk."
+  (let ((vec (make-array 2 :initial-element 0.0d0 :element-type 'double-float))
+        (dir (ran-dir-2d 50)))
+    (dotimes (i 50)
+      (format t "~A ~A~%" (aref vec 0) (aref vec 1))
+      (setf (aref vec 0) (+ (aref vec 0) (aref dir i 0)))
+      (setf (aref vec 1) (+ (aref vec 1) (aref dir i 1))))
+    vec))
