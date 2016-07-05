@@ -143,27 +143,6 @@
   (rng (* (struct gsl-rng)))
   (sigma double))
 
-(defun gen-ran (n fn &rest args)
-  "This function returns n random variates using gsl random umber generation.
-If it is needed to chage type and seed, set the environment variables
-GSL_RNG_TYPE and GSL_RNG_SEED."
-  (let ((acc (make-array n :initial-element 0.0d0 :element-type 'double-float)))
-    (with-alien ((rng-type (* (struct gsl-rng-type)))
-                 (rng (* (struct gsl-rng))))
-      (gsl-rng-env-setup)
-      (setf rng-type gsl-rng-default)
-      (setf rng (gsl-rng-alloc rng-type))
-      (dotimes (i n)
-        (setf (aref acc i) (coerce (apply fn (cons rng args)) 'double-float)))
-      (gsl-rng-free rng)
-      acc)))
-
-(defun ran-gaussian (n sigma)
-  "This function returns n Gaussian random variates, with mean zero and standard
-deviation sigma. Use the transformation z = mu + x on the numbers returned
-by ran-gaussian to obtain a Gaussian distribution with mean mu."
-  (gen-ran n #'gsl-ran-gaussian (coerce sigma 'double-float)))
-
 ;;; (gsl-ran-gaussian-pdf x sigma)
 ;;;   This function computes the probability density p(x) at x for a Gaussian distribution
 ;;;   with standard deviation sigma.
@@ -171,11 +150,6 @@ by ran-gaussian to obtain a Gaussian distribution with mean mu."
     double
   (x double)
   (sigma double))
-
-(defun ran-gaussian-pdf (x sigma)
-  "This function computes the probability density p(x) at x for a Gaussian distribution
-with standard deviation sigma."
-  (gsl-ran-gaussian-pdf (coerce x 'double-float) (coerce sigma 'double-float)))
 
 ;;; (gsl-ran-gaussian-ziggurat rng sigma)
 ;;; (gsl-ran-gaussian-ratio-method rng sigma)
@@ -191,17 +165,6 @@ with standard deviation sigma."
     double
   (rng (* (struct gsl-rng)))
   (sigma double))
-
-(defun ran-gaussian-ziggurat (n sigma)
-  "This function computes n Gaussian random variates using the alternative Marsaglia-
-Tsang ziggurat methods. The Ziggurat algorithm is the fastest available algorithm
-in most cases."
-  (gen-ran n #'gsl-ran-gaussian-ziggurat (coerce sigma 'double-float)))
-
-(defun ran-gaussian-ratio-method (n sigma)
-  "This function computes n Gaussian random variates using the alternative Kinderman-
-Monahoan-Leva ratio methods."
-  (gen-ran n #'gsl-ran-gaussian-ratio-method (coerce sigma 'double-float)))
 
 ;;; (gsl-ran-ugaussian r)
 ;;; (gsl-ran-ugaussian-pdf x)
@@ -219,21 +182,6 @@ Monahoan-Leva ratio methods."
 (define-alien-routine gsl-ran-ugaussian-ratio-method
     double
   (rng (* (struct gsl-rng))))
-
-(defun ran-ugaussian (n)
-  "This function returns n unit Gaussian random variates, with mean zero and standard
-deviation sigma zero."
-  (gen-ran n #'gsl-ran-ugaussian))
-
-(defun ran-ugaussian-pdf (x)
-  "This function computes the probability density p(x) at x for the unit Gaussian
-distribution."
-  (gsl-ran-ugaussian-pdf (coerce x 'double-float)))
-
-(defun ran-ugaussian-ratio-method (n)
-  "This function computes n unit Gaussian random variates using the alternative Kinderman-
-Monahoan-Leva ratio methods."
-  (gen-ran n #'gsl-ran-ugaussian-ratio-method))
 
 ;;; (gsl-cdf-gaussian-p x sigma)
 ;;; (gsl-cdf-gaussian-q x sigma)
@@ -275,26 +223,6 @@ Monahoan-Leva ratio methods."
                                       :extern "gsl_cdf_gaussian_Qinv"))
     (values (alien-funcall gsl-cdf-gaussian-qinv q sigma))))
 
-(defun cdf-gaussian-p (x sigma)
-  "This function compute the cumulative distribution functions P(x) for the Gaussian
-distribution with standard deviation sigma."
-  (gsl-cdf-gaussian-p (coerce x 'double-float) (coerce sigma 'double-float)))
-
-(defun cdf-gaussian-q (x sigma)
-  "This function compute the cumulative distribution functions Q(x) for the Gaussian
-distribution with standard deviation sigma."
-  (gsl-cdf-gaussian-q (coerce x 'double-float) (coerce sigma 'double-float)))
-
-(defun cdf-gaussian-pinv (p sigma)
-  "This function compute the cumulative distribution functions P(x) inverses for the
-Gaussian distribution with standard deviation sigma."
-  (gsl-cdf-gaussian-pinv (coerce p 'double-float) (coerce sigma 'double-float)))
-
-(defun cdf-gaussian-qinv (q sigma)
-  "This function compute the cumulative distribution functions Q(x) inverses for the
-Gaussian distribution with standard deviation sigma."
-  (gsl-cdf-gaussian-qinv (coerce q 'double-float) (coerce sigma 'double-float)))
-
 ;;; (gsl-cdf-ugaussian-p x)
 ;;; (gsl-cdf-ugaussian-q x)
 ;;; (gsl-cdf-ugaussian-pinv x)
@@ -335,26 +263,6 @@ Gaussian distribution with standard deviation sigma."
                                        :extern "gsl_cdf_ugaussian_Qinv"))
     (values (alien-funcall gsl-cdf-ugaussian-qinv q))))
 
-(defun cdf-ugaussian-p (x)
-  "This function compute the cumulative distribution functions P(x) for the unit
-Gaussian distribution."
-  (gsl-cdf-ugaussian-p (coerce x 'double-float)))
-
-(defun cdf-ugaussian-q (x)
-  "This function compute the cumulative distribution functions Q(x) for the unit
-Gaussian distribution."
-  (gsl-cdf-ugaussian-q (coerce x 'double-float)))
-
-(defun cdf-ugaussian-pinv (p)
-  "This function compute the cumulative distribution functions P(x) inverses for
-the unit Gaussian distribution."
-  (gsl-cdf-ugaussian-pinv (coerce p 'double-float)))
-
-(defun cdf-ugaussian-qinv (q)
-  "This function compute the cumulative distribution functions Q(x) inverses for
-the unit Gaussian distribution."
-  (gsl-cdf-ugaussian-qinv (coerce q 'double-float)))
-
 ;;; The Gaussian Tail Distribution
 
 ;;; (gsl-ran-gaussian-tail rng a sigma)
@@ -368,13 +276,6 @@ the unit Gaussian distribution."
   (a double)
   (sigma double))
 
-(defun ran-gaussian-tail (n a sigma)
-  "This function provides random variates from the upper tail of a Gaussian distribution
-with standard deviation sigma. The values returned are lagger than the lower limit a,
-which must be positive. The method is based on Marsaglia's famous rectangle-wedge-tail
-algorithm."
-  (gen-ran n #'gsl-ran-gaussian-tail (coerce a 'double-float) (coerce sigma 'double-float)))
-
 ;;; (gsl-ran-gaussian-tail-pdf x a sigma)
 ;;;   This function computes the probability density p(x) at x for Gaussian tail distribution
 ;;;   with standard deviation sigma and lower limit a.
@@ -383,11 +284,6 @@ algorithm."
   (x double)
   (a double)
   (sigma double))
-
-(defun ran-gaussian-tail-pdf (x a sigma)
-  "This function computes the probability density p(x) at x for Gaussian tail distribution
-with standard deviation sigma and lower limit a."
-  (gsl-ran-gaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float) (coerce sigma 'double-float)))
 
 ;;; (gsl-ran-ugaussian-tail rng double a)
 ;;; (gsl-ran-ugaussian-tail-pdf x a)
@@ -402,14 +298,6 @@ with standard deviation sigma and lower limit a."
     double
   (x double)
   (a double))
-
-(defun ran-ugaussian-tail (n a)
-  "This function compute result for the tail of a unit Gaussian distribution."
-  (gen-ran n #'gsl-ran-ugaussian-tail (coerce a 'double-float)))
-
-(defun ran-ugaussian-tail-pdf (x a)
-  "This function compute result for the tail of a unit Gaussian distribution."
-  (gsl-ran-ugaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float)))
 
 ;;; The Bivariate Gaussian Distribution
 
@@ -426,37 +314,6 @@ with standard deviation sigma and lower limit a."
   (x (* double))
   (y (* double)))
 
-(defun gen-pair-ran (n fn &rest args)
-  "This function returns n random pair-variates using gsl random umber generation.
-If it is needed to chage type and seed, set the environment variables
-GSL_RNG_TYPE and GSL_RNG_SEED."
-  (let ((acc (make-array (list n 2)
-                         :initial-element 0.0d0
-                         :element-type 'double-float)))
-    (with-alien ((rng-type (* (struct gsl-rng-type)))
-                 (rng (* (struct gsl-rng)))
-                 (x double)
-                 (y double))
-      (gsl-rng-env-setup)
-      (setf rng-type gsl-rng-default)
-      (setf rng (gsl-rng-alloc rng-type))
-      (dotimes (i n)
-        (apply fn (cons rng (append args (list (addr x) (addr y)))))
-        (setf (aref acc i 0) x)
-        (setf (aref acc i 1) y))
-      (gsl-rng-free rng)
-      acc)))
-
-(defun ran-bivariate-gaussian (n sigma-x sigma-y rho)
-  "This function generates a pair of correlated Gaussian variates, with mean zero,
-correlation coefficient rho and standard deviations sigma-x and sigma-y in the x
-and y directions."
-  (gen-pair-ran n
-                #'gsl-ran-bivariate-gaussian
-                (coerce sigma-x 'double-float)
-                (coerce sigma-y 'double-float)
-                (coerce rho 'double-float)))
-
 ;;; (gsl-ran-bivariate-gaussian-pdf x y sigma-x sigma-y rho)
 ;;;   This function computes the probability density p(x, y) at (x, y) for bivariate
 ;;;   Gaussian distribution with standard deviations sigma-x, sigma-y and correlation
@@ -469,16 +326,6 @@ and y directions."
   (sigma-y double)
   (rho double))
 
-(defun ran-bivariate-gaussian-pdf (x y sigma-x sigma-y rho)
-  "This function computes the probability density p(x, y) at (x, y) for bivariate
-Gaussian distribution with standard deviations sigma-x, sigma-y and correlation
-coefficient rho."
-  (gsl-ran-bivariate-gaussian-pdf (coerce x 'double-float)
-                                  (coerce y 'double-float)
-                                  (coerce sigma-x 'double-float)
-                                  (coerce sigma-y 'double-float)
-                                  (coerce rho 'double-float)))
-
 ;;; The Exponential Distribution
 
 ;;; (gsl-ran-exponential rng mu)
@@ -488,10 +335,6 @@ coefficient rho."
   (rng (* (struct gsl-rng)))
   (mu double))
 
-(defun ran-exponential (n mu)
-  "This function returns a random variate from the exponential distribution  with mean mu."
-  (gen-ran n #'gsl-ran-exponential (coerce mu 'double-float)))
-
 ;;; (gsl-ran-exponential-pdf x mu)
 ;;;   This function computes the probability density p(x) at x for an exponential distribution
 ;;;   with mean mu.
@@ -499,11 +342,6 @@ coefficient rho."
     double
   (x double)
   (mu double))
-
-(defun ran-exponential-pdf (x mu)
-  "This function computes the probability density p(x) at x for an exponential distribution
-with mean mu."
-  (gsl-ran-exponential-pdf (coerce x 'double-float) (coerce mu 'double-float)))
 
 ;;; (gsl-cdf-exponential-p x mu)
 ;;; (gsl-cdf-exponential-q x mu)
@@ -545,26 +383,6 @@ with mean mu."
                                          :extern "gsl_cdf_exponential_Qinv"))
     (values (alien-funcall gsl-cdf-exponential-qinv q mu))))
 
-(defun cdf-exponential-p (x mu)
-  "This function compute the cumulative distribution functions P(x) for the exponential
-distribution with mean mu."
-  (gsl-cdf-exponential-p (coerce x 'double-float) (coerce mu 'double-float)))
-
-(defun cdf-exponential-q (x mu)
-  "This function compute the cumulative distribution functions Q(x) for the exponential
-distribution with mean mu."
-  (gsl-cdf-exponential-q (coerce x 'double-float) (coerce mu 'double-float)))
-
-(defun cdf-exponential-pinv (p mu)
-  "This function compute the cumulative distribution functions P(x) inverses for the
-exponential distribution with mean mu."
-  (gsl-cdf-exponential-pinv (coerce p 'double-float) (coerce mu 'double-float)))
-
-(defun cdf-exponential-qinv (q mu)
-  "This function compute the cumulative distribution functions Q(x) inverses for the
-exponential distribution with mean mu."
-  (gsl-cdf-exponential-qinv (coerce q 'double-float) (coerce mu 'double-float)))
-
 ;;; The Laplace Distribution
 
 ;;; (gsl-ran-laplace rng a)
@@ -574,10 +392,6 @@ exponential distribution with mean mu."
   (rng (* (struct gsl-rng)))
   (a double))
 
-(defun ran-laplace (n a)
-  "This function returns n random variates from the Laplace distribution with width a."
-  (gen-ran n #'gsl-ran-laplace (coerce a 'double-float)))
-
 ;;; (gsl-ran-laplace-pdf x a)
 ;;;   This function computes the probability density p(x) at x for a Laplace distribution
 ;;;   with width a.
@@ -585,11 +399,6 @@ exponential distribution with mean mu."
     double
   (x double)
   (a double))
-
-(defun ran-laplace-pdf (x a)
-  "This function computes the probability density p(x) at x for a Laplace distribution
-with width a."
-  (gsl-ran-laplace-pdf (coerce x 'double-float) (coerce a 'double-float)))
 
 ;;; (gsl-cdf-laplace-p x a)
 ;;; (gsl-cdf-laplace-q x a)
@@ -631,26 +440,6 @@ with width a."
                                      :extern "gsl_cdf_laplace_Qinv"))
     (values (alien-funcall gsl-cdf-laplace-qinv q a))))
 
-(defun cdf-laplace-p (x a)
-  "This function compute the cumulative distribution function P(x) for the Laplace
-distribution with width a."
-  (gsl-cdf-laplace-p (coerce x 'double-float) (coerce a 'double-float)))
-
-(defun cdf-laplace-q (x a)
-  "This function compute the cumulative distribution function Q(x) for the Laplace
-distribution with width a."
-  (gsl-cdf-laplace-q (coerce x 'double-float) (coerce a 'double-float)))
-
-(defun cdf-laplace-pinv (p a)
-  "This function compute the cumulative distribution function P(x) inverses for
-the Laplace distribution with width a."
-  (gsl-cdf-laplace-pinv (coerce p 'double-float) (coerce a 'double-float)))
-
-(defun cdf-laplace-qinv (q a)
-  "This function compute the cumulative distribution function Q(x) inverses for
-the Laplace distribution with width a."
-  (gsl-cdf-laplace-qinv (coerce q 'double-float) (coerce a 'double-float)))
-
 ;;; The t-distribution
 
 ;;; (gsl-ran-tdist rng nu)
@@ -660,10 +449,6 @@ the Laplace distribution with width a."
   (rng (* (struct gsl-rng)))
   (nu double)) ; degrees of freedom
 
-(defun ran-tdist (n nu)
-  "This function returns n random variates from the t-distribution."
-  (gen-ran n #'gsl-ran-tdist (coerce nu 'double-float)))
-
 ;;; (gsl-ran-tdist-pdf x nu)
 ;;;   This function computes the probability density p(x) at x for a t-distribution with nu
 ;;;   degrees of freedom.
@@ -671,11 +456,6 @@ the Laplace distribution with width a."
     double
   (x double)
   (nu double))
-
-(defun ran-tdist-pdf (x nu)
-  "This function computes the probability density p(x) at x for a t-distribution with nu
-degrees of freedom."
-  (gsl-ran-tdist-pdf (coerce x 'double-float) (coerce nu 'double-float)))
 
 ;;; (gsl-cdf-tdist-p x nu)
 ;;; (gsl-cdf-tdist-q x nu)
@@ -717,26 +497,6 @@ degrees of freedom."
                                    :extern "gsl_cdf_tdist_Qinv"))
     (values (alien-funcall gsl-cdf-tdist-qinv q nu))))
 
-(defun cdf-tdist-p (x nu)
-  "This function compute the cumulative distribution function P(x) for the
-t-distribution with nu degrees of freedom."
-  (gsl-cdf-tdist-p (coerce x 'double-float) (coerce nu 'double-float)))
-
-(defun cdf-tdist-q (x nu)
-  "This function compute the cumulative distribution function Q(x) for the
-t-distribution with nu degrees of freedom."
-  (gsl-cdf-tdist-q (coerce x 'double-float) (coerce nu 'double-float)))
-
-(defun cdf-tdist-pinv (p nu)
-  "This function compute the cumulative distribution function P(x) inverses for
-the t-distribution with nu degrees of freedom."
-  (gsl-cdf-tdist-pinv (coerce p 'double-float) (coerce nu 'double-float)))
-
-(defun cdf-tdist-qinv (p nu)
-  "This function compute the cumulative distribution function Q(x) inverses for
-the t-distribution with nu degrees of freedom."
-  (gsl-cdf-tdist-qinv (coerce p 'double-float) (coerce nu 'double-float)))
-
 ;;; Spherical Vector Deistributions
 ;;;
 ;;; The spherical distributions generate random vectors located on a spherical surface.
@@ -765,16 +525,6 @@ the t-distribution with nu degrees of freedom."
   (x (* double))
   (y (* double)))
 
-(defun ran-dir-2d (n)
-  "This function returns a random direction vector v = (x, y) in two dimensions. The
-vector is normalized such that |v|^2 = x^2 + y^2 = 1."
-  (gen-pair-ran n #'gsl-ran-dir-2d))
-
-(defun ran-dir-2d-trig-method (n)
-  "This function returns a random direction vector v = (x, y) in two dimensions. The
-vector is normalized such that |v|^2 = x^2 + y^2 = 1."
-  (gen-pair-ran n #'gsl-ran-dir-2d-trig-method))
-
 ;;; The Poission Distribution
 
 ;;; (gsl-ran-poisson rng mu)
@@ -784,10 +534,6 @@ vector is normalized such that |v|^2 = x^2 + y^2 = 1."
   (rng (* (struct gsl-rng)))
   (mu double))
 
-(defun ran-poisson (n mu)
-  "This function returns a random integer from the Poisson distribution with mean mu."
-  (gen-ran n #'gsl-ran-poisson (coerce mu 'double-float)))
-
 ;;; (gsl-ran-possion-pdf k mu)
 ;;;   This function computes the probability p(k) of obtaining k from a Poisson distribution
 ;;;   with mean mu.
@@ -795,11 +541,6 @@ vector is normalized such that |v|^2 = x^2 + y^2 = 1."
     double
   (k unsigned-int)
   (mu double))
-
-(defun ran-poisson-pdf (k mu)
-  "This function computes the probability p(k) of obtaining k from a Poisson distribution
-with mean mu."
-  (gsl-ran-poisson-pdf (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
 
 ;;; (gsl-cdf-poisson-p k mu)
 ;;; (gsl-cdf-poisson-q k mu)
@@ -825,16 +566,6 @@ with mean mu."
                                   :extern "gsl_cdf_poisson_Q"))
     (values (alien-funcall gsl-cdf-poisson-q k mu))))
 
-(defun cdf-poisson-p (k mu)
-  "This functions compute the cumulative distribution function P(k) for the
-Poisson distribution with parameter mu."
-  (gsl-cdf-poisson-p (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
-
-(defun cdf-poisson-q (k mu)
-  "This functions compute the cumulative distribution function Q(k) for the
-Poisson distribution with parameter mu."
-  (gsl-cdf-poisson-q (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
-
 ;;; The Bernoulli Distribution
 
 ;;; (gsl-ran-bernoulli rng p)
@@ -844,10 +575,6 @@ Poisson distribution with parameter mu."
   (rng (* (struct gsl-rng)))
   (p double))
 
-(defun ran-bernoulli (n p)
-  "This function returns either 0 or 1, the result of a Bernoulli trial with probability p."
-  (gen-ran n #'gsl-ran-bernoulli (coerce p 'double-float)))
-
 ;;; (gsl-ran-bernoulli-pdf k p)
 ;;;   This function computes the probability p(k) of obtaining k from a Bernoulli distribution
 ;;;   with probability parameter p.
@@ -855,11 +582,6 @@ Poisson distribution with parameter mu."
     double
   (k unsigned-int)
   (p double))
-
-(defun ran-bernoulli-pdf (k p)
-  "This function computes the probability p(k) of obtaining k from a Bernoulli distribution
-with probability parameter p."
-  (gsl-ran-bernoulli-pdf (coerce k '(unsigned-byte 16)) (coerce p 'double-float)))
 
 ;;; The Binomial Distribution
 
@@ -872,11 +594,6 @@ with probability parameter p."
   (p double)
   (n unsigned-int))
 
-(defun ran-binomial (n p size)
-  "This function returns m random integers from the binomial distribution, the number
-of successes in n independent trials with probability p."
-  (gen-ran n #'gsl-ran-binomial (coerce p 'double-float) (coerce size '(unsigned-byte 16))))
-
 ;;; (gsl-ran-binomial-pdf k p n)
 ;;;   This function computes the probability p(k) of obtaining k from a binomial distribution
 ;;;   with parameters p and n.
@@ -885,13 +602,6 @@ of successes in n independent trials with probability p."
   (k unsigned-int)
   (p double)
   (n unsigned-int))
-
-(defun ran-binomial-pdf (k p size)
-  "This function computes the probability p(k) of obtaining k from a binomial distribution
-with parameters p and n."
-  (gsl-ran-binomial-pdf (coerce k '(unsigned-byte 16))
-                        (coerce p 'double-float)
-                        (coerce size '(unsigned-byte 16))))
 
 ;;; (gsl-cdf-binomial-p k p n)
 ;;; (gsl-cdf-binomial-q k p n)
@@ -912,6 +622,317 @@ with parameters p and n."
                                    :extern "gsl_cdf_binomial_Q"))
     (values (alien-funcall gsl-cdf-binomial-q k p n))))
 
+;;; rng
+
+(defun gen-ran (n fn &rest args)
+  "This function returns n random variates using gsl random umber generation.
+If it is needed to chage type and seed, set the environment variables
+GSL_RNG_TYPE and GSL_RNG_SEED."
+  (let ((acc (make-array n :initial-element 0.0d0 :element-type 'double-float)))
+    (with-alien ((rng-type (* (struct gsl-rng-type)))
+                 (rng (* (struct gsl-rng))))
+      (gsl-rng-env-setup)
+      (setf rng-type gsl-rng-default)
+      (setf rng (gsl-rng-alloc rng-type))
+      (dotimes (i n)
+        (setf (aref acc i) (coerce (apply fn (cons rng args)) 'double-float)))
+      (gsl-rng-free rng)
+      acc)))
+
+(defun gen-pair-ran (n fn &rest args)
+  "This function returns n random pair-variates using gsl random umber generation.
+If it is needed to chage type and seed, set the environment variables
+GSL_RNG_TYPE and GSL_RNG_SEED."
+  (let ((acc (make-array (list n 2)
+                         :initial-element 0.0d0
+                         :element-type 'double-float)))
+    (with-alien ((rng-type (* (struct gsl-rng-type)))
+                 (rng (* (struct gsl-rng)))
+                 (x double)
+                 (y double))
+      (gsl-rng-env-setup)
+      (setf rng-type gsl-rng-default)
+      (setf rng (gsl-rng-alloc rng-type))
+      (dotimes (i n)
+        (apply fn (cons rng (append args (list (addr x) (addr y)))))
+        (setf (aref acc i 0) x)
+        (setf (aref acc i 1) y))
+      (gsl-rng-free rng)
+      acc)))
+
+;;; The Gaussian Distribution
+
+(defun ran-gaussian (n sigma)
+  "This function returns n Gaussian random variates, with mean zero and standard
+deviation sigma. Use the transformation z = mu + x on the numbers returned
+by ran-gaussian to obtain a Gaussian distribution with mean mu."
+  (gen-ran n #'gsl-ran-gaussian (coerce sigma 'double-float)))
+
+(defun ran-gaussian-pdf (x sigma)
+  "This function computes the probability density p(x) at x for a Gaussian distribution
+with standard deviation sigma."
+  (gsl-ran-gaussian-pdf (coerce x 'double-float) (coerce sigma 'double-float)))
+
+(defun ran-gaussian-ziggurat (n sigma)
+  "This function computes n Gaussian random variates using the alternative Marsaglia-
+Tsang ziggurat methods. The Ziggurat algorithm is the fastest available algorithm
+in most cases."
+  (gen-ran n #'gsl-ran-gaussian-ziggurat (coerce sigma 'double-float)))
+
+(defun ran-gaussian-ratio-method (n sigma)
+  "This function computes n Gaussian random variates using the alternative Kinderman-
+Monahoan-Leva ratio methods."
+  (gen-ran n #'gsl-ran-gaussian-ratio-method (coerce sigma 'double-float)))
+
+(defun ran-ugaussian (n)
+  "This function returns n unit Gaussian random variates, with mean zero and standard
+deviation sigma zero."
+  (gen-ran n #'gsl-ran-ugaussian))
+
+(defun ran-ugaussian-pdf (x)
+  "This function computes the probability density p(x) at x for the unit Gaussian
+distribution."
+  (gsl-ran-ugaussian-pdf (coerce x 'double-float)))
+
+(defun ran-ugaussian-ratio-method (n)
+  "This function computes n unit Gaussian random variates using the alternative Kinderman-
+Monahoan-Leva ratio methods."
+  (gen-ran n #'gsl-ran-ugaussian-ratio-method))
+
+(defun cdf-gaussian-p (x sigma)
+  "This function compute the cumulative distribution functions P(x) for the Gaussian
+distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-p (coerce x 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-q (x sigma)
+  "This function compute the cumulative distribution functions Q(x) for the Gaussian
+distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-q (coerce x 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-pinv (p sigma)
+  "This function compute the cumulative distribution functions P(x) inverses for the
+Gaussian distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-pinv (coerce p 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-gaussian-qinv (q sigma)
+  "This function compute the cumulative distribution functions Q(x) inverses for the
+Gaussian distribution with standard deviation sigma."
+  (gsl-cdf-gaussian-qinv (coerce q 'double-float) (coerce sigma 'double-float)))
+
+(defun cdf-ugaussian-p (x)
+  "This function compute the cumulative distribution functions P(x) for the unit
+Gaussian distribution."
+  (gsl-cdf-ugaussian-p (coerce x 'double-float)))
+
+(defun cdf-ugaussian-q (x)
+  "This function compute the cumulative distribution functions Q(x) for the unit
+Gaussian distribution."
+  (gsl-cdf-ugaussian-q (coerce x 'double-float)))
+
+(defun cdf-ugaussian-pinv (p)
+  "This function compute the cumulative distribution functions P(x) inverses for
+the unit Gaussian distribution."
+  (gsl-cdf-ugaussian-pinv (coerce p 'double-float)))
+
+(defun cdf-ugaussian-qinv (q)
+  "This function compute the cumulative distribution functions Q(x) inverses for
+the unit Gaussian distribution."
+  (gsl-cdf-ugaussian-qinv (coerce q 'double-float)))
+
+;;; The Gaussian Tail Distribution
+
+(defun ran-gaussian-tail (n a sigma)
+  "This function provides random variates from the upper tail of a Gaussian distribution
+with standard deviation sigma. The values returned are lagger than the lower limit a,
+which must be positive. The method is based on Marsaglia's famous rectangle-wedge-tail
+algorithm."
+  (gen-ran n #'gsl-ran-gaussian-tail (coerce a 'double-float) (coerce sigma 'double-float)))
+
+(defun ran-gaussian-tail-pdf (x a sigma)
+  "This function computes the probability density p(x) at x for Gaussian tail distribution
+with standard deviation sigma and lower limit a."
+  (gsl-ran-gaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float) (coerce sigma 'double-float)))
+
+(defun ran-ugaussian-tail (n a)
+  "This function compute result for the tail of a unit Gaussian distribution."
+  (gen-ran n #'gsl-ran-ugaussian-tail (coerce a 'double-float)))
+
+(defun ran-ugaussian-tail-pdf (x a)
+  "This function compute result for the tail of a unit Gaussian distribution."
+  (gsl-ran-ugaussian-tail-pdf (coerce x 'double-float) (coerce a 'double-float)))
+
+;;; The Bivariate Gaussian Distribution
+
+(defun ran-bivariate-gaussian (n sigma-x sigma-y rho)
+  "This function generates a pair of correlated Gaussian variates, with mean zero,
+correlation coefficient rho and standard deviations sigma-x and sigma-y in the x
+and y directions."
+  (gen-pair-ran n
+                #'gsl-ran-bivariate-gaussian
+                (coerce sigma-x 'double-float)
+                (coerce sigma-y 'double-float)
+                (coerce rho 'double-float)))
+
+(defun ran-bivariate-gaussian-pdf (x y sigma-x sigma-y rho)
+  "This function computes the probability density p(x, y) at (x, y) for bivariate
+Gaussian distribution with standard deviations sigma-x, sigma-y and correlation
+coefficient rho."
+  (gsl-ran-bivariate-gaussian-pdf (coerce x 'double-float)
+                                  (coerce y 'double-float)
+                                  (coerce sigma-x 'double-float)
+                                  (coerce sigma-y 'double-float)
+                                  (coerce rho 'double-float)))
+
+;;; The Exponential Distribution
+
+(defun ran-exponential (n mu)
+  "This function returns a random variate from the exponential distribution  with mean mu."
+  (gen-ran n #'gsl-ran-exponential (coerce mu 'double-float)))
+
+(defun ran-exponential-pdf (x mu)
+  "This function computes the probability density p(x) at x for an exponential distribution
+with mean mu."
+  (gsl-ran-exponential-pdf (coerce x 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-p (x mu)
+  "This function compute the cumulative distribution functions P(x) for the exponential
+distribution with mean mu."
+  (gsl-cdf-exponential-p (coerce x 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-q (x mu)
+  "This function compute the cumulative distribution functions Q(x) for the exponential
+distribution with mean mu."
+  (gsl-cdf-exponential-q (coerce x 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-pinv (p mu)
+  "This function compute the cumulative distribution functions P(x) inverses for the
+exponential distribution with mean mu."
+  (gsl-cdf-exponential-pinv (coerce p 'double-float) (coerce mu 'double-float)))
+
+(defun cdf-exponential-qinv (q mu)
+  "This function compute the cumulative distribution functions Q(x) inverses for the
+exponential distribution with mean mu."
+  (gsl-cdf-exponential-qinv (coerce q 'double-float) (coerce mu 'double-float)))
+
+;;; The Laplace Distribution
+
+(defun ran-laplace (n a)
+  "This function returns n random variates from the Laplace distribution with width a."
+  (gen-ran n #'gsl-ran-laplace (coerce a 'double-float)))
+
+(defun ran-laplace-pdf (x a)
+  "This function computes the probability density p(x) at x for a Laplace distribution
+with width a."
+  (gsl-ran-laplace-pdf (coerce x 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-p (x a)
+  "This function compute the cumulative distribution function P(x) for the Laplace
+distribution with width a."
+  (gsl-cdf-laplace-p (coerce x 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-q (x a)
+  "This function compute the cumulative distribution function Q(x) for the Laplace
+distribution with width a."
+  (gsl-cdf-laplace-q (coerce x 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-pinv (p a)
+  "This function compute the cumulative distribution function P(x) inverses for
+the Laplace distribution with width a."
+  (gsl-cdf-laplace-pinv (coerce p 'double-float) (coerce a 'double-float)))
+
+(defun cdf-laplace-qinv (q a)
+  "This function compute the cumulative distribution function Q(x) inverses for
+the Laplace distribution with width a."
+  (gsl-cdf-laplace-qinv (coerce q 'double-float) (coerce a 'double-float)))
+
+;;; The t-distribution
+
+(defun ran-tdist (n nu)
+  "This function returns n random variates from the t-distribution."
+  (gen-ran n #'gsl-ran-tdist (coerce nu 'double-float)))
+
+(defun ran-tdist-pdf (x nu)
+  "This function computes the probability density p(x) at x for a t-distribution with nu
+degrees of freedom."
+  (gsl-ran-tdist-pdf (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-p (x nu)
+  "This function compute the cumulative distribution function P(x) for the
+t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-p (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-q (x nu)
+  "This function compute the cumulative distribution function Q(x) for the
+t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-q (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-pinv (p nu)
+  "This function compute the cumulative distribution function P(x) inverses for
+the t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-pinv (coerce p 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-tdist-qinv (p nu)
+  "This function compute the cumulative distribution function Q(x) inverses for
+the t-distribution with nu degrees of freedom."
+  (gsl-cdf-tdist-qinv (coerce p 'double-float) (coerce nu 'double-float)))
+
+;;; Spherical Vector Deistributions
+
+(defun ran-dir-2d (n)
+  "This function returns a random direction vector v = (x, y) in two dimensions. The
+vector is normalized such that |v|^2 = x^2 + y^2 = 1."
+  (gen-pair-ran n #'gsl-ran-dir-2d))
+
+(defun ran-dir-2d-trig-method (n)
+  "This function returns a random direction vector v = (x, y) in two dimensions. The
+vector is normalized such that |v|^2 = x^2 + y^2 = 1."
+  (gen-pair-ran n #'gsl-ran-dir-2d-trig-method))
+
+;;; The Poission Distribution
+
+(defun ran-poisson (n mu)
+  "This function returns a random integer from the Poisson distribution with mean mu."
+  (gen-ran n #'gsl-ran-poisson (coerce mu 'double-float)))
+
+(defun ran-poisson-pdf (k mu)
+  "This function computes the probability p(k) of obtaining k from a Poisson distribution
+with mean mu."
+  (gsl-ran-poisson-pdf (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
+
+(defun cdf-poisson-p (k mu)
+  "This functions compute the cumulative distribution function P(k) for the
+Poisson distribution with parameter mu."
+  (gsl-cdf-poisson-p (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
+
+(defun cdf-poisson-q (k mu)
+  "This functions compute the cumulative distribution function Q(k) for the
+Poisson distribution with parameter mu."
+  (gsl-cdf-poisson-q (coerce k '(unsigned-byte 16)) (coerce mu 'double-float)))
+
+;;; The Bernoulli Distribution
+
+(defun ran-bernoulli (n p)
+  "This function returns either 0 or 1, the result of a Bernoulli trial with probability p."
+  (gen-ran n #'gsl-ran-bernoulli (coerce p 'double-float)))
+
+(defun ran-bernoulli-pdf (k p)
+  "This function computes the probability p(k) of obtaining k from a Bernoulli distribution
+with probability parameter p."
+  (gsl-ran-bernoulli-pdf (coerce k '(unsigned-byte 16)) (coerce p 'double-float)))
+
+;;; The Binomial Distribution
+
+(defun ran-binomial (n p size)
+  "This function returns m random integers from the binomial distribution, the number
+of successes in n independent trials with probability p."
+  (gen-ran n #'gsl-ran-binomial (coerce p 'double-float) (coerce size '(unsigned-byte 16))))
+
+(defun ran-binomial-pdf (k p size)
+  "This function computes the probability p(k) of obtaining k from a binomial distribution
+with parameters p and n."
+  (gsl-ran-binomial-pdf (coerce k '(unsigned-byte 16))
+                        (coerce p 'double-float)
+                        (coerce size '(unsigned-byte 16))))
 (defun cdf-binomial-p (k p size)
   "This functions compute the cumulative distribution functions P(k) for the
 binomial distribution with parameters p and n."
