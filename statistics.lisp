@@ -24,7 +24,8 @@
 (cl:defpackage "SB-GSL-STATS"
   (:use "CL"
         "SB-ALIEN"
-        "SB-C-CALL")
+        "SB-C-CALL"
+        "SB-SYS")
   (:export "GSL-STATS-MEAN"
            "GSL-STATS-VARIANCE"
            "GSL-STATS-VARIANCE-M"
@@ -33,7 +34,16 @@
            "GSL-STATS-TSS"
            "GSL-STATS-TSS-M"
            "GSL-STATS-VARIANCE-WITH-FIXED-MEAN"
-           "GSL-STATS-SD-WITH-FIXED-MEAN"))
+           "GSL-STATS-SD-WITH-FIXED-MEAN"
+           "STATS-MEAN"
+           "STATS-VARIANCE"
+           "STATS-VARIANCE-M"
+           "STATS-SD"
+           "STATS-SD-M"
+           "STATS-TSS"
+           "STATS-TSS-M"
+           "STATS-VARIANCE-WITH-FIXED-MEAN"
+           "STATS-SD-WITH-FIXED-MEAN"))
 
 (cl:in-package "SB-GSL-STATS")
 
@@ -42,7 +52,7 @@
 ;;;   stride.
 (define-alien-routine gsl-stats-mean
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t))
 
@@ -51,7 +61,7 @@
 ;;;   n with stride stride.
 (define-alien-routine gsl-stats-variance
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t))
 
@@ -59,7 +69,7 @@
 ;;;   This function retruns the sample variance of data relative to the given value of mean.
 (define-alien-routine gsl-stats-variance-m
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t)
   (mean double))
@@ -70,13 +80,13 @@
 ;;;   retrun the square root of the corresponding variance function above.
 (define-alien-routine gsl-stats-sd
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t))
 
 (define-alien-routine gsl-stats-sd-m
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t)
   (mean double))
@@ -88,13 +98,13 @@
 ;;;   is computed using gsl-stats-mean.
 (define-alien-routine gsl-stats-tss
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t))
 
 (define-alien-routine gsl-stats-tss-m
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t)
   (mean double))
@@ -104,7 +114,7 @@
 ;;;   ulation mean mean of the underlying distribution is known apriori.
 (define-alien-routine gsl-stats-variance-with-fixed-mean
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t)
   (mean double))
@@ -114,25 +124,86 @@
 ;;;   mean.
 (define-alien-routine gsl-stats-sd-with-fixed-mean
     double
-  (data (array double nil))
+  (data (* double)) ; using pointer type insted of (array double nil)
   (stride size-t)
   (n size-t)
   (mean double))
 
+(defun stats-mean (data)
+  "This function retruns the arithmetic mean of data. A type of data must be
+'(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-mean (vector-sap data) 1 (length data))))
+
+(defun stats-variance (data)
+  "This function retruns the estimated, or sample, variance of data. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-variance (vector-sap data) 1 (length data))))
+
+(defun stats-variance-m (data mean)
+  "This function retruns the sample variance of data relative to the given value of mean.
+A type of data must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-variance-m (vector-sap data) 1 (length data) (coerce mean 'double-float))))
+
+(defun stats-sd (data)
+  "The standard deviation is defined as the square root of the variance. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-sd (vector-sap data) 1 (length data))))
+
+(defun stats-sd-m (data mean)
+  "The standard deviation is defined as the square root of the variance. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-sd-m (vector-sap data) 1 (length data) (coerce mean 'double-float))))
+
+(defun stats-tss (data)
+  "This function returns the total sum of sqares (TSS) of data about mean. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-tss (vector-sap data) 1 (length data))))
+
+(defun stats-tss-m (data mean)
+  "This function returns the total sum of sqares (TSS) of data about mean. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-tss-m (vector-sap data) 1 (length data) (coerce mean 'double-float))))
+
+(defun stats-variance-with-fixed-mean (data mean)
+  "This function computes an unbiased estimate of the variance of data when the pop-
+ulation mean mean of the underlying distribution is known apriori. A type of data
+must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-variance-with-fixed-mean (vector-sap data)
+                                        1
+                                        (length data)
+                                        (coerce mean 'double-float))))
+
+(defun stats-sd-with-fixed-mean (data mean)
+  "This function calculates the standard deviation of data for a fixed population mean
+mean. A type of data must be '(simple-array double-float ({data length}))."
+  (with-pinned-objects (data)
+    (gsl-stats-sd-with-fixed-mean (vector-sap data)
+                                  1
+                                  (length data)
+                                  (coerce mean 'double-float))))
+
 ;;; (test-gsl-stats)
 ;;;   This function do tests.
 (defun test-gsl-stats ()
-  (with-alien ((c-array (array double 100)))
+  (let ((vec (make-array 100 :initial-element 0.0d0 :element-type 'double-float)))
     (dotimes (i 100)
-      (setf (deref c-array i) (coerce i 'double-float)))
-    (format t "GSL-STATS-MEAN: ~A~%" (gsl-stats-mean c-array 1 100))
-    (format t "GSL-STATS-VARIANCE: ~A~%" (gsl-stats-variance c-array 1 100))
-    (format t "GSL-STATS-VARIANCE-M: ~A~%" (gsl-stats-variance-m c-array 1 100 50.0d0))
-    (format t "GSL-STATS-SD: ~A~%" (gsl-stats-sd c-array 1 100))
-    (format t "GSL-STATS-SD-M: ~A~%" (gsl-stats-sd-m c-array 1 100 50.0d0))
-    (format t "GSL-STATS-TSS: ~A~%" (gsl-stats-tss c-array 1 100))
-    (format t "GSL-STATS-TSS-M: ~A~%" (gsl-stats-tss-m c-array 1 100 50.0d0))
-    (format t "GSL-STATS-VARIANCE-WITH-FIXED-MEAN: ~A~%"
-            (gsl-stats-variance-with-fixed-mean c-array 1 100 50.0d0))
-    (format t "GSL-STATS-SD-WITH-FIXED-MEAN: ~A~%"
-            (gsl-stats-sd-with-fixed-mean c-array 1 100 50.0d0))))
+      (setf (aref vec i) (coerce i 'double-float)))
+    (format t "STATS-MEAN: ~A~%" (stats-mean vec))
+    (format t "STATS-VARIANCE: ~A~%" (stats-variance vec))
+    (format t "STATS-VARIANCE-M: ~A~%" (stats-variance-m vec 50.d0))
+    (format t "STATS-SD: ~A~%" (stats-sd vec))
+    (format t "STATS-SD-M: ~A~%" (stats-sd-m vec 50.0d0))
+    (format t "STATS-TSS: ~A~%" (stats-tss vec))
+    (format t "STATS-TSS-M: ~A~%" (stats-tss-m vec 50.d0))
+    (format t "STATS-VARIANCE-WITH-FIXED-MEAN: ~A~%"
+            (stats-variance-with-fixed-mean vec 50.0d0))
+    (format t "STATS-SD-WITH-FIXED-MEAN: ~A~%"
+            (stats-sd-with-fixed-mean vec 50.0d0))))
