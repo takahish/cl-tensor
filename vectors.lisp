@@ -23,10 +23,8 @@
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL"
-        "SB-SYS"
         "SB-GSL-BLOCK")
   (:export "GSL-VECTOR"
-           "GSL-VECTOR-VIEW"
            "GSL-VECTOR-ALLOC"
            "GSL-VECTOR-CALLOC"
            "GSL-VECTOR-FREE"
@@ -57,12 +55,14 @@
            "GSL-VECTOR-ISNEG"
            "GSL-VECTOR-ISNONNEG"
            "GSL-VECTOR-EQUAL"
-           "MAKE-VECTOR"
            "VECTOR-SIZE"
            "VECTOR-STRIDE"
            "VECTOR-DATA"
            "VECTOR-BLOCK"
            "VECTOR-OWNER"
+           "VECTOR-ALLOC"
+           "VECTOR-CALLOC"
+           "VECTOR-FREE"
            "VECTOR-GET"
            "VECTOR-SET"
            "VECTOR-PTR"
@@ -89,6 +89,8 @@
            "VECTOR-ISPOS"
            "VECTOR-ISNEG"
            "VECTOR-ISNONNEG"
+           "VECTOR-SET-SEQUENCE"
+           "MAKE-VECTOR"
            "VECTOR-ARRAY"))
 
 (cl:in-package "SB-GSL-VECTOR")
@@ -334,23 +336,6 @@
   (u (* (struct gsl-vector)))
   (v (* (struct gsl-vector))))
 
-;;; Allocate an alien of (struct gsl-vector) in foreign heap, and return a pointer to it.
-(defun make-vector (n &key (initial-element nil) (initial-contents nil))
-  "This function makes a gsl-vector of length n, returning a pointer to a newly initialized
-vector struct. A new block is allocated for the elements of the vector, and stored in
-the block component of the vector struct. The block is owned by the vector, and will be
-deallocated when the vector is deallocated.
-The memory is allocated using gsl-vector-alloc, so it can be passed to foreign functions
-which gsl-vector-free, or released using free-alien."
-  (let ((v (make-alien (struct gsl-vector))))
-    (setf v (gsl-vector-calloc n))
-    (when (not (null initial-element))
-        (gsl-vector-set-all v initial-element))
-    (when (not (null initial-contents))
-        (dotimes (i n)
-          (gsl-vector-set v i (coerce (elt initial-contents i) 'double-float))))
-    v))
-
 (defun vector-size (v)
   "This function returns the size of a vector v."
   (slot v 'size))
@@ -370,6 +355,21 @@ which gsl-vector-free, or released using free-alien."
 (defun vector-owner (v)
   "This function returns the owner of a vector v."
   (slot v 'owner))
+
+(defun vector-alloc (n)
+  "This function creates a vector of length n, returning a pointer to a newly initialized
+vector struct."
+  (gsl-vector-alloc n))
+
+(defun vector-calloc (n)
+  "This function allocates memory for a vector of length n and initializes all the elements
+of the vector to zero."
+  (gsl-vector-calloc n))
+
+(defun vector-free (v &optional (rt nil))
+  "This function frees a previously allocated vector v."
+  (progn (gsl-vector-free v)
+         rt))
 
 (defun vector-get (v i)
   "This function retruns the i-th element of a vector v."
@@ -410,9 +410,10 @@ except for the i-th element which is set to one."
 
 (defun vector-memcpy (src)
   "This function copies the elements of the vector src."
-  (let ((dest (make-vector (vector-size src))))
-    (gsl-vector-memcpy dest src)
-    dest))
+  (let ((dest (make-alien (struct gsl-vector))))
+    (progn (setf dest (vector-alloc (vector-size src)))
+           (gsl-vector-memcpy dest src)
+           dest)))
 
 (defun vector-swap (v w)
   "This function exhanges the elements of the vectors v and w by copying."
@@ -514,6 +515,30 @@ and 0 otherwise."
 0 otherwise."
   (= (gsl-vector-isnonneg v) 1))
 
+(defun vector-set-sequence (v seq)
+  "This function sets each element of the vector v to each element of the sequence
+seq respectively."
+  (if (not (= (vector-size v) (length seq)))
+      (error "sequence length must be vector size")
+      (dotimes (i (vector-size v) v)
+        (vector-set v i (coerce (elt seq i) 'double-float)))))
+
+;;; Allocate an alien of (struct gsl-vector) in foreign heap, and return a pointer to it.
+(defun make-vector (n &key (initial-element nil) (initial-contents nil))
+  "This function makes a gsl-vector of length n, returning a pointer to a newly initialized
+vector struct. A new block is allocated for the elements of the vector, and stored in
+the block component of the vector struct. The block is owned by the vector, and will be
+deallocated when the vector is deallocated.
+The memory is allocated using gsl-vector-alloc, so it can be passed to foreign functions
+which gsl-vector-free, or released using free-alien."
+  (let ((v (make-alien (struct gsl-vector))))
+    (progn (setf v (vector-calloc n))
+           (cond ((not (null initial-element))
+                  (vector-set-all v initial-element))
+                 ((not (null initial-contents))
+                  (vector-set-sequence v initial-contents))
+                 (t v)))))
+
 (defun vector-array (v)
   (let ((acc (make-array (vector-size v) :element-type 'double-float)))
     (dotimes (i (vector-size v) acc)
@@ -523,5 +548,5 @@ and 0 otherwise."
 ;;;   This function do tests.
 (defun test-gsl-vector ()
   (let ((v (make-vector 10 :initial-contents '(0 1 2 3 4 5 6 7 8 9))))
-    (dotimes (i (vector-size v) (gsl-vector-free v))
+    (dotimes (i (vector-size v) (vector-free v))
       (format t "P_~A = ~A~%" i (vector-get v i)))))
