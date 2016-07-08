@@ -58,6 +58,18 @@
            "GSL-CDF-LAPLACE-Q"
            "GSL-CDF-LAPLACE-PINV"
            "GSL-CDF-LAPLACE-QINV"
+           "GSL-RAN-CHISQ"
+           "GSL-RAN-CHISQ-PDF"
+           "GSL-CDF-CHISQ-P"
+           "GSL-CDF-CHISQ-Q"
+           "GSL-CDF-CHISQ-PINV"
+           "GSL-CDF-CHISQ-QINV"
+           "GSL-RAN-FDIST"
+           "GSL-RAN-FDIST-PDF"
+           "GSL-CDF-FDIST-P"
+           "GSL-CDF-FDIST-Q"
+           "GSL-CDF-FDIST-PINV"
+           "GSL-CDF-FDIST-QINV"
            "GSL-RAN-TDIST"
            "GSL-RAN-TDIST-PDF"
            "GSL-CDF-TDIST-P"
@@ -109,6 +121,18 @@
            "CDF-LAPLACE-Q"
            "CDF-LAPLACE-PINV"
            "CDF-LAPLACE-QINV"
+           "RAN-CHISQ"
+           "RAN-CHISQ-PDF"
+           "CDF-CHISQ-P"
+           "CDF-CHISQ-Q"
+           "CDF-CHISQ-PINV"
+           "CDF-CHISQ-QINV"
+           "RAN-FDIST"
+           "RAN-FDIST-PDF"
+           "CDF-FDIST-P"
+           "CDF-FDIST-Q"
+           "CDF-FDIST-PINV"
+           "CDF-FDIST-QINV"
            "RAN-TDIST"
            "RAN-TDIST-PDF"
            "CDF-TDIST-P"
@@ -439,6 +463,124 @@
   (with-alien ((gsl-cdf-laplace-qinv (function double double double)
                                      :extern "gsl_cdf_laplace_Qinv"))
     (values (alien-funcall gsl-cdf-laplace-qinv q a))))
+
+;;; The chi-squared distribution
+
+;;; (gsl-ran-chisq rng nu)
+;;;   This function returns a random variate from the chi-squared distribution with nu
+;;;   degrees of freedom.
+(define-alien-routine gsl-ran-chisq
+    double
+  (rng (* (struct gsl-rng)))
+  (nu double))
+
+;;; (gsl-ran-chisq-pdf x nu)
+;;;   This function computes the probability density p(x) at x for a chi-squared distribution
+;;;   with nu degrees of freedom.
+(define-alien-routine gsl-ran-chisq-pdf
+    double
+  (x double)
+  (nu double))
+
+;;; (gsl-cdf-chisq-p x nu)
+;;; (gsl-cdf-chisq-q x nu)
+;;; (gsl-cdf-chisq-pinv p nu)
+;;; (gsl-cdf-chisq-qinv q nu)
+;;;   These functions compute the cumulative distribution functions P(x), Q(x) and their
+;;;   inverses for the chi-squared distribution with nu degrees of freedom.
+;;;
+;;; define-alien-routine macro automatically try to find c-function name with lower case
+;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
+;;; But cdf functions have partially upper case letter, so these functions are directly
+;;; difined by defun.
+
+;; function gsl-cdf-chisq-p for c-function "gsl_cdf_chisq_P".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-chisq-p))
+(defun gsl-cdf-chisq-p (x nu)
+  (with-alien ((gsl-cdf-chisq-p (function double double double)
+                                :extern "gsl_cdf_chisq_P"))
+    (values (alien-funcall gsl-cdf-chisq-p x nu))))
+
+;; function gsl-cdf-chisq-q for c-function "gsl_cdf_chisq_Q".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-chisq-q))
+(defun gsl-cdf-chisq-q (x nu)
+  (with-alien ((gsl-cdf-chisq-q (function double double double)
+                                :extern "gsl_cdf_chisq_Q"))
+    (values (alien-funcall gsl-cdf-chisq-q x nu))))
+
+;; function gsl-cdf-chisq-pinv for c-function "gsl_cdf_chisq_Pinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-chisq-pinv))
+(defun gsl-cdf-chisq-pinv (p nu)
+  (with-alien ((gsl-cdf-chisq-pinv (function double double double)
+                                   :extern "gsl_cdf_chisq_Pinv"))
+    (values (alien-funcall gsl-cdf-chisq-pinv p nu))))
+
+;; function gsl-cdf-chisq-qinv for c-function "gsl_cdf_chisq_Qinv".
+(declaim (ftype (function (t t) (values (alien double) &optional)) gsl-cdf-chisq-qinv))
+(defun gsl-cdf-chisq-qinv (q nu)
+  (with-alien ((gsl-cdf-chisq-qinv (function double double double)
+                                   :extern "gsl_cdf_chisq_Qinv"))
+    (values (alien-funcall gsl-cdf-chisq-qinv q nu))))
+
+;;; The F-distribution
+
+;;; (gsl-ran-fdist rng nu1 nu2)
+;;;   This function returns a random variate from the F-distribution with degrees of
+;;;   freedom nu1 and nu2.o
+(define-alien-routine gsl-ran-fdist
+    double
+  (rng (* (struct gsl-rng)))
+  (nu1 double)
+  (nu2 double))
+
+;;; (gsl-ran-fdist-pdf x nu1 nu2)
+;;;   This function computes the probability density p(x) at x for an F-distribution with
+;;;   nu1 and nu2 degrees of freedom.
+(define-alien-routine gsl-ran-fdist-pdf
+    double
+  (x double)
+  (nu1 double)
+  (nu2 double))
+
+;;; (gsl-cdf-fdist-p x nu1 nu2)
+;;; (gsl-cdf-fdist-q x nu1 nu2)
+;;; (gsl-cdf-fdist-pinv p nu1 nu2)
+;;; (gsl-cdf-fdist-qinv q nu1 nu2)
+;;;   These functions compute the cumulative distribution functions P(x), Q(x) and their
+;;;   inverses for the F-distribution with nu1 and nu2 degrees of freedom.
+;;;
+;;; define-alien-routine macro automatically try to find c-function name with lower case
+;;; letter. If symbol is gsl-cdf-gaussian-p, macro try to find c-function gsl_cdf_gaussian_p.
+;;; But cdf functions have partially upper case letter, so these functions are directly
+;;; difined by defun.
+
+;; function gsl-cdf-fdist-p for c-function "gsl_cdf_dist_P".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-fdist-p))
+(defun gsl-cdf-fdist-p (x nu1 nu2)
+  (with-alien ((gsl-cdf-fdist-p (function double double double double)
+                                :extern "gsl_cdf_fdist_P"))
+    (values (alien-funcall gsl-cdf-fdist-p x nu1 nu2))))
+
+;; function gsl-cdf-fdist-q for c-function "gsl_cdf_fdist_Q".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-fdist-q))
+(defun gsl-cdf-fdist-q (x nu1 nu2)
+  (with-alien ((gsl-cdf-fdist-q (function double double double double)
+                                :EXTERN "gsl_cdf_fdist_Q"))
+    (values (alien-funcall gsl-cdf-fdist-q x nu1 nu2))))
+
+;; function gsl-cdf-fdist-pinv for c-function "gsl_cdf_dist_Pinv".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-fdist-pinv))
+(defun gsl-cdf-fdist-pinv (p nu1 nu2)
+  (with-alien ((gsl-cdf-fdist-pinv (function double double double double)
+                                   :extern "gsl_cdf_fdist_Pinv"))
+    (values (alien-funcall gsl-cdf-fdist-pinv p nu1 nu2))))
+
+;; function gsl-cdf-fdist-qinv for c-function "gsl_cdf_dist_qinv".
+(declaim (ftype (function (t t t) (values (alien double) &optional)) gsl-cdf-fdist-qinv))
+(defun gsl-cdf-fdist-qinv (q nu1 nu2)
+  (with-alien ((gsl-cdf-fdist-qinv (function double double double double)
+                                   :extern "gsl_cdf_fdist_Qinv"))
+    (values (alien-funcall gsl-cdf-fdist-qinv q nu1 nu2))))
 
 ;;; The t-distribution
 
@@ -844,6 +986,80 @@ the Laplace distribution with width a."
   "This function compute the cumulative distribution function Q(x) inverses for
 the Laplace distribution with width a."
   (gsl-cdf-laplace-qinv (coerce q 'double-float) (coerce a 'double-float)))
+
+;;; The chi-squared distribution
+
+(defun ran-chisq (n nu)
+  "This function returns n random variate from the chi-squared distribution with nu
+degrees of freedom."
+  (gen-ran n #'gsl-ran-chisq (coerce nu 'double-float)))
+
+(defun ran-chisq-pdf (x nu)
+  "This function computes the probability density p(x) at x for a chi-squared distribution
+with nu degrees of freedom."
+  (gsl-ran-chisq-pdf (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-chisq-p (x nu)
+  "This function compute the cumulative distribution functions P(x)
+for the chi-squared distribution with nu degrees of freedom."
+  (gsl-cdf-chisq-p (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-chisq-q (x nu)
+  "This function compute the cumulative distribution functions Q(x)
+for the chi-squared distribution with nu degrees of freedom."
+  (gsl-cdf-chisq-q (coerce x 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-chisq-pinv (p nu)
+  "These functions compute the cumulative distribution functions P(x) inverses
+for the chi-squared distribution with nu degrees of freedom."
+  (gsl-cdf-chisq-pinv (coerce p 'double-float) (coerce nu 'double-float)))
+
+(defun cdf-chisq-qinv (q nu)
+  "These functions compute the cumulative distribution functions Q(x) inverses
+for the chi-squared distribution with nu degrees of freedom."
+  (gsl-cdf-chisq-qinv (coerce q 'double-float) (coerce nu 'double-float)))
+
+;;; The F-distribution
+
+(defun ran-fdist (n nu1 nu2)
+  "This function returns n random variate from the F-distribution with degrees of
+freedom nu1 and nu2."
+  (gen-ran n #'gsl-ran-fdist (coerce nu1 'double-float) (coerce nu2 'double-float)))
+
+(defun ran-fdist-pdf (x nu1 nu2)
+  "This function computes the probability density p(x) at x for an F-distribution with
+nu1 and nu2 degrees of freedom."
+  (gsl-ran-fdist-pdf (coerce x 'double-float)
+                     (coerce nu1 'double-float)
+                     (coerce nu2 'double-float)))
+
+(defun cdf-fdist-p (x nu1 nu2)
+  "These functions compute the cumulative distribution functions P(x)
+for the F-distribution with nu1 and nu2 degrees of freedom."
+  (gsl-cdf-fdist-p (coerce x 'double-float)
+                   (coerce nu1 'double-float)
+                   (coerce nu2 'double-float)))
+
+(defun cdf-fdist-q (x nu1 nu2)
+  "These functions compute the cumulative distribution functions Q(x)
+for the F-distribution with nu1 and nu2 degrees of freedom."
+  (gsl-cdf-fdist-q (coerce x 'double-float)
+                   (coerce nu1 'double-float)
+                   (coerce nu2 'double-float)))
+
+(defun cdf-fdist-pinv (p nu1 nu2)
+  "These functions compute the cumulative distribution functions P(x) inverses
+for the F-distribution with nu1 and nu2 degrees of freedom."
+  (gsl-cdf-fdist-pinv (coerce p 'double-float)
+                      (coerce nu1 'double-float)
+                      (coerce nu2 'double-float)))
+
+(defun cdf-fdist-qinv (q nu1 nu2)
+  "These functions compute the cumulative distribution functions Q(x) inverses
+for the F-distribution with nu1 and nu2 degrees of freedom."
+  (gsl-cdf-fdist-qinv (coerce q 'double-float)
+                      (coerce nu1 'double-float)
+                      (coerce nu2 'double-float)))
 
 ;;; The t-distribution
 
