@@ -91,7 +91,8 @@
            "VECTOR-ISNONNEG"
            "VECTOR-SET-SEQUENCE"
            "MAKE-VECTOR"
-           "VECTOR-ARRAY"))
+           "VECTOR-ARRAY"
+           "VECTOR-SUM"))
 
 (cl:in-package "SB-GSL-VECTOR")
 
@@ -374,20 +375,20 @@ of the vector to zero."
 (defun vector-get (v i)
   "This function retruns the i-th element of a vector v."
   (if (or (< i 0) (< (- (vector-size v) 1) i))
-      (error "i must lie inside the range of 0 to (- size 1)")
+      (error "i must lie inside the range of 0 to size-1")
       (gsl-vector-get v i)))
 
 (defun vector-set (v i x)
   "This function sets the value of the i-th element of a vector v to x."
   (if (or (< i 0) (< (- (vector-size v) 1) i))
-      (error "i must lie inside the range of 0 to (- size 1)")
+      (error "i must lie inside the range of 0 to size-1")
       (progn (gsl-vector-set v i (coerce x 'double-float))
              v)))
 
 (defun vector-ptr (v i)
   "This function return a pointer to the i-th element of a vector v."
   (if (or (< i 0) (< (- (vector-size v) 1) i))
-      (error "i must lie inside the range of 0 to (- size 1)")
+      (error "i must lie inside the range of 0 to size-1")
       (gsl-vector-ptr v i)))
 
 (defun vector-set-all (v x)
@@ -404,21 +405,23 @@ of the vector to zero."
   "This function makes a basis vector by setting all the elements of the vector v to zero
 except for the i-th element which is set to one."
   (if (or (< i 0) (< (- (vector-size v) 1) i))
-      (error "i must lie inside the range of 0 to (- size 1)")
+      (error "i must lie inside the range of 0 to size-1")
       (progn (gsl-vector-set-basis v i)
              v)))
 
-(defun vector-memcpy (src)
-  "This function copies the elements of the vector src."
-  (let ((dest (make-alien (struct gsl-vector))))
-    (progn (setf dest (vector-alloc (vector-size src)))
-           (gsl-vector-memcpy dest src)
-           dest)))
+(defun vector-memcpy (dest src)
+  "This function copies the elements of the vector src into the vector dest."
+  (if (not (= (vector-size dest) (vector-size src)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-memcpy dest src)
+             dest)))
 
 (defun vector-swap (v w)
   "This function exhanges the elements of the vectors v and w by copying."
-  (progn (gsl-vector-swap v w)
-         (values v w)))
+  (if (not (= (vector-size v) (vector-size w)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-swap v w)
+             (values v w))))
 
 (defun vector-swap-elements (v i j)
   "This function exchanges the i-th and j-th elements of the vector v in-place."
@@ -426,7 +429,7 @@ except for the i-th element which is set to one."
     (cond ((= i j)
            (error "i and j must be different"))
           ((or (< i 0) (< size-1 i) (< j 0) (< size-1 j))
-           (error "i and j must lie inside the range of 0 to (- size 1)"))
+           (error "i and j must lie inside the range of 0 to size-1"))
           (t
            (progn (gsl-vector-swap-elements v i j)
                   v)))))
@@ -438,23 +441,31 @@ except for the i-th element which is set to one."
 
 (defun vector-add (a b)
   "This function adds the elements of vector b to the elements of vector a."
-  (progn (gsl-vector-add a b)
-         a))
+  (if (not (= (vector-size a) (vector-size b)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-add a b)
+             a)))
 
 (defun vector-sub (a b)
   "This function subtracts the elements of vector b from the elements of vector a."
-  (progn (gsl-vector-sub a b)
-         a))
+  (if (not (= (vector-size a) (vector-size b)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-sub a b)
+             a)))
 
 (defun vector-mul (a b)
   "This function multiplies the elements of vector a by the elements of vector b."
-  (progn (gsl-vector-mul a b)
-         a))
+  (if (not (= (vector-size a) (vector-size b)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-mul a b)
+             a)))
 
 (defun vector-div (a b)
   "This function divides the elements of vector a by the elements of vector b."
-  (progn (gsl-vector-div a b)
-         a))
+  (if (not (= (vector-size a) (vector-size b)))
+      (error "the two vectors must have the same length")
+      (progn (gsl-vector-div a b)
+             a)))
 
 (defun vector-scale (a x)
   "This function multiplies the elements of vector a by the constant factor x."
@@ -497,29 +508,29 @@ except for the i-th element which is set to one."
            (values imin imax))))
 
 (defun vector-isnull (v)
-  "This function return 1 if all the elements of the vector v are zero, and 0 otherwise."
+  "This function return t if all the elements of the vector v are zero, and nil otherwise."
   (= (gsl-vector-isnull v) 1))
 
 (defun vector-ispos (v)
-  "This function return 1 if all the elements of the vector v are strictly positive,
-and 0 otherwise."
+  "This function return t if all the elements of the vector v are strictly positive,
+and nil otherwise."
   (= (gsl-vector-ispos v) 1))
 
 (defun vector-isneg (v)
-  "This function return 1 if all the elements of the vector v are strictly negative,
-and 0 otherwise."
+  "This function return t if all the elements of the vector v are strictly negative,
+and nil otherwise."
   (= (gsl-vector-isneg v) 1))
 
 (defun vector-isnonneg (v)
-  "This function return 1 if all the elements of the vector v are non-negative, and
-0 otherwise."
+  "This function return t if all the elements of the vector v are non-negative, and
+nil otherwise."
   (= (gsl-vector-isnonneg v) 1))
 
 (defun vector-set-sequence (v seq)
   "This function sets each element of the vector v to each element of the sequence
 seq respectively."
   (if (not (= (vector-size v) (length seq)))
-      (error "sequence length must be vector size")
+      (error "the sequence and the vector must be the same length")
       (dotimes (i (vector-size v) v)
         (vector-set v i (coerce (elt seq i) 'double-float)))))
 
@@ -540,6 +551,7 @@ which gsl-vector-free, or released using free-alien."
                  (t v)))))
 
 (defun vector-array (v)
+  "This function return the array whose i-th element is equal to i-th element of the vector."
   (let ((acc (make-array (vector-size v) :element-type 'double-float)))
     (dotimes (i (vector-size v) acc)
       (setf (aref acc i) (vector-get v i)))))
