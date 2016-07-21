@@ -23,7 +23,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-BLOCK"
+(cl:defpackage "GSL-BLOCK"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL")
@@ -32,7 +32,7 @@
            "GSL-BLOCK-CALLOC"
            "GSL-BLOCK-FREE"))
 
-(cl:in-package "SB-GSL-BLOCK")
+(cl:in-package "GSL-BLOCK")
 
 ;;; gsl_block_struct
 (define-alien-type nil
@@ -63,12 +63,3 @@
 (define-alien-routine gsl-block-free
     void
   (b (* (struct gsl-block))))
-
-;;; (test-gsl-block)
-;;;   This function do tests.
-(defun test-gsl-block ()
-  (with-alien ((b (* (struct gsl-block))))
-    (setf b (gsl-block-alloc 100))
-    (format t "length of block = ~A~%" (slot (deref b) 'size))
-    (format t "blcok data object = ~A~%" (slot (deref b) 'data))
-    (gsl-block-free b)))

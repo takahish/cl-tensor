@@ -20,11 +20,11 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-RAN"
+(cl:defpackage "GSL-RAN"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL"
-        "SB-GSL-RNG")
+        "GSL-RNG")
   (:export "GSL-RAN-GAUSSIAN"
            "GSL-RAN-GAUSSIAN-PDF"
            "GSL-RAN-GAUSSIAN-ZIGGURAT"
@@ -152,7 +152,7 @@
            "CDF-BINOMIAL-P"
            "CDF-BINOMIAL-Q"))
 
-(cl:in-package "SB-GSL-RAN")
+(cl:in-package "GSL-RAN")
 
 ;;; The Gaussian Distribution
 
@@ -1204,15 +1204,3 @@ binomial distribution with parameters p and n."
   (gsl-cdf-binomial-q (coerce k '(unsigned-byte 16))
                       (coerce p 'double-float)
                       (coerce size '(unsigned-byte 16))))
-
-;;; (test-gsl-ran)
-;;;   This function do tests.
-(defun test-gsl-ran ()
-  "This function do tests. A random walk."
-  (let ((vec (make-array 2 :element-type 'double-float))
-        (dir (ran-dir-2d 50)))
-    (dotimes (i 50)
-      (format t "~A ~A~%" (aref vec 0) (aref vec 1))
-      (setf (aref vec 0) (+ (aref vec 0) (aref dir i 0)))
-      (setf (aref vec 1) (+ (aref vec 1) (aref dir i 1))))
-    vec))

@@ -1,4 +1,4 @@
-;;;; sbcl-gsl/vectors.lisp
+;;;; sbcl-gsl/matrices.lisp
 ;;;;
 ;;;; Matrices are defined by a gsl-matrix structure which describes a generalized slice of a
 ;;;; block. Like a vector it represents a set of elements in an area of memory, but uses two
@@ -19,12 +19,12 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-MATRIX"
+(cl:defpackage "GSL-MATRIX"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL"
-        "SB-GSL-BLOCK"
-        "SB-GSL-VECTOR")
+        "GSL-BLOCK"
+        "GSL-VECTOR")
   (:export "GSL-MATRIX"
            "GSL-MATRIX"
            "GSL-MATRIX-ALLOC"
@@ -112,7 +112,7 @@
            "MAKE-MATRIX"
            "MATRIX-2DARRAY"))
 
-(cl:in-package "SB-GSL-MATRIX")
+(cl:in-package "GSL-MATRIX")
 
 ;;; (struct gsl-matrix)
 ;;;   The gsl-matrix structure contains six components, the two dimensions of the matrix,

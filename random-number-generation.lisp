@@ -20,7 +20,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-RNG"
+(cl:defpackage "GSL-RNG"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL")
@@ -107,7 +107,7 @@
            "GSL-RNG-MEMCPY"
            "GSL-RNG-CLONE"))
 
-(cl:in-package "SB-GSL-RNG")
+(cl:in-package "GSL-RNG")
 
 ;;; (struct gsl-rng-type)
 ;;; (struct gsl-rng)
@@ -335,21 +335,3 @@
 (define-alien-routine gsl-rng-clone
     (* (struct gsl-rng))
   (r (* (struct gsl-rng))))
-
-;;; (test-gsl-rng)
-;;;   This function do tests.
-(defun test-gsl-rng ()
-  (with-alien ((rng-type (* (struct gsl-rng-type)))
-               (rng (* (struct gsl-rng))))
-    (gsl-rng-env-setup)
-    (setf rng-type gsl-rng-default)
-    (setf rng (gsl-rng-alloc rng-type))
-    (format t "generator type: ~A~%" (gsl-rng-name rng))
-    (format t "seed = ~A~%"  gsl-rng-default-seed)
-    (format t "size = ~A~%" (gsl-rng-size rng))
-    (format t "the largest value = ~A~%" (gsl-rng-max rng))
-    (format t "the smallest value = ~A~%" (gsl-rng-min rng))
-    (format t "random values [0,1):~%")
-    (dotimes (i 10)
-      (format t "~A~%" (gsl-rng-uniform rng)))
-    (gsl-rng-free rng)))

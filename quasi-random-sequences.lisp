@@ -23,7 +23,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-QRNG"
+(cl:defpackage "GSL-QRNG"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL")
@@ -43,7 +43,7 @@
            "GSL-QRNG-MEMCPY"
            "GSL-QRNG-CLONE"))
 
-(cl:in-package "SB-GSL-QRNG")
+(cl:in-package "GSL-QRNG")
 
 ;;; (struct gsl-qrng-type)
 ;;;   Structure describing a type of generator.
@@ -136,14 +136,3 @@
 (define-alien-routine gsl-qrng-clone
     (* (struct gsl-qrng))
   (q (* (struct gsl-qrng))))
-
-;;; (test-gsl-rng)
-;;;   This function do tests.
-(defun test-gsl-qrng ()
-  (with-alien ((qrng (* (struct gsl-qrng)))
-               (vector (array double 2)))
-    (setf qrng (gsl-qrng-alloc gsl-qrng-sobol 2))
-    (dotimes (i 10)
-      (gsl-qrng-get qrng vector)
-      (format t "~,5F ~,5F~%" (deref vector 0) (deref vector 1)))
-    (gsl-qrng-free qrng)))

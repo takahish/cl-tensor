@@ -21,7 +21,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-STATS"
+(cl:defpackage "GSL-STATS"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL"
@@ -45,7 +45,7 @@
            "STATS-VARIANCE-WITH-FIXED-MEAN"
            "STATS-SD-WITH-FIXED-MEAN"))
 
-(cl:in-package "SB-GSL-STATS")
+(cl:in-package "GSL-STATS")
 
 ;;; (gsl-stats-mean data stride n)
 ;;;   This function retruns the arithmetic mean of data, a dataset of length n with stride
@@ -189,21 +189,3 @@ mean. A type of data must be '(simple-array double-float ({data length}))."
                                   1
                                   (length data)
                                   (coerce mean 'double-float))))
-
-;;; (test-gsl-stats)
-;;;   This function do tests.
-(defun test-gsl-stats ()
-  (let ((vec (make-array 100 :initial-element 0.0d0 :element-type 'double-float)))
-    (dotimes (i 100)
-      (setf (aref vec i) (coerce i 'double-float)))
-    (format t "STATS-MEAN: ~A~%" (stats-mean vec))
-    (format t "STATS-VARIANCE: ~A~%" (stats-variance vec))
-    (format t "STATS-VARIANCE-M: ~A~%" (stats-variance-m vec 50.d0))
-    (format t "STATS-SD: ~A~%" (stats-sd vec))
-    (format t "STATS-SD-M: ~A~%" (stats-sd-m vec 50.0d0))
-    (format t "STATS-TSS: ~A~%" (stats-tss vec))
-    (format t "STATS-TSS-M: ~A~%" (stats-tss-m vec 50.d0))
-    (format t "STATS-VARIANCE-WITH-FIXED-MEAN: ~A~%"
-            (stats-variance-with-fixed-mean vec 50.0d0))
-    (format t "STATS-SD-WITH-FIXED-MEAN: ~A~%"
-            (stats-sd-with-fixed-mean vec 50.0d0))))

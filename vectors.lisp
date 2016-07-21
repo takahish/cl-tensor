@@ -19,11 +19,11 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SB-GSL-VECTOR"
+(cl:defpackage "GSL-VECTOR"
   (:use "CL"
         "SB-ALIEN"
         "SB-C-CALL"
-        "SB-GSL-BLOCK")
+        "GSL-BLOCK")
   (:export "GSL-VECTOR"
            "GSL-VECTOR-ALLOC"
            "GSL-VECTOR-CALLOC"
@@ -94,7 +94,7 @@
            "VECTOR-ARRAY"
            "VECTOR-SUM"))
 
-(cl:in-package "SB-GSL-VECTOR")
+(cl:in-package "GSL-VECTOR")
 
 ;;; (struct gsl-vector)
 ;;;   The gsl-vector structure contains five components, the size, the stride, a
@@ -555,10 +555,3 @@ which gsl-vector-free, or released using free-alien."
   (let ((acc (make-array (vector-size v) :element-type 'double-float)))
     (dotimes (i (vector-size v) acc)
       (setf (aref acc i) (vector-get v i)))))
-
-;;; (test-gsl-vector)
-;;;   This function do tests.
-(defun test-gsl-vector ()
-  (let ((v (make-vector 10 :initial-contents '(0 1 2 3 4 5 6 7 8 9))))
-    (dotimes (i (vector-size v) (vector-free v))
-      (format t "P_~A = ~A~%" i (vector-get v i)))))
