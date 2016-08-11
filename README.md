@@ -1,6 +1,6 @@
-# sbcl-gsl
+# cl-gsl
 
-SBCL Foreign Function Interface for GNU Scientific Library.
+CL Foreign Function Interface for GNU Scientific Library.
 
 #License
 
