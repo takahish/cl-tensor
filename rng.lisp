@@ -93,10 +93,12 @@
 (defvar *rng-seed* gsl_rng_default_seed
   "Default seed is 0.")
 
-(defun rng-alloc (type)
+(defun rng-alloc (type seed)
   "This function returns a pointer to a newly-created instance of a random number
 generator of type type."
-  (make-instance 'rng :entity (gsl_rng_alloc type)))
+  (let ((rng (make-instance 'rng :entity (gsl_rng_alloc type))))
+    (gsl_rng_set (entity rng) seed)
+    rng))
 
 (defun rng-set (rng seed)
   "This function initialized (or 'seeds') the random number generator. If the generator

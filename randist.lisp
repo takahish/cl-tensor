@@ -22,9 +22,6 @@
 
 (cl:in-package "GSL")
 
-(defvar *rng* (rng-alloc *rng-type*)
-  "A newly-created instance of random number generator.")
-
 (defun gen-ran (n fn &rest args)
   "This function returns n random variates using gsl random umber generation.
 If it is needed to chage type and seed, set the environment variables
@@ -47,44 +44,44 @@ GSL_RNG_TYPE and GSL_RNG_SEED."
 
 ;;; The Gaussian Distribution
 
-(defun ran-gaussian (n sigma)
+(defun ran-gaussian (rng sigma &optional (n 1))
   "This function returns n Gaussian random variates, with mean zero and standard
 deviation sigma. Use the transformation z = mu + x on the numbers returned
 by gsl-ran-gaussian to obtain a Gaussian distribution with mean mu. This
 function uses the Box-Muller algorithm which requires two calls to the random
 number generator rng."
-  (gen-ran n #'gsl_ran_gaussian (entity *rng*) sigma))
+  (gen-ran n #'gsl_ran_gaussian (entity rng) sigma))
 
 (defun ran-gaussian-pdf (x sigma)
   "This function computes the probability density p(x) at x for a Gaussian distribution
 with standard deviation sigma."
   (gsl_ran_gaussian_pdf x sigma))
 
-(defun ran-gaussian-ziggurat (n sigma)
+(defun ran-gaussian-ziggurat (rng sigma &optional (n 1))
   "This function computes n Gaussian random variates using the alternative Marsaglia-
 Tsang ziggurat methods. The Ziggurat algorithm is the fastest available algorithm
 in most cases."
-  (gen-ran n #'gsl_ran_gaussian_ziggurat (entity *rng*) sigma))
+  (gen-ran n #'gsl_ran_gaussian_ziggurat (entity rng) sigma))
 
-(defun ran-gaussian-ratio-method (n sigma)
+(defun ran-gaussian-ratio-method (rng sigma &optional (n 1))
   "This function computes n Gaussian random variates using the alternative Kinderman-
 Monahoan-Leva ratio methods."
-  (gen-ran n #'gsl_ran_gaussian_ratio_method (entity *rng*) sigma))
+  (gen-ran n #'gsl_ran_gaussian_ratio_method (entity rng) sigma))
 
-(defun ran-ugaussian (n)
+(defun ran-ugaussian (rng &optional (n 1))
   "This function returns n unit Gaussian random variates, with mean zero and standard
 deviation sigma zero."
-  (gen-ran n #'gsl_ran_ugaussian (entity *rng*)))
+  (gen-ran n #'gsl_ran_ugaussian (entity rng)))
 
 (defun ran-ugaussian-pdf (x)
   "This function computes the probability density p(x) at x for the unit Gaussian
 distribution."
   (gsl_ran_ugaussian_pdf x))
 
-(defun ran-ugaussian-ratio-method (n)
+(defun ran-ugaussian-ratio-method (rng &optional (n 1))
   "This function computes n unit Gaussian random variates using the alternative Kinderman-
 Monahoan-Leva ratio methods."
-  (gen-ran n #'gsl_ran_ugaussian_ratio_method (entity *rng*)))
+  (gen-ran n #'gsl_ran_ugaussian_ratio_method (entity rng)))
 
 (defun cdf-gaussian-p (x sigma)
   "This function compute the cumulative distribution functions P(x) for the Gaussian
@@ -128,21 +125,21 @@ the unit Gaussian distribution."
 
 ;;; The Gaussian Tail Distribution
 
-(defun ran-gaussian-tail (n a sigma)
+(defun ran-gaussian-tail (rng a sigma &optional (n 1))
   "This function provides random variates from the upper tail of a Gaussian distribution
 with standard deviation sigma. The values returned are lagger than the lower limit a,
 which must be positive. The method is based on Marsaglia's famous rectangle-wedge-tail
 algorithm."
-  (gen-ran n #'gsl_ran_gaussian_tail (entity *rng*) a sigma))
+  (gen-ran n #'gsl_ran_gaussian_tail (entity rng) a sigma))
 
 (defun ran-gaussian-tail-pdf (x a sigma)
   "This function computes the probability density p(x) at x for Gaussian tail distribution
 with standard deviation sigma and lower limit a."
   (gsl_ran_gaussian_tail_pdf x a sigma))
 
-(defun ran-ugaussian-tail (n a)
+(defun ran-ugaussian-tail (rng a &optional (n 1))
   "This function compute result for the tail of a unit Gaussian distribution."
-  (gen-ran n #'gsl_ran_ugaussian_tail (entity *rng*) a))
+  (gen-ran n #'gsl_ran_ugaussian_tail (entity rng) a))
 
 (defun ran-ugaussian-tail-pdf (x a)
   "This function compute result for the tail of a unit Gaussian distribution."
@@ -150,11 +147,11 @@ with standard deviation sigma and lower limit a."
 
 ;;; The Bivariate Gaussian Distribution
 
-(defun ran-bivariate-gaussian (n sigma-x sigma-y rho)
+(defun ran-bivariate-gaussian (rng sigma-x sigma-y rho &optional (n 1))
   "This function generates a pair of correlated Gaussian variates, with mean zero,
 correlation coefficient rho and standard deviations sigma-x and sigma-y in the x
 and y directions."
-  (gen-pair-ran n #'gsl_ran_bivariate_gaussian (entity *rng*) sigma-x sigma-y rho))
+  (gen-pair-ran n #'gsl_ran_bivariate_gaussian (entity rng) sigma-x sigma-y rho))
 
 (defun ran-bivariate-gaussian-pdf (x y sigma-x sigma-y rho)
   "This function computes the probability density p(x, y) at (x, y) for bivariate
@@ -164,9 +161,9 @@ coefficient rho."
 
 ;;; The Exponential Distribution
 
-(defun ran-exponential (n mu)
+(defun ran-exponential (rng mu &optional (n 1))
   "This function returns a random variate from the exponential distribution  with mean mu."
-  (gen-ran n #'gsl_ran_exponential (entity *rng*) mu))
+  (gen-ran n #'gsl_ran_exponential (entity rng) mu))
 
 (defun ran-exponential-pdf (x mu)
   "This function computes the probability density p(x) at x for an exponential distribution
@@ -195,9 +192,9 @@ exponential distribution with mean mu."
 
 ;;; The Laplace Distribution
 
-(defun ran-laplace (n a)
+(defun ran-laplace (rng a &optional (n 1))
   "This function returns n random variates from the Laplace distribution with width a."
-  (gen-ran n #'gsl_ran_laplace (entity *rng*) a))
+  (gen-ran n #'gsl_ran_laplace (entity rng) a))
 
 (defun ran-laplace-pdf (x a)
   "This function computes the probability density p(x) at x for a Laplace distribution
@@ -226,10 +223,10 @@ the Laplace distribution with width a."
 
 ;;; The chi-squared distribution
 
-(defun ran-chisq (n nu)
+(defun ran-chisq (rng nu &optional (n 1))
   "This function returns n random variate from the chi-squared distribution with nu
 degrees of freedom."
-  (gen-ran n #'gsl_ran_chisq (entity *rng*) nu))
+  (gen-ran n #'gsl_ran_chisq (entity rng) nu))
 
 (defun ran-chisq-pdf (x nu)
   "This function computes the probability density p(x) at x for a chi-squared distribution
@@ -258,10 +255,10 @@ for the chi-squared distribution with nu degrees of freedom."
 
 ;;; The F-distribution
 
-(defun ran-fdist (n nu1 nu2)
+(defun ran-fdist (rng nu1 nu2 &optional (n 1))
   "This function returns n random variate from the F-distribution with degrees of
 freedom nu1 and nu2."
-  (gen-ran n #'gsl_ran_fdist (entity *rng*) nu1 nu2))
+  (gen-ran n #'gsl_ran_fdist (entity rng) nu1 nu2))
 
 (defun ran-fdist-pdf (x nu1 nu2)
   "This function computes the probability density p(x) at x for an F-distribution with
@@ -290,9 +287,9 @@ for the F-distribution with nu1 and nu2 degrees of freedom."
 
 ;;; The t-distribution
 
-(defun ran-tdist (n nu)
+(defun ran-tdist (rng nu &optional (n 1))
   "This function returns n random variates from the t-distribution."
-  (gen-ran n #'gsl_ran_tdist (entity *rng*) nu))
+  (gen-ran n #'gsl_ran_tdist (entity rng) nu))
 
 (defun ran-tdist-pdf (x nu)
   "This function computes the probability density p(x) at x for a t-distribution with nu
@@ -324,7 +321,7 @@ the t-distribution with nu degrees of freedom."
 ;;; The spherical distributions generate random vectors located on a spherical surface.
 ;;; They can be used as random directions, for example in the steps of a random walk.
 
-(defun ran-dir-2d (n)
+(defun ran-dir-2d (rng &optional (n 1))
   "This function returns a random direction vector v = (x, y) in two dimensions. The
 vector is normalized such that |v|^2 = x^2 + y^2 = 1. The obvious way to do this is
 to take a uniform random number between 0 and 2 * pi and let x and y be the sine
@@ -334,9 +331,9 @@ to go. This is the case for the Pentium (but not the case for the Sum Sparcstati
 One can avoid the trig evaluations by choosing x and y in the interior of a unit
 circle (choose them at random from the interior of the enclosing square, and then
 reject those that are outside the unit circle), and dividing by sqrt(x^2 + y^2)."
-  (gen-pair-ran n #'gsl_ran_dir_2d (entity *rng*)))
+  (gen-pair-ran n #'gsl_ran_dir_2d (entity rng)))
 
-(defun ran-dir-2d-trig-method (n)
+(defun ran-dir-2d-trig-method (rng &optional (n 1))
   "This function returns a random direction vector v = (x, y) in two dimensions. The
 vector is normalized such that |v|^2 = x^2 + y^2 = 1. The obvious way to do this is
 to take a uniform random number between 0 and 2 * pi and let x and y be the sine
@@ -346,13 +343,13 @@ to go. This is the case for the Pentium (but not the case for the Sum Sparcstati
 One can avoid the trig evaluations by choosing x and y in the interior of a unit
 circle (choose them at random from the interior of the enclosing square, and then
 reject those that are outside the unit circle), and dividing by sqrt(x^2 + y^2)."
-  (gen-pair-ran n #'gsl_ran_dir_2d_trig_method (entity *rng*)))
+  (gen-pair-ran n #'gsl_ran_dir_2d_trig_method (entity rng)))
 
 ;;; The Poission Distribution
 
-(defun ran-poisson (n mu)
+(defun ran-poisson (rng mu &optional (n 1))
   "This function returns a random integer from the Poisson distribution with mean mu."
-  (gen-ran n #'gsl_ran_poisson (entity *rng*) mu))
+  (gen-ran n #'gsl_ran_poisson (entity rng) mu))
 
 (defun ran-poisson-pdf (k mu)
   "This function computes the probability p(k) of obtaining k from a Poisson distribution
@@ -371,9 +368,9 @@ Poisson distribution with parameter mu."
 
 ;;; The Bernoulli Distribution
 
-(defun ran-bernoulli (n p)
+(defun ran-bernoulli (rng p &optional (n 1))
   "This function returns either 0 or 1, the result of a Bernoulli trial with probability p."
-  (gen-ran n #'gsl_ran_bernoulli (entity *rng*) p))
+  (gen-ran n #'gsl_ran_bernoulli (entity rng) p))
 
 (defun ran-bernoulli-pdf (k p)
   "This function computes the probability p(k) of obtaining k from a Bernoulli distribution
@@ -382,10 +379,10 @@ with probability parameter p."
 
 ;;; The Binomial Distribution
 
-(defun ran-binomial (n p size)
+(defun ran-binomial (rng p size &optional (n 1))
   "This function returns m random integers from the binomial distribution, the number
 of successes in n independent trials with probability p."
-  (gen-ran n #'gsl_ran_binomial (entity *rng*) p size))
+  (gen-ran n #'gsl_ran_binomial (entity rng) p size))
 
 (defun ran-binomial-pdf (k p size)
   "This function computes the probability p(k) of obtaining k from a binomial distribution
