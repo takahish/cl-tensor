@@ -23,43 +23,14 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "GSL-BLOCK"
-  (:use "CL"
-        "SB-ALIEN"
-        "SB-C-CALL")
-  (:export "GSL-BLOCK"
-           "GSL-BLOCK-ALLOC"
-           "GSL-BLOCK-CALLOC"
-           "GSL-BLOCK-FREE"))
-
-(cl:in-package "GSL-BLOCK")
+(cl:in-package "GSL")
 
 ;;; gsl_block_struct
-(define-alien-type nil
-    (struct gsl-block
-            (size size-t)
-            (data (* double))))
+(defcstruct gsl-block
+  (size :unsigned-int)
+  (data (:pointer :double)))
 
-;;; (gsl-block-alloc n)
-;;;   This function allocates memory for a block of n double-precision elements, returning
-;;;   a pointer to the block struct. The block is not initialized and so the values of its
-;;;   elements are undefined. Use the function gsl-block-calloc if you want to ensure
-;;;   that all the elements are initialized to zero.
-;;;   A null pointer is returned if insufficient memory is available to create the block.
-(define-alien-routine gsl-block-alloc
-    (* (struct gsl-block))
-  (n size-t))
-
-;;; (gsl-block-calloc n)
-;;;   This funciton allocates memory for a block and initialized all the elements of the block
-;;;   to zero.
-(define-alien-routine gsl-block-calloc
-    (* (struct gsl-block))
-  (n size-t))
-
-;;; (gsl-block-free b)
-;;;   This function frees the memory used by a block b previously allocated with
-;;;   gsl-block-alloc or gsl-block-calloc.
-(define-alien-routine gsl-block-free
-    void
-  (b (* (struct gsl-block))))
+;;; gsl_block_float_struct
+(defcstruct gsl-block-float
+  (size :unsigned-int)
+  (data (:pointer :float)))
