@@ -1,4 +1,4 @@
-;;;; cl-gsl/package.lisp
+;;;; cl-gsl/pkg.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -123,7 +123,6 @@
            "QRNG-MEMCPY"
            "QRNG-CLONE"
            ;; cl-gsl/randist.lisp
-           "*RNG*"
            "RAN-GAUSSIAN"
            "RAN-GAUSSIAN-PDF"
            "RAN-GAUSSIAN-ZIGGURAT"

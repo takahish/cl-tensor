@@ -1,8 +1,8 @@
-;;;; sbcl-gsl/matrices.lisp
+;;;; cl-gsl/matrix.lisp
 ;;;;
-;;;; Matrices are defined by a gsl-matrix structure which describes a generalized slice of a
-;;;; block. Like a vector it represents a set of elements in an area of memory, but uses two
-;;;; indices instead of one.
+;;;; Matrices are defined by a gsl-matrix structure which describes a
+;;;; generalized slice of a block. Like a vector it represents a set of
+;;;; elements in an area of memory, but uses two indices instead of one.
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;

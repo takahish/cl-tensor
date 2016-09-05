@@ -1,8 +1,8 @@
-;;;; sbcl-gsl/vector.lisp
+;;;; cl-gsl/vector.lisp
 ;;;;
-;;;; Vectors are defined by a gsl-vector structure which describes a slice of a block.
-;;;; Different vectors can be created which point to the same block. A vector slice is
-;;;; a set of equally-spaced elements of an area of memory.
+;;;; Vectors are defined by a gsl-vector structure which describes a slice of
+;;;; a block. Different vectors can be created which point to the same block.
+;;;; A vector slice is a set of equally-spaced elements of an area of memory.
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
