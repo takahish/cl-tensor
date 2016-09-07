@@ -51,6 +51,8 @@
            "VECTOR-SET-SEQUENCE"
            "MAKE-VECTOR"
            "VECTOR-TO-ARRAY"
+           "VECTOR-READ"
+           "VECTOR-WRITE"
            ;; cl-gsl/matrix.lisp
            "MATRIX-ALLOC"
            "MATRIX-CALLOC"
@@ -92,7 +94,10 @@
            "MATRIX-SET-SEQUENCE"
            "MATRIX-SET-2DARRAY"
            "MAKE-MATRIX"
-           "MATRIX-TO-2DARRAY"           
+           "MATRIX-TO-ARRAY"
+           "MATRIX-TO-2DARRAY"
+           "MATRIX-READ"
+           "MATRIX-WRITE"
            ;; cl-gsl/rng.lisp
            "*RNG-TYPE*"
            "*RNG-SEED*"

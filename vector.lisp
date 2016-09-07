@@ -440,3 +440,31 @@ vector-free."
   (let* ((ary (make-array n :element-type 'single-float)))
     (dotimes (i n ary)
       (setf (aref ary i) (gsl_vector_float_get (entity v) i)))))
+
+(defgeneric vector-read (v n &optional stream)
+  (:documentation
+   "This function reads into the vector v from the open stream stream. The vector v must be
+preallocated with the correct length since the function uses the size of v to determine
+how many values to read."))
+
+(defmethod vector-read ((v vector-double) n &optional (str *standard-input*))
+  (dotimes (i n v)
+    (gsl_vector_set (entity v) i (read str))))
+
+(defmethod vector-read ((v vector-float) n &optional (str *standard-input*))
+  (dotimes (i n v)
+    (gsl_vector_float_set (entity v) i (read str))))
+
+(defgeneric vector-write (v n &optional stream)
+  (:documentation
+   "This function writes the elements of the vector v line-by-line to the stream"))
+
+(defmethod vector-write ((v vector-double) n &optional (str *standard-output*))
+  (format str "; ~A ~A VECTOR~%" n 'double-float)
+  (dotimes (i n v)
+    (format str "~A~%" (gsl_vector_get (entity v) i))))
+
+(defmethod vector-write ((v vector-float) n &optional (str *standard-output*))
+  (format str "; ~A ~A VECTOR~%" n 'single-float)
+  (dotimes (i n v)
+    (format str "~A~%" (gsl_vector_float_get (entity v) i))))
