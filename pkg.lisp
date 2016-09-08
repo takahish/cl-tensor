@@ -53,6 +53,8 @@
            "VECTOR-TO-ARRAY"
            "VECTOR-READ"
            "VECTOR-WRITE"
+           "VECTOR-MAP"
+           "VECTOR-REDUCE"
            ;; cl-gsl/matrix.lisp
            "MATRIX-ALLOC"
            "MATRIX-CALLOC"

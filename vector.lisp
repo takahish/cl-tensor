@@ -468,3 +468,29 @@ how many values to read."))
   (format str "; ~A ~A VECTOR~%" n 'single-float)
   (dotimes (i n v)
     (format str "~A~%" (gsl_vector_float_get (entity v) i))))
+
+(defgeneric vector-map (func v n)
+  (:documentation
+   "Apply function to successive elements of vector."))
+
+(defmethod vector-map (func (v vector-double)  n)
+  (dotimes (i n v)
+    (gsl_vector_set (entity v) i (funcall func (gsl_vector_get (entity v) i)))))
+
+(defmethod vector-map (func (v vector-float) n)
+  (dotimes (i n v)
+    (gsl_vector_float_set (entity v) i (funcall func (gsl_vector_float_get (entity v) i)))))
+
+(defgeneric vector-reduce (func init v n)
+  (:documentation
+   "Combine the elements of vector using function."))
+
+(defmethod vector-reduce (func init (v vector-double) n)
+  (let ((acc init))
+    (dotimes (i n acc)
+      (setf acc (funcall func acc (gsl_vector_get (entity v) i))))))
+
+(defmethod vector-reduce (func init (v vector-float) n)
+  (let ((acc init))
+    (dotimes (i n acc)
+      (setf acc (funcall func acc (gsl_vector_float_get (entity v) i))))))
