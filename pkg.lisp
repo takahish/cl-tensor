@@ -193,3 +193,18 @@
            "RAN-BINOMIAL-PDF"
            "CDF-BINOMIAL-P"
            "CDF-BINOMIAL-Q"))
+
+(cl:in-package "GSL")
+
+(cffi:define-foreign-library libgslcblas
+  (:darwin "libgslcblas.dylib")
+  (:unix "libgslcblas.so")
+  (t (:default "libgslcblas")))
+
+(cffi:define-foreign-library libgsl
+  (:darwin "libgsl.dylib")
+  (:unix "libgsl.so")
+  (t (:default "libgsl")))
+
+(cffi:use-foreign-library libgslcblas)
+(cffi:use-foreign-library libgsl)
