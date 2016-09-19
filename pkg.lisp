@@ -17,7 +17,15 @@
 
 (cl:defpackage "GSL"
   (:use "CL")
-  (:export ;; cl-gsl/vector.lisp
+  (:export ;; cl-gsl/array.lisp
+           "MAKE-SIMPLE-ARRAY"
+           "SIMPLE-ARRAY-GET"
+           "SIMPLE-ARRAY-SET"
+           "SIMPLE-ARRAY-READ"
+           "SIMPLE-ARRAY-WRITE"
+           "SIMPLE-ARRAY-MAP"
+           "SIMPLE-ARRAY-REDUCE"
+           ;; cl-gsl/vector.lisp
            "VECTOR-ALLOC"
            "VECTOR-CALLOC"
            "VECTOR-FREE"
