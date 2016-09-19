@@ -22,7 +22,9 @@
 (cl:in-package "GSL")
 
 (defclass vector-t ()
-  ((entity :accessor entity :initarg :entity)))
+  ((entity :accessor entity :initarg :entity)
+   (size :accessor size :initarg :size)
+   (stride :accessor stride :initarg :stride)))
 
 (defclass vector-double (vector-t) ())
 
@@ -34,18 +36,30 @@ vector struct. A new block is allocated for the elements of the vector, and stor
 the block component of the vector struct. The block is owned by the vector, and
 will be deallocated when the vector is deallocated."
   (cond ((eq ctype :double)
-         (make-instance 'vector-double :entity (gsl_vector_alloc n)))
+         (make-instance 'vector-double
+                        :entity (gsl_vector_alloc n)
+                        :size n
+                        :stride 1))
         ((eq ctype :float)
-         (make-instance 'vector-float :entity (gsl_vector_float_alloc n)))
+         (make-instance 'vector-float
+                        :entity (gsl_vector_float_alloc n)
+                        :size n
+                        :stride 1))
         (t (error "unknown ctype"))))
 
 (defun vector-calloc (n &key (ctype :double))
   "This function allocates memory for a vector of length n and initializes all the elements
 of the vector to zero."
   (cond ((eq ctype :double)
-         (make-instance 'vector-double :entity (gsl_vector_calloc n)))
+         (make-instance 'vector-double
+                        :entity (gsl_vector_calloc n)
+                        :size n
+                        :stride 1))
         ((eq ctype :float)
-         (make-instance 'vector-float :entity (gsl_vector_float_calloc n)))
+         (make-instance 'vector-float
+                        :entity (gsl_vector_float_calloc n)
+                        :size n
+                        :stride 1))
         (t (error "unknown ctype"))))
 
 (defgeneric vector-free (v &optional result)
@@ -97,7 +111,7 @@ returned."))
   (gsl_vector_ptr (entity v) i))
 
 (defmethod vector-ptr ((v vector-float) i)
-  (gsl_vector_ptr (entity v) i))
+  (gsl_vector_float_ptr (entity v) i))
 
 (defgeneric vector-set-all (v x)
   (:documentation
@@ -427,70 +441,74 @@ vector-free."
            (vector-set-sequence v n initial-contents))
           (t v))))
 
-(defgeneric vector-to-array (v n)
+(defgeneric vector-to-array (v &optional n)
   (:documentation
    "This function return the array whose i-th element is equal to i-th element of the vector."))
 
-(defmethod vector-to-array ((v vector-double) n)
-  (let ((ary (make-array n :element-type 'double-float)))
-    (dotimes (i n ary)
-      (setf (aref ary i) (gsl_vector_get (entity v) i)))))
+(defmethod vector-to-array ((v vector-double) &optional (n nil))
+  (let* ((s (if (null n) (size v) n))
+         (a (make-array s :element-type 'double-float)))
+    (dotimes (i s a)
+      (setf (aref a i) (gsl_vector_get (entity v) i)))))
 
-(defmethod vector-to-array ((v vector-float) n)
-  (let* ((ary (make-array n :element-type 'single-float)))
-    (dotimes (i n ary)
-      (setf (aref ary i) (gsl_vector_float_get (entity v) i)))))
+(defmethod vector-to-array ((v vector-float) &optional (n nil))
+  (let* ((s (if (null n) (size v) n))
+         (a (make-array s :element-type 'single-float)))
+    (dotimes (i s a)
+      (setf (aref a i) (gsl_vector_float_get (entity v) i)))))
 
-(defgeneric vector-read (v n &optional stream)
+(defgeneric vector-read (v &optional str n)
   (:documentation
-   "This function reads into the vector v from the open stream stream. The vector v must be
+   "This function reads into the vector v from the open stream str. The vector v must be
 preallocated with the correct length since the function uses the size of v to determine
 how many values to read."))
 
-(defmethod vector-read ((v vector-double) n &optional (str *standard-input*))
-  (dotimes (i n v)
+(defmethod vector-read ((v vector-double) &optional (str *standard-input*) (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_set (entity v) i (read str))))
 
-(defmethod vector-read ((v vector-float) n &optional (str *standard-input*))
-  (dotimes (i n v)
+(defmethod vector-read ((v vector-float) &optional (str *standard-input*) (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_float_set (entity v) i (read str))))
 
-(defgeneric vector-write (v n &optional stream)
+(defgeneric vector-write (v &optional str n)
   (:documentation
-   "This function writes the elements of the vector v line-by-line to the stream"))
+   "This function writes the elements of the vector v line-by-line to the stream str."))
 
-(defmethod vector-write ((v vector-double) n &optional (str *standard-output*))
-  (format str "; ~A ~A VECTOR~%" n 'double-float)
-  (dotimes (i n v)
-    (format str "~A~%" (gsl_vector_get (entity v) i))))
+(defmethod vector-write ((v vector-double) &optional (str *standard-output*) (n nil))
+  (let ((s (if (null n) (size v) n)))
+    (format str "; ~A ~A VECTOR~%" s 'double-float)
+    (dotimes (i s v)
+      (format str "~S~%" (gsl_vector_get (entity v) i)))))
 
-(defmethod vector-write ((v vector-float) n &optional (str *standard-output*))
-  (format str "; ~A ~A VECTOR~%" n 'single-float)
-  (dotimes (i n v)
-    (format str "~A~%" (gsl_vector_float_get (entity v) i))))
+(defmethod vector-write ((v vector-float) &optional (str *standard-output*) (n nil))
+  (let ((s (if (null n) (size v) n)))
+    (format str "; ~A ~A VECTOR~%" s 'single-float)
+    (dotimes (i s v)
+      (format str "~S~%" (gsl_vector_float_get (entity v) i)))))
 
-(defgeneric vector-map (func v n)
+(defgeneric vector-map (func v &optional n)
   (:documentation
    "Apply function to successive elements of vector."))
 
-(defmethod vector-map (func (v vector-double)  n)
-  (dotimes (i n v)
+(defmethod vector-map (func (v vector-double) &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_set (entity v) i (funcall func (gsl_vector_get (entity v) i)))))
 
-(defmethod vector-map (func (v vector-float) n)
-  (dotimes (i n v)
+(defmethod vector-map (func (v vector-float) &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_float_set (entity v) i (funcall func (gsl_vector_float_get (entity v) i)))))
 
-(defgeneric vector-reduce (func init v n)
+(defgeneric vector-reduce (func init v &optional n)
   (:documentation
    "Combine the elements of vector using function."))
 
-(defmethod vector-reduce (func init (v vector-double) n)
+(defmethod vector-reduce (func init (v vector-double) &optional (n nil))
   (let ((acc init))
-    (dotimes (i n acc)
+    (dotimes (i (if (null n) (size v) n) acc)
       (setf acc (funcall func acc (gsl_vector_get (entity v) i))))))
 
-(defmethod vector-reduce (func init (v vector-float) n)
+(defmethod vector-reduce (func init (v vector-float) &optional (n nil))
   (let ((acc init))
-    (dotimes (i n acc)
+    (dotimes (i (if (null n) (size v) n) acc)
       (setf acc (funcall func acc (gsl_vector_float_get (entity v) i))))))

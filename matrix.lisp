@@ -22,7 +22,10 @@
 (cl:in-package "GSL")
 
 (defclass matrix-t ()
-  ((entity :accessor entity :initarg :entity)))
+  ((entity :accessor entity :initarg :entity)
+   (size1 :accessor size1 :initarg :size1)
+   (size2 :accessor size2 :initarg :size2)
+   (tda :accessor tda :initarg :tda)))
 
 (defclass matrix-double (matrix-t) ())
 
@@ -34,18 +37,34 @@ to a newly initialized matrix struct. A new block is allocated for the elements 
 the matrix, and stored in the block component of the matrix struct. The bclok is
 owned by the matrix, and will be deallocated when the matrix is deallocated."
   (cond ((eq ctype :double)
-         (make-instance 'matrix-double :entity (gsl_matrix_alloc n1 n2)))
+         (make-instance 'matrix-double
+                        :entity (gsl_matrix_alloc n1 n2)
+                        :size1 n1
+                        :size2 n2
+                        :tda n2))
         ((eq ctype :float)
-         (make-instance 'matrix-float :entity (gsl_matrix_float_alloc n1 n2)))
+         (make-instance 'matrix-float
+                        :entity (gsl_matrix_float_alloc n1 n2)
+                        :size1 n1
+                        :size2 n2
+                        :tda n2))
         (t (error "unknown ctype"))))
 
 (defun matrix-calloc (n1 n2 &key (ctype :double))
   "This function allocates memory for a matrix of size n1 rows by n2 columns and
 initializes all the elements of the matrix to zero."
   (cond ((eq ctype :double)
-         (make-instance 'matrix-double :entity (gsl_matrix_calloc n1 n2)))
+         (make-instance 'matrix-double
+                        :entity (gsl_matrix_calloc n1 n2)
+                        :size1 n1
+                        :size2 n2
+                        :tda n2))
         ((eq ctype :float)
-         (make-instance 'matrix-float :entity (gsl_matrix_float_calloc n1 n2)))
+         (make-instance 'matrix-float
+                        :entity (gsl_matrix_float_calloc n1 n2)
+                        :size1 n1
+                        :size2 n2
+                        :tda n2))
         (t (error "unknown ctype"))))
 
 (defgeneric matrix-free (m &optional result)
@@ -590,70 +609,86 @@ functions which gsl-matrix-free, or released using free-alien."
                   (matrix-set-2darray m n1 n2 initial-contents))))
           (t m))))
 
-(defgeneric matrix-to-array (m n1 n2)
+(defgeneric matrix-to-array (m &optional n1 n2)
   (:documentation
    "This function return the array whose elements is equal to elements of the matrix."))
 
-(defmethod matrix-to-array ((m matrix-double) n1 n2)
-  (let ((acc (make-array (* n1 n2) :element-type 'double-float)))
-    (dotimes (i n1 acc)
-      (dotimes (j n2)
-        (setf (aref acc (+ (* i n2) j)) (gsl_matrix_get (entity m) i j))))))
+(defmethod matrix-to-array ((m matrix-double) &optional (n1 nil) (n2 nil))
+  (let* ((s1 (if (null n1) (size1 m) n1))
+         (s2 (if (null n2) (size2 m) n2))
+         (acc (make-array (* s1 s2) :element-type 'double-float)))
+    (dotimes (i s1 acc)
+      (dotimes (j s2)
+        (setf (aref acc (+ (* i s2) j)) (gsl_matrix_get (entity m) i j))))))
 
-(defmethod matrix-to-array ((m matrix-float) n1 n2)
-  (let ((acc (make-array (* n1 n2) :element-type 'single-float)))
-    (dotimes (i n1 acc)
-      (dotimes (j n2)
-        (setf (aref acc (+ (* i n2) j)) (gsl_matrix_float_get (entity m) i j))))))
+(defmethod matrix-to-array ((m matrix-float) &optional (n1 nil) (n2 nil))
+  (let* ((s1 (if (null n1) (size1 m) n1))
+         (s2 (if (null n2) (size2 m) n2))
+         (acc (make-array (* s1 s2) :element-type 'single-float)))
+    (dotimes (i s1 acc)
+      (dotimes (j s2)
+        (setf (aref acc (+ (* i s2) j)) (gsl_matrix_float_get (entity m) i j))))))
 
-(defgeneric matrix-to-2darray (m n1 n2)
+(defgeneric matrix-to-2darray (m &optional n1 n2)
   (:documentation
    "This function return the 2darray whose elements is equal to elements of the matrix."))
 
-(defmethod matrix-to-2darray ((m matrix-double) n1 n2)
-  (let ((acc (make-array (list n1 n2) :element-type 'double-float)))
-    (dotimes (i n1 acc)
-      (dotimes (j n2)
+(defmethod matrix-to-2darray ((m matrix-double) &optional (n1 nil) (n2 nil))
+  (let* ((s1 (if (null n1) (size1 m) n1))
+         (s2 (if (null n2) (size2 m) n2))
+         (acc (make-array (list s1 s2) :element-type 'double-float)))
+    (dotimes (i s1 acc)
+      (dotimes (j s2)
         (setf (aref acc i j) (gsl_matrix_get (entity m) i j))))))
 
-(defmethod matrix-to-2darray ((m matrix-float) n1 n2)
-  (let ((acc (make-array (list n1 n2) :element-type 'single-float)))
-    (dotimes (i n1 acc)
-      (dotimes (j n2)
+(defmethod matrix-to-2darray ((m matrix-float) &optional (n1 nil) (n2 nil))
+  (let* ((s1 (if (null n1) (size1 m) n1))
+         (s2 (if (null n2) (size2 m) n2))
+         (acc (make-array (list s1 s2) :element-type 'single-float)))
+    (dotimes (i s1 acc)
+      (dotimes (j s2)
         (setf (aref acc i j) (gsl_matrix_float_get (entity m) i j))))))
 
-(defgeneric matrix-read (m n1 n2 &optional str)
+(defgeneric matrix-read (m &optional str n1 n2)
   (:documentation
    "This function reads into the matrix m from the open stream stream in binary format.
 The matrix m must be preallocated with the correct dimensions since the function
 uses the size of m to determine how many bytes to read."))
 
-(defmethod matrix-read ((m matrix-double) n1 n2 &optional (str *standard-input*))
-  (dotimes (i n1 m)
-    (dotimes (j n2)
-      (gsl_matrix_set (entity m) i j (read str)))))
+(defmethod matrix-read ((m matrix-double) &optional (str *standard-input*) (n1 nil) (n2 nil))
+  (let ((s1 (if (null n1) (size1 m) n1))
+        (s2 (if (null n2) (size2 m) n2)))
+    (dotimes (i s1 m)
+      (dotimes (j s2)
+        (gsl_matrix_set (entity m) i j (read str))))))
 
-(defmethod matrix-read ((m matrix-float) n1 n2 &optional (str *standard-input*))
-  (dotimes (i n1 m)
-    (dotimes (j n2)
-      (gsl_matrix_float_set (entity m) i j (read str)))))
+(defmethod matrix-read ((m matrix-float) &optional (str *standard-input*) (n1 nil) (n2 nil))
+  (let ((s1 (if (null n1) (size1 m) n1))
+        (s2 (if (null n2) (size2 m) n2)))
+    (dotimes (i s1 m)
+      (dotimes (j s2)
+        (gsl_matrix_float_set (entity m) i j (read str))))))
 
-(defgeneric matrix-write (m n1 n2 &optional str)
+(defgeneric matrix-write (m &optional str n1 n2)
   (:documentation
    "This function writes the elements of the matrix m to the stream."))
 
-(defmethod matrix-write ((m matrix-double)  n1 n2 &optional (str *standard-output*))
-  (format str "; ~A X ~A ~A MATRIX~%" n1 n2 'double-float)
-  (dotimes (i n1 m)
-    (dotimes (j n2)
-      (if (eql j (- n2 1))
-          (format str "~S~%" (gsl_matrix_get (entity m) i j))
-          (format str "~S~C" (gsl_matrix_get (entity m) i j) #\tab)))))
+(defmethod matrix-write ((m matrix-double) &optional (str *standard-output*) (n1 nil) (n2 nil))
+  (let ((s1 (if (null n1) (size1 m) n1))
+        (s2 (if (null n2) (size2 m) n2)))
+    (format str "; ~A X ~A ~A MATRIX~%" s1 s2 'double-float)
+    (dotimes (i s1 m)
+      (dotimes (j s2)
+        (if (eql j (- s2 1))
+            (format str "~S~%" (gsl_matrix_get (entity m) i j))
+            (format str "~S~C" (gsl_matrix_get (entity m) i j) #\tab))))))
 
-(defmethod matrix-write ((m matrix-float)  n1 n2 &optional (str *standard-output*))
-  (format str "; ~A X ~A ~A MATRIX~%" n1 n2 'single-float)
-  (dotimes (i n1 m)
-    (dotimes (j n2)
-      (if (eql j (- n2 1))
-          (format str "~S~%" (gsl_matrix_float_get (entity m) i j))
-          (format str "~S~C" (gsl_matrix_float_get (entity m) i j) #\tab)))))
+(defmethod matrix-write ((m matrix-float) &optional (str *standard-output*) (n1 nil) (n2 nil))
+  (let ((s1 (if (null n1) (size1 m) n1))
+        (s2 (if (null n2) (size2 m) n2)))
+    (format str "; ~A X ~A ~A MATRIX~%" s1 s2 'single-float)
+    (dotimes (i s1 m)
+      (dotimes (j s2)
+        (if (eql j (- s2 1))
+            (format str "~S~%" (gsl_matrix_float_get (entity m) i j))
+            (format str "~S~C" (gsl_matrix_float_get (entity m) i j) #\tab))))))
