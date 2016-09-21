@@ -7,9 +7,13 @@
 #include <gsl/gsl_inline.h>
 #include <gsl/gsl_check_range.h>
 #include <gsl/gsl_vector_double.h>
-#include <gsl/gsl_matrix_double.h>
 #include <gsl/gsl_vector_float.h>
+#include <gsl/gsl_vector_int.h>
+#include <gsl/gsl_vector_uint.h>
+#include <gsl/gsl_matrix_double.h>
 #include <gsl/gsl_matrix_float.h>
+#include <gsl/gsl_matrix_int.h>
+#include <gsl/gsl_matrix_uint.h>
 %}
 
 typedef unsigned int size_t;
@@ -34,6 +38,26 @@ struct gsl_matrix_float
   int owner;
 };
 
+struct gsl_matrix_int
+{
+  size_t size1;
+  size_t size2;
+  size_t tda;
+  int * data;
+  gsl_block_int * block;
+  int owner;
+};
+
+struct gsl_matrix_uint
+{
+  size_t size1;
+  size_t size2;
+  size_t tda;
+  unsigned int * data;
+  gsl_block_uint * block;
+  int owner;
+};
+
 /* Allocation */
 
 gsl_matrix *
@@ -51,6 +75,22 @@ gsl_matrix_float *
 gsl_matrix_float_calloc (const size_t n1, const size_t n2);
 
 void gsl_matrix_float_free (gsl_matrix_float * m);
+
+gsl_matrix_int *
+gsl_matrix_int_alloc (const size_t n1, const size_t n2);
+
+gsl_matrix_int *
+gsl_matrix_int_calloc (const size_t n1, const size_t n2);
+
+void gsl_matrix_int_free (gsl_matrix_int * m);
+
+gsl_matrix_uint *
+gsl_matrix_uint_alloc (const size_t n1, const size_t n2);
+
+gsl_matrix_uint *
+gsl_matrix_uint_calloc (const size_t n1, const size_t n2);
+
+void gsl_matrix_uint_free (gsl_matrix_uint * m);
 
 /* Operations */
 
@@ -98,7 +138,6 @@ int gsl_matrix_set_col(gsl_matrix * m, const size_t j, const gsl_vector * v);
 double gsl_matrix_get(const gsl_matrix * m, const size_t i, const size_t j);
 void gsl_matrix_set(gsl_matrix * m, const size_t i, const size_t j, const double x);
 double * gsl_matrix_ptr(gsl_matrix * m, const size_t i, const size_t j);
-const double * gsl_matrix_const_ptr(const gsl_matrix * m, const size_t i, const size_t j);
 
 void gsl_matrix_float_set_zero (gsl_matrix_float * m);
 void gsl_matrix_float_set_identity (gsl_matrix_float * m);
@@ -144,4 +183,93 @@ int gsl_matrix_float_set_col(gsl_matrix_float * m, const size_t j, const gsl_vec
 float   gsl_matrix_float_get(const gsl_matrix_float * m, const size_t i, const size_t j);
 void    gsl_matrix_float_set(gsl_matrix_float * m, const size_t i, const size_t j, const float x);
 float * gsl_matrix_float_ptr(gsl_matrix_float * m, const size_t i, const size_t j);
-const float * gsl_matrix_float_const_ptr(const gsl_matrix_float * m, const size_t i, const size_t j);
+
+void gsl_matrix_int_set_zero (gsl_matrix_int * m);
+void gsl_matrix_int_set_identity (gsl_matrix_int * m);
+void gsl_matrix_int_set_all (gsl_matrix_int * m, int x);
+
+int gsl_matrix_int_memcpy(gsl_matrix_int * dest, const gsl_matrix_int * src);
+int gsl_matrix_int_swap(gsl_matrix_int * m1, gsl_matrix_int * m2);
+
+int gsl_matrix_int_swap_rows(gsl_matrix_int * m, const size_t i, const size_t j);
+int gsl_matrix_int_swap_columns(gsl_matrix_int * m, const size_t i, const size_t j);
+int gsl_matrix_int_swap_rowcol(gsl_matrix_int * m, const size_t i, const size_t j);
+int gsl_matrix_int_transpose (gsl_matrix_int * m);
+int gsl_matrix_int_transpose_memcpy (gsl_matrix_int * dest, const gsl_matrix_int * src);
+
+int gsl_matrix_int_max (const gsl_matrix_int * m);
+int gsl_matrix_int_min (const gsl_matrix_int * m);
+void gsl_matrix_int_minmax (const gsl_matrix_int * m, int * min_out, int * max_out);
+
+void gsl_matrix_int_max_index (const gsl_matrix_int * m, size_t * imax, size_t *jmax);
+void gsl_matrix_int_min_index (const gsl_matrix_int * m, size_t * imin, size_t *jmin);
+void gsl_matrix_int_minmax_index (const gsl_matrix_int * m, size_t * imin, size_t * jmin, size_t * imax, size_t * jmax);
+
+int gsl_matrix_int_equal (const gsl_matrix_int * a, const gsl_matrix_int * b);
+
+int gsl_matrix_int_isnull (const gsl_matrix_int * m);
+int gsl_matrix_int_ispos (const gsl_matrix_int * m);
+int gsl_matrix_int_isneg (const gsl_matrix_int * m);
+int gsl_matrix_int_isnonneg (const gsl_matrix_int * m);
+
+int gsl_matrix_int_add (gsl_matrix_int * a, const gsl_matrix_int * b);
+int gsl_matrix_int_sub (gsl_matrix_int * a, const gsl_matrix_int * b);
+int gsl_matrix_int_mul_elements (gsl_matrix_int * a, const gsl_matrix_int * b);
+int gsl_matrix_int_div_elements (gsl_matrix_int * a, const gsl_matrix_int * b);
+int gsl_matrix_int_scale (gsl_matrix_int * a, const double x);
+int gsl_matrix_int_add_constant (gsl_matrix_int * a, const double x);
+int gsl_matrix_int_add_diagonal (gsl_matrix_int * a, const double x);
+
+int gsl_matrix_int_get_row(gsl_vector_int * v, const gsl_matrix_int * m, const size_t i);
+int gsl_matrix_int_get_col(gsl_vector_int * v, const gsl_matrix_int * m, const size_t j);
+int gsl_matrix_int_set_row(gsl_matrix_int * m, const size_t i, const gsl_vector_int * v);
+int gsl_matrix_int_set_col(gsl_matrix_int * m, const size_t j, const gsl_vector_int * v);
+
+int gsl_matrix_int_get(const gsl_matrix_int * m, const size_t i, const size_t j);
+void gsl_matrix_int_set(gsl_matrix_int * m, const size_t i, const size_t j, const int x);
+int * gsl_matrix_int_ptr(gsl_matrix_int * m, const size_t i, const size_t j);
+
+void gsl_matrix_uint_set_zero (gsl_matrix_uint * m);
+void gsl_matrix_uint_set_identity (gsl_matrix_uint * m);
+void gsl_matrix_uint_set_all (gsl_matrix_uint * m, unsigned int x);
+
+int gsl_matrix_uint_memcpy(gsl_matrix_uint * dest, const gsl_matrix_uint * src);
+int gsl_matrix_uint_swap(gsl_matrix_uint * m1, gsl_matrix_uint * m2);
+
+int gsl_matrix_uint_swap_rows(gsl_matrix_uint * m, const size_t i, const size_t j);
+int gsl_matrix_uint_swap_columns(gsl_matrix_uint * m, const size_t i, const size_t j);
+int gsl_matrix_uint_swap_rowcol(gsl_matrix_uint * m, const size_t i, const size_t j);
+int gsl_matrix_uint_transpose (gsl_matrix_uint * m);
+int gsl_matrix_uint_transpose_memcpy (gsl_matrix_uint * dest, const gsl_matrix_uint * src);
+
+unsigned int gsl_matrix_uint_max (const gsl_matrix_uint * m);
+unsigned int gsl_matrix_uint_min (const gsl_matrix_uint * m);
+void gsl_matrix_uint_minmax (const gsl_matrix_uint * m, unsigned int * min_out, unsigned int * max_out);
+
+void gsl_matrix_uint_max_index (const gsl_matrix_uint * m, size_t * imax, size_t *jmax);
+void gsl_matrix_uint_min_index (const gsl_matrix_uint * m, size_t * imin, size_t *jmin);
+void gsl_matrix_uint_minmax_index (const gsl_matrix_uint * m, size_t * imin, size_t * jmin, size_t * imax, size_t * jmax);
+
+int gsl_matrix_uint_equal (const gsl_matrix_uint * a, const gsl_matrix_uint * b);
+
+int gsl_matrix_uint_isnull (const gsl_matrix_uint * m);
+int gsl_matrix_uint_ispos (const gsl_matrix_uint * m);
+int gsl_matrix_uint_isneg (const gsl_matrix_uint * m);
+int gsl_matrix_uint_isnonneg (const gsl_matrix_uint * m);
+
+int gsl_matrix_uint_add (gsl_matrix_uint * a, const gsl_matrix_uint * b);
+int gsl_matrix_uint_sub (gsl_matrix_uint * a, const gsl_matrix_uint * b);
+int gsl_matrix_uint_mul_elements (gsl_matrix_uint * a, const gsl_matrix_uint * b);
+int gsl_matrix_uint_div_elements (gsl_matrix_uint * a, const gsl_matrix_uint * b);
+int gsl_matrix_uint_scale (gsl_matrix_uint * a, const double x);
+int gsl_matrix_uint_add_constant (gsl_matrix_uint * a, const double x);
+int gsl_matrix_uint_add_diagonal (gsl_matrix_uint * a, const double x);
+
+int gsl_matrix_uint_get_row(gsl_vector_uint * v, const gsl_matrix_uint * m, const size_t i);
+int gsl_matrix_uint_get_col(gsl_vector_uint * v, const gsl_matrix_uint * m, const size_t j);
+int gsl_matrix_uint_set_row(gsl_matrix_uint * m, const size_t i, const gsl_vector_uint * v);
+int gsl_matrix_uint_set_col(gsl_matrix_uint * m, const size_t j, const gsl_vector_uint * v);
+
+unsigned int gsl_matrix_uint_get(const gsl_matrix_uint * m, const size_t i, const size_t j);
+void gsl_matrix_uint_set(gsl_matrix_uint * m, const size_t i, const size_t j, const unsigned int x);
+unsigned int * gsl_matrix_uint_ptr(gsl_matrix_uint * m, const size_t i, const size_t j);

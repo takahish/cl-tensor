@@ -26,10 +26,14 @@
 
 (defclass simple-array-float (simple-array-t) ())
 
-(defun make-simple-array (n &key (element-type 'double-float)
+(defclass simple-array-int (simple-array-t) ())
+
+(defclass simple-array-uint (simple-array-t) ())
+
+(defun make-simple-array (n &key (element-type :double)
                               (initial-element nil)
                               (initial-contents nil))
-  (cond ((and (eql element-type 'double-float)
+  (cond ((and (eql element-type :double)
               (not (null initial-element)))
          (make-instance 'simple-array-double
                         :entity (make-array n
@@ -37,7 +41,7 @@
                                             :initial-element initial-element)
                         :size n
                         :stride 1))
-        ((and (eql element-type 'double-float)
+        ((and (eql element-type :double)
               (not (null initial-contents)))
          (make-instance 'simple-array-double
                         :entity (make-array n
@@ -45,7 +49,7 @@
                                             :initial-contents initial-contents)
                         :size n
                         :stride 1))
-        ((eql element-type 'double-float)
+        ((eql element-type :double)
          (make-instance 'simple-array-double
                         :entity (make-array n
                                             :element-type 'double-float
@@ -60,7 +64,7 @@
                                             :initial-element initial-element)
                         :size n
                         :stride 1))
-        ((and (eql element-type 'single-float)
+        ((and (eql element-type :float)
               (not (null initial-contents)))
          (make-instance  'simple-array-float
                          :entity (make-array n
@@ -68,13 +72,62 @@
                                              :initial-contents initial-contents)
                          :size n
                          :stride 1))
-        ((eql element-type 'single-float)
+        ((eql element-type :float)
          (make-instance  'simple-array-float
                          :entity (make-array n
                                              :element-type 'single-float
                                              :initial-element 0.0)
                          :size n
                          :stride 1))
+        ((and (eql element-type :int)
+              (not (null initial-element)))
+         (make-instance 'simple-array-int
+                        :entity (make-array n
+                                            ;; imposing limit on the magnitude of an integer
+                                            :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-element initial-element)
+                        :size n
+                        :stride 1))
+        ((and (eql element-type :int)
+              (not (null initial-contents)))
+         (make-instance 'simple-array-int
+                        :entity (make-array n
+                                            ;; imposing limit on the magnitude of an integer
+                                            :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-contents initial-contents)
+                        :size n
+                        :stride 1))
+        ((eql element-type :int)
+         (make-instance 'simple-array-int
+                        :entity (make-array n
+                                            ;; imposing limit on the magnitude of an integer
+                                            :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-element 0)
+                        :size n
+                        :stride 1))
+        ((and (eql element-type :unsigned-int)
+              (not (null initial-element)))
+         (make-instance 'simple-array-uint
+                        :entity (make-array n
+                                            :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-element initial-element)
+                        :size n
+                        :stride 1))
+        ((and (eql element-type :unsigned-int)
+              (not (null initial-contents)))
+         (make-instance 'simple-array-uint
+                        :entity (make-array n
+                                            :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-contents initial-contents)
+                        :size n
+                        :stride 1))
+        ((eql element-type :unsigned-int)
+         (make-instance 'simple-array-uint
+                        :entity (make-array n
+                                            :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
+                                            :initial-element 0)
+                        :size n
+                        :stride 1))
         (t (error "unsapported element type"))))
 
 (defgeneric simple-array-get (a i)
@@ -115,11 +168,19 @@ how many values to read."))
     (format str "~S~%" (simple-array-get a i))))
 
 (defmethod simple-array-write ((a simple-array-double) &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) 'double-float)
+  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) :double)
   (call-next-method))
 
 (defmethod simple-array-write ((a simple-array-float) &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) 'single-float)
+  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) :float)
+  (call-next-method))
+
+(defmethod simple-array-write ((a simple-array-int) &optional (str *standard-output*) (n nil))
+  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) :int)
+  (call-next-method))
+
+(defmethod simple-array-write ((a simple-array-uint) &optional (str *standard-output*) (n nil))
+  (format str "; ~A ~A SIMPLE-ARRAY~%" (if (null n) (size a) n) :unsigned-int)
   (call-next-method))
 
 (defgeneric simple-array-map (func a &optional n)

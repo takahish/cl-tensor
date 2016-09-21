@@ -30,37 +30,61 @@
 
 (defclass vector-float (vector-t) ())
 
-(defun vector-alloc (n &key (ctype :double))
+(defclass vector-int (vector-t) ())
+
+(defclass vector-uint (vector-t) ())
+
+(defun vector-alloc (n &key (element-type :double))
   "This function creates a vector of length n, returning a pointer to a newly initialized
 vector struct. A new block is allocated for the elements of the vector, and stored in
 the block component of the vector struct. The block is owned by the vector, and
 will be deallocated when the vector is deallocated."
-  (cond ((eq ctype :double)
+  (cond ((eql element-type :double)
          (make-instance 'vector-double
                         :entity (gsl_vector_alloc n)
                         :size n
                         :stride 1))
-        ((eq ctype :float)
+        ((eql element-type :float)
          (make-instance 'vector-float
                         :entity (gsl_vector_float_alloc n)
                         :size n
                         :stride 1))
-        (t (error "unknown ctype"))))
+        ((eql element-type :int)
+         (make-instance 'vector-int
+                        :entity (gsl_vector_int_alloc n)
+                        :size n
+                        :stride 1))
+        ((eql element-type :unsigned-int)
+         (make-instance 'vector-uint
+                        :entity (gsl_vector_uint_alloc n)
+                        :size n
+                        :stride 1))
+        (t (error "unknown element type"))))
 
-(defun vector-calloc (n &key (ctype :double))
+(defun vector-calloc (n &key (element-type :double))
   "This function allocates memory for a vector of length n and initializes all the elements
 of the vector to zero."
-  (cond ((eq ctype :double)
+  (cond ((eql element-type :double)
          (make-instance 'vector-double
                         :entity (gsl_vector_calloc n)
                         :size n
                         :stride 1))
-        ((eq ctype :float)
+        ((eql element-type :float)
          (make-instance 'vector-float
                         :entity (gsl_vector_float_calloc n)
                         :size n
                         :stride 1))
-        (t (error "unknown ctype"))))
+        ((eql element-type :int)
+         (make-instance 'vector-int
+                        :entity (gsl_vector_int_calloc n)
+                        :size n
+                        :stride 1))
+        ((eql element-type :unsigned-int)
+         (make-instance 'vector-uint
+                        :entity (gsl_vector_uint_calloc n)
+                        :size n
+                        :stride 1))
+        (t (error "unknown element type"))))
 
 (defgeneric vector-free (v &optional result)
   (:documentation
@@ -74,7 +98,15 @@ that object and will not be deallocated."))
   result)
 
 (defmethod vector-free ((v vector-float) &optional (result nil))
-  (gsl_vector_free (entity v))
+  (gsl_vector_float_free (entity v))
+  result)
+
+(defmethod vector-free ((v vector-int) &optional (result nil))
+  (gsl_vector_int_free (entity v))
+  result)
+
+(defmethod vector-free ((v vector-uint) &optional (result nil))
+  (gsl_vector_uint_free (entity v))
   result)
 
 (defgeneric vector-get (v i)
@@ -87,6 +119,12 @@ of 0 to n - 1 then the error handler is invoked and 0 is returned."))
 
 (defmethod vector-get ((v vector-float) i)
   (gsl_vector_float_get (entity v) i))
+
+(defmethod vector-get ((v vector-int) i)
+  (gsl_vector_int_get (entity v) i))
+
+(defmethod vector-get ((v vector-uint) i)
+  (gsl_vector_uint_get (entity v) i))
 
 (defgeneric vector-set (v i x)
   (:documentation
@@ -101,6 +139,14 @@ the allowed range of 0 to n - 1 then the error handler is invoked."))
   (gsl_vector_float_set (entity v) i x)
   v)
 
+(defmethod vector-set ((v vector-int) i x)
+  (gsl_vector_int_set (entity v) i x)
+  v)
+
+(defmethod vector-set ((v vector-uint) i x)
+  (gsl_vector_uint_set (entity v) i x)
+  v)
+
 (defgeneric vector-ptr (v i)
   (:documentation
    "This function return a pointer to the i-th element of a vector v. If i lies outside
@@ -112,6 +158,12 @@ returned."))
 
 (defmethod vector-ptr ((v vector-float) i)
   (gsl_vector_float_ptr (entity v) i))
+
+(defmethod vector-ptr ((v vector-int) i)
+  (gsl_vector_int_ptr (entity v) i))
+
+(defmethod vector-ptr ((v vector-uint) i)
+  (gsl_vector_uint_ptr (entity v) i))
 
 (defgeneric vector-set-all (v x)
   (:documentation
@@ -125,6 +177,14 @@ returned."))
   (gsl_vector_float_set_all (entity v) x)
   v)
 
+(defmethod vector-set-all ((v vector-int) x)
+  (gsl_vector_int_set_all (entity v) x)
+  v)
+
+(defmethod vector-set-all ((v vector-uint) x)
+  (gsl_vector_uint_set_all (entity v) x)
+  v)
+
 (defgeneric vector-set-zero (v)
   (:documentation
    "This function sets all the elements of the vector v to zero."))
@@ -135,6 +195,14 @@ returned."))
 
 (defmethod vector-set-zero ((v vector-float))
   (gsl_vector_float_set_zero (entity v))
+  v)
+
+(defmethod vector-set-zero ((v vector-int))
+  (gsl_vector_int_set_zero (entity v))
+  v)
+
+(defmethod vector-set-zero ((v vector-uint))
+  (gsl_vector_uint_set_zero (entity v))
   v)
 
 (defgeneric vector-set-basis (v i)
@@ -150,6 +218,14 @@ except for the i-th element which is set to one."))
   (gsl_vector_float_set_basis (entity v) i)
   v)
 
+(defmethod vector-set-basis ((v vector-int) i)
+  (gsl_vector_int_set_basis (entity v) i)
+  v)
+
+(defmethod vector-set-basis ((v vector-uint) i)
+  (gsl_vector_uint_set_basis (entity v) i)
+  v)
+
 (defgeneric vector-memcpy (dest src)
   (:documentation
    "This function copies the elements of the vector src into the vector dest. The two
@@ -161,6 +237,14 @@ vectors must have the same length."))
 
 (defmethod vector-memcpy ((dest vector-float) (src vector-float))
   (gsl_vector_float_memcpy (entity dest) (entity src))
+  dest)
+
+(defmethod vector-memcpy ((dest vector-int) (src vector-int))
+  (gsl_vector_int_memcpy (entity dest) (entity src))
+  dest)
+
+(defmethod vector-memcpy ((dest vector-uint) (src vector-uint))
+  (gsl_vector_uint_memcpy (entity dest) (entity src))
   dest)
 
 (defgeneric vector-swap (v w)
@@ -176,6 +260,14 @@ vectors must have the same length."))
   (gsl_vector_float_swap (entity v) (entity w))
   (values v w))
 
+(defmethod vector-swap ((v vector-int) (w vector-int))
+  (gsl_vector_int_swap (entity v) (entity w))
+  (values v w))
+
+(defmethod vector-swap ((v vector-uint) (w vector-uint))
+  (gsl_vector_uint_swap (entity v) (entity w))
+  (values v w))
+
 (defgeneric vector-swap-elements (v i j)
   (:documentation
    "This function exchanges the i-th and j-th elements of the vector v in-place."))
@@ -188,6 +280,14 @@ vectors must have the same length."))
   (gsl_vector_float_swap_elements (entity v) i j)
   v)
 
+(defmethod vector-swap-elements ((v vector-int) i j)
+  (gsl_vector_int_swap_elements (entity v) i j)
+  v)
+
+(defmethod vector-swap-elements ((v vector-uint) i j)
+  (gsl_vector_uint_swap_elements (entity v) i j)
+  v)
+
 (defgeneric vector-reverse (v)
   (:documentation
    "This function reverses the order of the elements of the vector v."))
@@ -198,6 +298,14 @@ vectors must have the same length."))
 
 (defmethod vector-reverse ((v vector-float))
   (gsl_vector_float_reverse (entity v))
+  v)
+
+(defmethod vector-reverse ((v vector-int))
+  (gsl_vector_int_reverse (entity v))
+  v)
+
+(defmethod vector-reverse ((v vector-uint))
+  (gsl_vector_uint_reverse (entity v))
   v)
 
 (defgeneric vector-add (a b)
@@ -214,6 +322,14 @@ the same length."))
   (gsl_vector_float_add (entity a) (entity b))
   a)
 
+(defmethod vector-add ((a vector-int) (b vector-int))
+  (gsl_vector_int_add (entity a) (entity b))
+  a)
+
+(defmethod vector-add ((a vector-uint) (b vector-uint))
+  (gsl_vector_uint_add (entity a) (entity b))
+  a)
+
 (defgeneric vector-sub (a b)
   (:documentation
    "This function subtracts the elements of vector b from the elements of vector a. The
@@ -226,6 +342,14 @@ have the same length."))
 
 (defmethod vector-sub ((a vector-float) (b vector-float))
   (gsl_vector_float_sub (entity a) (entity b))
+  a)
+
+(defmethod vector-sub ((a vector-int) (b vector-int))
+  (gsl_vector_int_sub (entity a) (entity b))
+  a)
+
+(defmethod vector-sub ((a vector-uint) (b vector-uint))
+  (gsl_vector_uint_sub (entity a) (entity b))
   a)
 
 (defgeneric vector-mul (a b)
@@ -242,6 +366,14 @@ have the same length."))
   (gsl_vector_float_mul (entity a) (entity b))
   a)
 
+(defmethod vector-mul ((a vector-int) (b vector-int))
+  (gsl_vector_int_mul (entity a) (entity b))
+  a)
+
+(defmethod vector-mul ((a vector-uint) (b vector-uint))
+  (gsl_vector_uint_mul (entity a) (entity b))
+  a)
+
 (defgeneric vector-div (a b)
   (:documentation
    "This function divides the elements of vector a by the elements of vector b. The result
@@ -254,6 +386,14 @@ same length."))
 
 (defmethod vector-div ((a vector-float) (b vector-float))
   (gsl_vector_float_div (entity a) (entity b))
+  a)
+
+(defmethod vector-div ((a vector-int) (b vector-int))
+  (gsl_vector_int_div (entity a) (entity b))
+  a)
+
+(defmethod vector-div ((a vector-uint) (b vector-uint))
+  (gsl_vector_uint_div (entity a) (entity b))
   a)
 
 (defgeneric vector-scale (a x)
@@ -269,6 +409,14 @@ a_i <- x * a_i is stored in a."))
   (gsl_vector_float_scale (entity a) x)
   a)
 
+(defmethod vector-scale ((a vector-int) x)
+  (gsl_vector_int_scale (entity a) x)
+  a)
+
+(defmethod vector-scale ((a vector-uint) x)
+  (gsl_vector_uint_scale (entity a) x)
+  a)
+
 (defgeneric vector-add-constant (a x)
   (:documentation
    "This function adds the constant value x to the elements of the vector a. The result
@@ -282,6 +430,14 @@ a_i <- a_i + x is stored in a."))
   (gsl_vector_float_add_constant (entity a) x)
   a)
 
+(defmethod vector-add-constant ((a vector-int) x)
+  (gsl_vector_int_add_constant (entity a) x)
+  a)
+
+(defmethod vector-add-constant ((a vector-uint) x)
+  (gsl_vector_uint_add_constant (entity a) x)
+  a)
+
 (defgeneric vector-max (v)
   (:documentation
    "This function returns the maximum value in the vector v."))
@@ -292,6 +448,12 @@ a_i <- a_i + x is stored in a."))
 (defmethod vector-max ((v vector-float))
   (gsl_vector_float_max (entity v)))
 
+(defmethod vector-max ((v vector-int))
+  (gsl_vector_int_max (entity v)))
+
+(defmethod vector-max ((v vector-uint))
+  (gsl_vector_uint_max (entity v)))
+
 (defgeneric vector-min (v)
   (:documentation
    "This function returns the maximum value in the vector v."))
@@ -301,6 +463,12 @@ a_i <- a_i + x is stored in a."))
 
 (defmethod vector-min ((v vector-float))
   (gsl_vector_float_min (entity v)))
+
+(defmethod vector-min ((v vector-int))
+  (gsl_vector_int_min (entity v)))
+
+(defmethod vector-min ((v vector-uint))
+  (gsl_vector_uint_min (entity v)))
 
 (defgeneric vector-minmax (v)
   (:documentation
@@ -320,6 +488,20 @@ a_i <- a_i + x is stored in a."))
     (values (cffi:mem-ref min-out :float)
             (cffi:mem-ref max-out :float))))
 
+(defmethod vector-minmax ((v vector-int))
+  (cffi:with-foreign-objects ((min-out :int)
+                              (max-out :int))
+    (gsl_vector_int_minmax (entity v) min-out max-out)
+    (values (cffi:mem-ref min-out :int)
+            (cffi:mem-ref max-out :int))))
+
+(defmethod vector-minmax ((v vector-uint))
+  (cffi:with-foreign-objects ((min-out :unsigned-int)
+                              (max-out :unsigned-int))
+    (gsl_vector_uint_minmax (entity v) min-out max-out)
+    (values (cffi:mem-ref min-out :unsigned-int)
+            (cffi:mem-ref max-out :unsigned-int))))
+
 (defgeneric vector-max-index (v)
   (:documentation
    "This function returns the index of the maximum value in the vector v. When there
@@ -330,6 +512,12 @@ are several equal maximum elements then the lowest index is returned."))
 
 (defmethod vector-max-index ((v vector-float))
   (gsl_vector_float_max_index (entity v)))
+
+(defmethod vector-max-index ((v vector-int))
+  (gsl_vector_int_max_index (entity v)))
+
+(defmethod vector-max-index ((v vector-uint))
+  (gsl_vector_uint_max_index (entity v)))
 
 (defgeneric vector-min-index (v)
   (:documentation
@@ -342,6 +530,12 @@ elements then the lowest indices are returned."))
 
 (defmethod vector-min-index ((v vector-float))
   (gsl_vector_float_min_index (entity v)))
+
+(defmethod vector-min-index ((v vector-int))
+  (gsl_vector_int_min_index (entity v)))
+
+(defmethod vector-min-index ((v vector-uint))
+  (gsl_vector_uint_min_index (entity v)))
 
 (defgeneric vector-minmax-index (v)
   (:documentation
@@ -356,8 +550,22 @@ elements then the lowest indices are returned."))
 
 (defmethod vector-minmax-index ((v vector-float))
   (cffi:with-foreign-objects ((imin :unsigned-int)
-                         (imax :unsigned-int))
+                              (imax :unsigned-int))
     (gsl_vector_float_minmax_index (entity v) imin imax)
+    (values (cffi:mem-ref imin :unsigned-int)
+            (cffi:mem-ref imax :unsigned-int))))
+
+(defmethod vector-minmax-index ((v vector-int))
+  (cffi:with-foreign-objects ((imin :unsigned-int)
+                              (imax :unsigned-int))
+    (gsl_vector_int_minmax_index (entity v) imin imax)
+    (values (cffi:mem-ref imin :unsigned-int)
+            (cffi:mem-ref imax :unsigned-int))))
+
+(defmethod vector-minmax-index ((v vector-uint))
+  (cffi:with-foreign-objects ((imin :unsigned-int)
+                              (imax :unsigned-int))
+    (gsl_vector_uint_minmax_index (entity v) imin imax)
     (values (cffi:mem-ref imin :unsigned-int)
             (cffi:mem-ref imax :unsigned-int))))
 
@@ -371,6 +579,12 @@ elements then the lowest indices are returned."))
 (defmethod vector-isnull ((v vector-float))
   (= (gsl_vector_float_isnull (entity v)) 1))
 
+(defmethod vector-isnull ((v vector-int))
+  (= (gsl_vector_int_isnull (entity v)) 1))
+
+(defmethod vector-isnull ((v vector-uint))
+  (= (gsl_vector_uint_isnull (entity v)) 1))
+
 (defgeneric vector-ispos (v)
   (:documentation
    "This function return t if all the elements of the vector v are strictly positive,
@@ -381,6 +595,12 @@ and nil otherwise."))
 
 (defmethod vector-ispos ((v vector-float))
   (= (gsl_vector_float_ispos (entity v)) 1))
+
+(defmethod vector-ispos ((v vector-int))
+  (= (gsl_vector_int_ispos (entity v)) 1))
+
+(defmethod vector-ispos ((v vector-uint))
+  (= (gsl_vector_uint_ispos (entity v)) 1))
 
 (defgeneric vector-isneg (v)
   (:documentation
@@ -393,6 +613,12 @@ and nil otherwise."))
 (defmethod vector-isneg ((v vector-float))
   (= (gsl_vector_float_isneg (entity v)) 1))
 
+(defmethod vector-isneg ((v vector-int))
+  (= (gsl_vector_int_isneg (entity v)) 1))
+
+(defmethod vector-isneg ((v vector-uint))
+  (= (gsl_vector_uint_isneg (entity v)) 1))
+
 (defgeneric vector-isnonneg (v)
   (:documentation
    "This function return t if all the elements of the vector v are non-negative, and
@@ -404,6 +630,12 @@ nil otherwise."))
 (defmethod vector-isnonneg ((v vector-float))
   (= (gsl_vector_float_isnonneg (entity v)) 1))
 
+(defmethod vector-isnonneg ((v vector-int))
+  (= (gsl_vector_int_isnonneg (entity v)) 1))
+
+(defmethod vector-isnonneg ((v vector-uint))
+  (= (gsl_vector_uint_isnonneg (entity v)) 1))
+
 (defgeneric vector-equal (u v)
   (:documentation
    "This function returns 1 if the vector u and v are equal and 0 otherwise."))
@@ -414,31 +646,45 @@ nil otherwise."))
 (defmethod vector-equal ((u vector-float) (v vector-float))
   (= (gsl_vector_float_equal (entity u) (entity v)) 1))
 
-(defgeneric vector-set-sequence (v n seq)
+(defmethod vector-equal ((u vector-int) (v vector-int))
+  (= (gsl_vector_int_equal (entity u) (entity v)) 1))
+
+(defmethod vector-equal ((u vector-uint) (v vector-uint))
+  (= (gsl_vector_uint_equal (entity u) (entity v)) 1))
+
+(defgeneric vector-set-sequence (v seq &optional n)
   (:documentation
    "This function sets each element of the vector v to each element of the sequence
 seq respectively."))
 
-(defmethod vector-set-sequence ((v vector-double) n seq)
-  (dotimes (i n v)
+(defmethod vector-set-sequence ((v vector-double) seq &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_set (entity v) i (elt seq i))))
 
-(defmethod vector-set-sequence ((v vector-float) n seq)
-  (dotimes (i n v)
+(defmethod vector-set-sequence ((v vector-float) seq &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_float_set (entity v) i (elt seq i))))
 
-(defun make-vector (n &key (initial-element nil) (initial-contents nil) (ctype :double))
+(defmethod vector-set-sequence ((v vector-int) seq &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_int_set (entity v) i (elt seq i))))
+
+(defmethod vector-set-sequence ((v vector-uint) seq &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_uint_set (entity v) i (elt seq i))))
+
+(defun make-vector (n &key (initial-element nil) (initial-contents nil) (element-type :double))
   "This function makes a vector of length n, returning a instance to a newly initialized
 vector class. A new block is allocated for the elements of the vector, and stored in
 the block component of the vector struct. The block is owned by the vector, and will be
 deallocated when the vector is deallocated.
 The memory is allocated using vector-calloc, so it can be passed to function which
 vector-free."
-  (let ((v (vector-calloc n :ctype ctype)))
+  (let ((v (vector-calloc n :element-type element-type)))
     (cond ((not (null initial-element))
            (vector-set-all v initial-element))
           ((not (null initial-contents))
-           (vector-set-sequence v n initial-contents))
+           (vector-set-sequence v initial-contents n))
           (t v))))
 
 (defgeneric vector-to-array (v &optional n)
@@ -457,6 +703,18 @@ vector-free."
     (dotimes (i s a)
       (setf (aref a i) (gsl_vector_float_get (entity v) i)))))
 
+(defmethod vector-to-array ((v vector-int) &optional (n nil))
+  (let* ((s (if (null n) (size v) n))
+         (a (make-array s :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8)))))
+    (dotimes (i s a)
+      (setf (aref a i) (gsl_vector_int_get (entity v) i)))))
+
+(defmethod vector-to-array ((v vector-uint) &optional (n nil))
+  (let* ((s (if (null n) (size v) n))
+         (a (make-array s :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8)))))
+    (dotimes (i s a)
+      (setf (aref a i) (gsl_vector_uint_get (entity v) i)))))
+
 (defgeneric vector-read (v &optional str n)
   (:documentation
    "This function reads into the vector v from the open stream str. The vector v must be
@@ -471,21 +729,41 @@ how many values to read."))
   (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_float_set (entity v) i (read str))))
 
+(defmethod vector-read ((v vector-int) &optional (str *standard-input*) (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_int_set (entity v) i (read str))))
+
+(defmethod vector-read ((v vector-uint) &optional (str *standard-input*) (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_uint_set (entity v) i (read str))))
+
 (defgeneric vector-write (v &optional str n)
   (:documentation
    "This function writes the elements of the vector v line-by-line to the stream str."))
 
 (defmethod vector-write ((v vector-double) &optional (str *standard-output*) (n nil))
   (let ((s (if (null n) (size v) n)))
-    (format str "; ~A ~A VECTOR~%" s 'double-float)
+    (format str "; ~A ~A VECTOR~%" s :double)
     (dotimes (i s v)
       (format str "~S~%" (gsl_vector_get (entity v) i)))))
 
 (defmethod vector-write ((v vector-float) &optional (str *standard-output*) (n nil))
   (let ((s (if (null n) (size v) n)))
-    (format str "; ~A ~A VECTOR~%" s 'single-float)
+    (format str "; ~A ~A VECTOR~%" s :float)
     (dotimes (i s v)
       (format str "~S~%" (gsl_vector_float_get (entity v) i)))))
+
+(defmethod vector-write ((v vector-int) &optional (str *standard-output*) (n nil))
+  (let ((s (if (null n) (size v) n)))
+    (format str "; ~A ~A VECTOR~%" s :int)
+    (dotimes (i s v)
+      (format str "~S~%" (gsl_vector_int_get (entity v) i)))))
+
+(defmethod vector-write ((v vector-uint) &optional (str *standard-output*) (n nil))
+  (let ((s (if (null n) (size v) n)))
+    (format str "; ~A ~A VECTOR~%" s :unsigned-int)
+    (dotimes (i s v)
+      (format str "~S~%" (gsl_vector_uint_get (entity v) i)))))
 
 (defgeneric vector-map (func v &optional n)
   (:documentation
@@ -498,6 +776,14 @@ how many values to read."))
 (defmethod vector-map (func (v vector-float) &optional (n nil))
   (dotimes (i (if (null n) (size v) n) v)
     (gsl_vector_float_set (entity v) i (funcall func (gsl_vector_float_get (entity v) i)))))
+
+(defmethod vector-map (func (v vector-int) &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_int_set (entity v) i (funcall func (gsl_vector_int_get (entity v) i)))))
+
+(defmethod vector-map (func (v vector-uint) &optional (n nil))
+  (dotimes (i (if (null n) (size v) n) v)
+    (gsl_vector_uint_set (entity v) i (funcall func (gsl_vector_uint_get (entity v) i)))))
 
 (defgeneric vector-reduce (func init v &optional n)
   (:documentation
@@ -512,3 +798,13 @@ how many values to read."))
   (let ((acc init))
     (dotimes (i (if (null n) (size v) n) acc)
       (setf acc (funcall func acc (gsl_vector_float_get (entity v) i))))))
+
+(defmethod vector-reduce (func init (v vector-int) &optional (n nil))
+  (let ((acc init))
+    (dotimes (i (if (null n) (size v) n) acc)
+      (setf acc (funcall func acc (gsl_vector_int_get (entity v) i))))))
+
+(defmethod vector-reduce (func init (v vector-uint) &optional (n nil))
+  (let ((acc init))
+    (dotimes (i (if (null n) (size v) n) acc)
+      (setf acc (funcall func acc (gsl_vector_uint_get (entity v) i))))))

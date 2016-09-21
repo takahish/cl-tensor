@@ -25,6 +25,20 @@
 	(block :pointer)
 	(owner :int))
 
+(cffi:defcstruct gsl_vector_int
+	(size :unsigned-int)
+	(stride :unsigned-int)
+	(data :pointer)
+	(block :pointer)
+	(owner :int))
+
+(cffi:defcstruct gsl_vector_uint
+	(size :unsigned-int)
+	(stride :unsigned-int)
+	(data :pointer)
+	(block :pointer)
+	(owner :int))
+
 (cffi:defcfun ("gsl_vector_alloc" gsl_vector_alloc) :pointer
   (n :unsigned-int))
 
@@ -41,6 +55,24 @@
   (n :unsigned-int))
 
 (cffi:defcfun ("gsl_vector_float_free" gsl_vector_float_free) :void
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_alloc" gsl_vector_int_alloc) :pointer
+  (n :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_int_calloc" gsl_vector_int_calloc) :pointer
+  (n :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_int_free" gsl_vector_int_free) :void
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_alloc" gsl_vector_uint_alloc) :pointer
+  (n :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_calloc" gsl_vector_uint_calloc) :pointer
+  (n :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_free" gsl_vector_uint_free) :void
   (v :pointer))
 
 (cffi:defcfun ("gsl_vector_set_zero" gsl_vector_set_zero) :void
@@ -142,10 +174,6 @@
   (x :double))
 
 (cffi:defcfun ("gsl_vector_ptr" gsl_vector_ptr) :pointer
-  (v :pointer)
-  (i :unsigned-int))
-
-(cffi:defcfun ("gsl_vector_const_ptr" gsl_vector_const_ptr) :pointer
   (v :pointer)
   (i :unsigned-int))
 
@@ -251,7 +279,207 @@
   (v :pointer)
   (i :unsigned-int))
 
-(cffi:defcfun ("gsl_vector_float_const_ptr" gsl_vector_float_const_ptr) :pointer
+(cffi:defcfun ("gsl_vector_int_set_zero" gsl_vector_int_set_zero) :void
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_set_all" gsl_vector_int_set_all) :void
+  (v :pointer)
+  (x :int))
+
+(cffi:defcfun ("gsl_vector_int_set_basis" gsl_vector_int_set_basis) :int
+  (v :pointer)
+  (i :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_int_memcpy" gsl_vector_int_memcpy) :int
+  (dest :pointer)
+  (src :pointer))
+
+(cffi:defcfun ("gsl_vector_int_reverse" gsl_vector_int_reverse) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_swap" gsl_vector_int_swap) :int
+  (v :pointer)
+  (w :pointer))
+
+(cffi:defcfun ("gsl_vector_int_swap_elements" gsl_vector_int_swap_elements) :int
+  (v :pointer)
+  (i :unsigned-int)
+  (j :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_int_max" gsl_vector_int_max) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_min" gsl_vector_int_min) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_minmax" gsl_vector_int_minmax) :void
+  (v :pointer)
+  (min_out :pointer)
+  (max_out :pointer))
+
+(cffi:defcfun ("gsl_vector_int_max_index" gsl_vector_int_max_index) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_min_index" gsl_vector_int_min_index) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_minmax_index" gsl_vector_int_minmax_index) :void
+  (v :pointer)
+  (imin :pointer)
+  (imax :pointer))
+
+(cffi:defcfun ("gsl_vector_int_add" gsl_vector_int_add) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_int_sub" gsl_vector_int_sub) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_int_mul" gsl_vector_int_mul) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_int_div" gsl_vector_int_div) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_int_scale" gsl_vector_int_scale) :int
+  (a :pointer)
+  (x :double))
+
+(cffi:defcfun ("gsl_vector_int_add_constant" gsl_vector_int_add_constant) :int
+  (a :pointer)
+  (x :double))
+
+(cffi:defcfun ("gsl_vector_int_equal" gsl_vector_int_equal) :int
+  (u :pointer)
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_isnull" gsl_vector_int_isnull) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_ispos" gsl_vector_int_ispos) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_isneg" gsl_vector_int_isneg) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_isnonneg" gsl_vector_int_isnonneg) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_int_get" gsl_vector_int_get) :int
+  (v :pointer)
+  (i :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_int_set" gsl_vector_int_set) :void
+  (v :pointer)
+  (i :unsigned-int)
+  (x :int))
+
+(cffi:defcfun ("gsl_vector_int_ptr" gsl_vector_int_ptr) :pointer
+  (v :pointer)
+  (i :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_set_zero" gsl_vector_uint_set_zero) :void
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_set_all" gsl_vector_uint_set_all) :void
+  (v :pointer)
+  (x :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_set_basis" gsl_vector_uint_set_basis) :int
+  (v :pointer)
+  (i :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_memcpy" gsl_vector_uint_memcpy) :int
+  (dest :pointer)
+  (src :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_reverse" gsl_vector_uint_reverse) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_swap" gsl_vector_uint_swap) :int
+  (v :pointer)
+  (w :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_swap_elements" gsl_vector_uint_swap_elements) :int
+  (v :pointer)
+  (i :unsigned-int)
+  (j :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_max" gsl_vector_uint_max) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_min" gsl_vector_uint_min) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_minmax" gsl_vector_uint_minmax) :void
+  (v :pointer)
+  (min_out :pointer)
+  (max_out :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_max_index" gsl_vector_uint_max_index) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_min_index" gsl_vector_uint_min_index) :unsigned-int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_minmax_index" gsl_vector_uint_minmax_index) :void
+  (v :pointer)
+  (imin :pointer)
+  (imax :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_add" gsl_vector_uint_add) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_sub" gsl_vector_uint_sub) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_mul" gsl_vector_uint_mul) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_div" gsl_vector_uint_div) :int
+  (a :pointer)
+  (b :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_scale" gsl_vector_uint_scale) :int
+  (a :pointer)
+  (x :double))
+
+(cffi:defcfun ("gsl_vector_uint_add_constant" gsl_vector_uint_add_constant) :int
+  (a :pointer)
+  (x :double))
+
+(cffi:defcfun ("gsl_vector_uint_equal" gsl_vector_uint_equal) :int
+  (u :pointer)
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_isnull" gsl_vector_uint_isnull) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_ispos" gsl_vector_uint_ispos) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_isneg" gsl_vector_uint_isneg) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_isnonneg" gsl_vector_uint_isnonneg) :int
+  (v :pointer))
+
+(cffi:defcfun ("gsl_vector_uint_get" gsl_vector_uint_get) :unsigned-int
+  (v :pointer)
+  (i :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_set" gsl_vector_uint_set) :void
+  (v :pointer)
+  (i :unsigned-int)
+  (x :unsigned-int))
+
+(cffi:defcfun ("gsl_vector_uint_ptr" gsl_vector_uint_ptr) :pointer
   (v :pointer)
   (i :unsigned-int))
 
