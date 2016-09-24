@@ -34,44 +34,44 @@
        ,@body)))
 
 (make-compare-func <-double :double
-                   (cond ((> x y) 1)
-                         ((< x y) -1)
-                         (t 0)))
+  (cond ((> x y) 1)
+        ((< x y) -1)
+        (t 0)))
 
 (make-compare-func >-double :double
-                   (cond ((< x y) 1)
-                         ((> x y) -1)
-                         (t 0)))
+  (cond ((< x y) 1)
+        ((> x y) -1)
+        (t 0)))
 
 (make-compare-func <-float :float
-*                   (cond ((> x y) 1)
-                         ((< x y) -1)
-                         (t 0)))
+  (cond ((> x y) 1)
+        ((< x y) -1)
+        (t 0)))
 
 (make-compare-func >-float :float
-                   (cond ((< x y) 1)
-                         ((> x y) -1)
-                         (t 0)))
+  (cond ((< x y) 1)
+        ((> x y) -1)
+        (t 0)))
 
 (make-compare-func <-int :int
-                   (cond ((> x y) 1)
-                         ((< x y) -1)
-                         (t 0)))
+  (cond ((> x y) 1)
+        ((< x y) -1)
+        (t 0)))
 
 (make-compare-func >-int :int
-                   (cond ((< x y) 1)
-                         ((> x y) -1)
-                         (t 0)))
+  (cond ((< x y) 1)
+        ((> x y) -1)
+        (t 0)))
 
 (make-compare-func <-uint :unsigned-int
-                   (cond ((> x y) 1)
-                         ((< x y) -1)
-                         (t 0)))
+  (cond ((> x y) 1)
+        ((< x y) -1)
+        (t 0)))
 
 (make-compare-func >-uint :unsigned-int
-                   (cond ((< x y) 1)
-                         ((> x y) -1)
-                         (t 0)))
+  (cond ((< x y) 1)
+        ((> x y) -1)
+        (t 0)))
 
 (defgeneric sort-asc (data &optional n)
   (:documentation
@@ -112,7 +112,7 @@
 
 (defgeneric sort-desc (data &optional n)
   (:documentation
-   "This function sorts the n elements of the array into ascending order."))
+   "This function sorts the n elements of the array into descending order."))
 
 (defmacro make-sort-desc-simple-array (class element-type compare-func)
   `(defmethod sort-desc ((data ,class) &optional (n nil))

@@ -108,6 +108,9 @@
            "MATRIX-TO-2DARRAY"
            "MATRIX-READ"
            "MATRIX-WRITE"
+           ;; cl-gsl/sort.lisp
+           "SORT-ASC"
+           "SORT-DESC"
            ;; cl-gsl/rng.lisp
            "*RNG-TYPE*"
            "*RNG-SEED*"
