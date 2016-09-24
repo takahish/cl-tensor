@@ -25,470 +25,532 @@
 
 (cl:in-package "GSL")
 
-(defgeneric stats-mean (data stride n)
+(defgeneric stats-mean (data &optional stride n)
   (:documentation
    "This function returns the arithmetic mean of data, a dataset of length n with stride."))
 
-(defmethod stats-mean ((data vector-double) stride n)
-  (gsl_stats_mean (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro anaphoric-stats-array (&body body)
+  `(let ((st (if (null stride) (stride data) stride))
+         (sz (if (null n) (size data) n)))
+     (cffi:with-pointer-to-vector-data (ptr (entity data))
+       ,@body)))
 
-(defmethod stats-mean ((data vector-float) stride n)
-  (gsl_stats_float_mean (gsl_vector_float_ptr (entity data) 0) stride n))
+(defmacro make-stats-mean (class c-func)
+  `(defmethod stats-mean ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defgeneric stats-variance (data stride n)
+(make-stats-mean simple-array-double gsl_stats_mean)
+
+(make-stats-mean simple-array-float gsl_stats_float_mean)
+
+(defgeneric stats-variance (data &optional stride n)
   (:documentation
    "This function returns the estimated, or sample variance of data, a dataset of length
 n with stride."))
 
-(defmethod stats-variance ((data vector-double) stride n)
-  (gsl_stats_variance (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-variance (class c-func)
+  `(defmethod stats-variance ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-variance ((data vector-float) stride n)
-  (gsl_stats_float_variance (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-variance simple-array-double gsl_stats_variance)
 
-(defgeneric stats-variance-m (data stride n mean)
+(make-stats-variance simple-array-float gsl_stats_float_variance)
+
+(defgeneric stats-variance-m (data mean &optional stride n)
   (:documentation
    "This function returns the sample variance of data relative to the given value of mean."))
 
-(defmethod stats-variance-m ((data vector-double) stride n mean)
-  (gsl_stats_variance_m (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-variance-m (class c-func)
+  `(defmethod stats-variance-m ((data ,class) mean &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-variance-m ((data vector-float) stride n mean)
-  (gsl_stats_float_variance_m (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-variance-m simple-array-double gsl_stats_variance_m)
 
-(defgeneric stats-sd (data stride n)
+(make-stats-variance-m simple-array-float gsl_stats_float_variance_m)
+
+(defgeneric stats-sd (data &optional stride n)
   (:documentation
    "The standard deviation is defined as the square root of the variance. This function
 return the square root of the corresponding variance function."))
 
-(defmethod stats-sd ((data vector-double) stride n)
-  (gsl_stats_sd (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-sd (class c-func)
+  `(defmethod stats-sd ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-sd ((data vector-float) stride n)
-  (gsl_stats_float_sd (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-sd simple-array-double gsl_stats_sd)
 
-(defgeneric stats-sd-m (data stride n mean)
+(make-stats-sd simple-array-float gsl_stats_float_sd)
+
+(defgeneric stats-sd-m (data mean &optional stride n)
   (:documentation
    "The standard deviation is defined as the square root of the variance. This function
 return the square root of the corresponding variance function."))
 
-(defmethod stats-sd-m ((data vector-double) stride n mean)
-  (gsl_stats_sd_m (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-sd-m (class c-func)
+  `(defmethod stats-sd-m ((data ,class) mean &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-sd-m ((data vector-float) stride n mean)
-  (gsl_stats_float_sd_m (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-sd-m simple-array-double gsl_stats_sd_m)
 
-(defgeneric stats-tss (data stride n)
+(make-stats-sd-m simple-array-float gsl_stats_float_sd_m)
+
+(defgeneric stats-tss (data &optional stride n)
   (:documentation
    "This function return the total sum of squared (TSS) of data about the mean."))
 
-(defmethod stats-tss ((data vector-double) stride n)
-  (gsl_stats_tss (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-tss (class c-func)
+  `(defmethod stats-tss ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-tss ((data vector-float) stride n)
-  (gsl_stats_float_tss (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-tss simple-array-double gsl_stats_tss)
 
-(defgeneric stats-tss-m (data stride n mean)
+(make-stats-tss simple-array-float gsl_stats_float_tss)
+
+(defgeneric stats-tss-m (data mean &optional stride n)
   (:documentation
    "This function return the total sum of squared (TSS) of data about the mean."))
 
-(defmethod stats-tss-m ((data vector-double) stride n mean)
-  (gsl_stats_tss_m (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-tss-m (class c-func)
+  `(defmethod stats-tss-m ((data ,class) mean &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-tss-m ((data vector-float) stride n mean)
-  (gsl_stats_float_tss_m (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-tss-m simple-array-double gsl_stats_tss_m)
 
-(defgeneric stats-variance-with-fixed-mean (data stride n mean)
+(make-stats-tss-m simple-array-float gsl_stats_float_tss_m)
+
+(defgeneric stats-variance-with-fixed-mean (data mean &optional stride n)
   (:documentation
    "This function computes an unbiased estimate of the variance of data when the
 population mean of the underlying distribution is known a priori. In this case
 the estimator for the variance uses the factor 1/N."))
 
-(defmethod stats-variance-with-fixed-mean ((data vector-double) stride n mean)
-  (gsl_stats_variance_with_fixed_mean (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-variance-with-fixed-mean (class c-func)
+  `(defmethod stats-variance-with-fixed-mean ((data ,class) mean
+                                              &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-variance-with-fixed-mean ((data vector-float) stride n mean)
-  (gsl_stats_float_variance_with_fixed_mean (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-variance-with-fixed-mean simple-array-double
+                                     gsl_stats_variance_with_fixed_mean)
 
-(defgeneric stats-sd-with-fixed-mean (data stride n mean)
+(make-stats-variance-with-fixed-mean simple-array-float
+                                     gsl_stats_float_variance_with_fixed_mean)
+
+(defgeneric stats-sd-with-fixed-mean (data mean &optional stride n)
   (:documentation
    "This function calculates the standard deviation of data for a fixed population mean
 The result is the square root of the corresponding variance function."))
 
-(defmethod stats-sd-with-fixed-mean ((data vector-double) stride n mean)
-  (gsl_stats_sd_with_fixed_mean (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-sd-with-fixed-mean (class c-func)
+  `(defmethod stats-sd-with-fixed-mean ((data ,class) mean &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-sd-with-fixed-mean ((data vector-float) stride n mean)
-  (gsl_stats_float_sd_with_fixed_mean (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-sd-with-fixed-mean simple-array-double gsl_stats_sd_with_fixed_mean)
 
-(defgeneric stats-absdev (data stride n)
+(make-stats-sd-with-fixed-mean simple-array-float gsl_stats_float_sd_with_fixed_mean)
+
+(defgeneric stats-absdev (data &optional stride n)
   (:documentation
    "This function computes the absoute deviation from the mean of data, a dataset of
 length n with stride."))
 
-(defmethod stats-absdev ((data vector-double) stride n)
-  (gsl_stats_absdev (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-absdev (class c-func)
+  `(defmethod stats-absdev ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-absdev ((data vector-float) stride n)
-  (gsl_stats_float_absdev (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-absdev simple-array-double gsl_stats_absdev)
 
-(defgeneric stats-absdev-m (data stride n mean)
+(make-stats-absdev simple-array-float gsl_stats_float_absdev)
+
+(defgeneric stats-absdev-m (data mean &optional stride n)
   (:documentation
    "This function computes the absolute deviation of the dataset data relative to the
 given value of mean. This function is useful if you have already computed the mean
 of data (and want to avoid recomputing it), or wish to calculate the absolute deviation
 relative to another value (such as zero, or the median)."))
 
-(defmethod stats-absdev-m ((data vector-double) stride n mean)
-  (gsl_stats_absdev_m (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-absdev-m (class c-func)
+  `(defmethod stats-absdev-m ((data ,class) mean &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-absdev-m ((data vector-float) stride n mean)
-  (gsl_stats_float_absdev_m (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-absdev-m simple-array-double gsl_stats_absdev_m)
 
-(defgeneric stats-skew (data stride n)
+(make-stats-absdev-m simple-array-float gsl_stats_float_absdev_m)
+
+(defgeneric stats-skew (data &optional stride n)
   (:documentation
    "This function computes the skewness of data, a dataset of length n with stride.
 The function computes the mean and estimated standard deviation of data via calls
 to gsl_stats_mean and gsl_stats_sd."))
 
-(defmethod stats-skew ((data vector-double) stride n)
-  (gsl_stats_skew (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-skew (class c-func)
+  `(defmethod stats-skew ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-skew ((data vector-float) stride n)
-  (gsl_stats_float_skew (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-skew simple-array-double gsl_stats_skew)
 
-(defgeneric stats-skew-m-sd (data stride n mean sd)
+(make-stats-skew simple-array-float gsl_stats_float_skew)
+
+(defgeneric stats-skew-m-sd (data mean sd &optional stride n)
   (:documentation
    "This function computes the skewness of the dataset data using the given values
 of the mean and standard deviation. This function are usefull if you have already
 computed the mean and standard deviation of data and want to avoid recomputing them."))
 
-(defmethod stats-skew-m-sd ((data vector-double) stride n mean sd)
-  (gsl_stats_skew_m_sd (gsl_vector_ptr (entity data) 0) stride n mean sd))
+(defmacro make-stats-skew-m-sd (class c-func)
+  `(defmethod stats-skew-m-sd ((data ,class) mean sd &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean sd))))
 
-(defmethod stats-skew-m-sd ((data vector-float) stride n mean sd)
-  (gsl_stats_float_skew_m_sd (gsl_vector_float_ptr (entity data) 0) stride n mean sd))
+(make-stats-skew-m-sd simple-array-double gsl_stats_skew_m_sd)
 
-(defgeneric stats-kurtosis (data stride n)
+(make-stats-skew-m-sd simple-array-float gsl_stats_float_skew_m_sd)
+
+(defgeneric stats-kurtosis (data &optional stride n)
   (:documentation
    "This function computes the kurtosis of data, a dataset of length n with stride.
 The kurtosis measures how sharply peaked a distribution is, relative to its width.
 The kurtosis is normalized to zero for a Gaussian distribution."))
 
-(defmethod stats-kurtosis ((data vector-double) stride n)
-  (gsl_stats_kurtosis (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-kurtosis (class c-func)
+  `(defmethod stats-kurtosis ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-kurtosis ((data vector-float) stride n)
-  (gsl_stats_float_kurtosis (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-kurtosis simple-array-double gsl_stats_kurtosis)
 
-(defgeneric stats-kurtosis-m-sd (data stride n mean sd)
+(make-stats-kurtosis simple-array-float gsl_stats_float_kurtosis)
+
+(defgeneric stats-kurtosis-m-sd (data mean sd &optional stride n)
   (:documentation
    "This function computes the kurtosis of the dataset data using the given values of
 the mean and standard deviation sd. This function is useful if you have already
 computed the mean and standard deviation of data and want to avoid recomputing them."))
 
-(defmethod stats-kurtosis-m-sd ((data vector-double) stride n mean sd)
-  (gsl_stats_kurtosis_m_sd (gsl_vector_ptr (entity data) 0) stride n mean sd))
+(defmacro make-stats-kurtosis-m-sd (class c-func)
+  `(defmethod stats-kurtosis-m-sd ((data ,class) mean sd &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean sd))))
 
-(defmethod stats-kurtosis-m-sd ((data vector-float) stride n mean sd)
-  (gsl_stats_float_kurtosis_m_sd (gsl_vector_float_ptr (entity data) 0) stride n mean sd))
+(make-stats-kurtosis-m-sd simple-array-double gsl_stats_kurtosis_m_sd)
 
-(defgeneric stats-lag1-autocorrelation (data stride n)
+(make-stats-kurtosis-m-sd simple-array-float gsl_stats_float_kurtosis_m_sd)
+
+(defgeneric stats-lag1-autocorrelation (data &optional stride n)
   (:documentation
    "This function computes the lag-1 autocorrelation of the dataset data."))
 
-(defmethod stats-lag1-autocorrelation ((data vector-double) stride n)
-  (gsl_stats_lag1_autocorrelation (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-lag1-autocorrelation (class c-func)
+  `(defmethod stats-lag1-autocorrelation ((data ,class)
+                                          &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-lag1-autocorrelation ((data vector-float) stride n)
-  (gsl_stats_float_lag1_autocorrelation (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-lag1-autocorrelation simple-array-double
+                                 gsl_stats_lag1_autocorrelation)
 
-(defgeneric stats-lag1-autocorrelation-m (data stride n mean)
+(make-stats-lag1-autocorrelation simple-array-float
+                                 gsl_stats_float_lag1_autocorrelation)
+
+(defgeneric stats-lag1-autocorrelation-m (data mean &optional stride n)
   (:documentation
    "This function computes the lag-1 autocorrelation of the dataset data using the
 given value of the mean."))
 
-(defmethod stats-lag1-autocorrelation-m ((data vector-double) stride n mean)
-  (gsl_stats_lag1_autocorrelation_m (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-lag1-autocorrelation-m (class c-func)
+  `(defmethod stats-lag1-autocorrelation-m ((data ,class) mean
+                                            &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz mean))))
 
-(defmethod stats-lag1-autocorrelation-m ((data vector-float) stride n mean)
-  (gsl_stats_float_lag1_autocorrelation_m (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-lag1-autocorrelation-m simple-array-double
+                                   gsl_stats_lag1_autocorrelation_m)
 
-(defgeneric stats-covariance (data1 stride1 data2 stride2 n)
+(make-stats-lag1-autocorrelation-m simple-array-float
+                                   gsl_stats_float_lag1_autocorrelation_m)
+
+(defgeneric stats-covariance (data1 data2 &optional stride1 stride2 n)
   (:documentation
    "This function computes the covariance of the datasets data1 and data2 which must
 both be of the same length n."))
 
-(defmethod stats-covariance ((data1 vector-double) stride1 (data2 vector-double) stride2 n)
-  (gsl_stats_covariance (gsl_vector_ptr (entity data1) 0) stride1
-                        (gsl_vector_ptr (entity data2) 0) stride2 n))
+(defmacro anaphoric-stats-arrays (&body body)
+  `(let ((st1 (if (null stride1) (stride data1) stride1))
+         (st2 (if (null stride2) (stride data2) stride2))
+         (sz (if (null n) (size data1) n)))
+     (cffi:with-pointer-to-vector-data (ptr1 (entity data1))
+       (cffi:with-pointer-to-vector-data (ptr2 (entity data2))
+         ,@body))))
 
-(defmethod stats-covariance ((data1 vector-float) stride1 (data2 vector-float) stride2 n)
-  (gsl_stats_float_covariance (gsl_vector_float_ptr (entity data1) 0) stride1
-                              (gsl_vector_float_ptr (entity data2) 0) stride2 n))
+(defmacro make-stats-covariance (class c-func)
+  `(defmethod stats-covariance ((data1 ,class) (data2 ,class)
+                                &optional (stride1 nil) (stride2 nil) (n nil))
+     (anaphoric-stats-arrays (,c-func ptr1 st1 ptr2 st2 sz))))
 
-(defgeneric stats-covariance-m (data1 stride1 data2 stride2 n mean1 mean2)
+(make-stats-covariance simple-array-double gsl_stats_covariance)
+
+(make-stats-covariance simple-array-float gsl_stats_float_covariance)
+
+(defgeneric stats-covariance-m (data1 data2 mean1 mean2 &optional stride1 stride2 n)
   (:documentation
    "This function computes the covariance of the datasets data1 and data2 using the
 given values of the means, mean1 and mean2. This is useful if you have already
 computed the mean of data1 and data2 and want to avoid recomputing them."))
 
-(defmethod stats-covariance-m ((data1 vector-double) stride1
-                               (data2 vector-double) stride2
-                               n mean1 mean2)
-  (gsl_stats_covariance_m (gsl_vector_ptr (entity data1) 0) stride1
-                          (gsl_vector_ptr (entity data2) 0) stride2
-                          n mean1 mean2))
+(defmacro make-stats-covariance-m (class c-func)
+  `(defmethod stats-covariance-m ((data1 ,class) (data2 ,class) mean1 mean2
+                                  &optional (stride1 nil) (stride2 nil) (n nil))
+     (anaphoric-stats-arrays (,c-func ptr1 st1 ptr2 st2 sz mean1 mean2))))
 
-(defmethod stats-covariance-m ((data1 vector-float) stride1
-                               (data2 vector-float) stride2
-                               n mean1 mean2)
-  (gsl_stats_float_covariance_m (gsl_vector_float_ptr (entity data1) 0) stride1
-                                (gsl_vector_float_ptr (entity data2) 0) stride2
-                                n mean1 mean2))
+(make-stats-covariance-m simple-array-double gsl_stats_covariance_m)
 
-(defgeneric stats-correlation (data1 stride1 data2 stride2 n)
+(make-stats-covariance-m simple-array-float gsl_stats_float_covariance_m)
+
+(defgeneric stats-correlation (data1 data2 &optional stride1 stride2 n)
   (:documentation
    "This function efficiently computes the Pearson correlation coefficient between the
 datasets data1 and data2 which must both be of the same length n."))
 
-(defmethod stats-correlation ((data1 vector-double) stride1 (data2 vector-double) stride2 n)
-  (gsl_stats_correlation (gsl_vector_ptr (entity data1) 0) stride1
-                         (gsl_vector_ptr (entity data2) 0) stride2 n))
+(defmacro make-stats-correlation (class c-func)
+  `(defmethod stats-correlation ((data1 ,class) (data2 ,class)
+                                 &optional (stride1 nil) (stride2 nil) (n nil))
+     (anaphoric-stats-arrays (,c-func ptr1 st1 ptr2 st2 sz))))
 
-(defmethod stats-correlation ((data1 vector-float) stride1 (data2 vector-float) stride2 n)
-  (gsl_stats_float_correlation (gsl_vector_float_ptr (entity data1) 0) stride1
-                               (gsl_vector_float_ptr (entity data2) 0) stride2 n))
+(make-stats-correlation simple-array-double gsl_stats_correlation)
 
-(defgeneric stats-spearman (data1 stride1 data2 stride2 n)
+(make-stats-correlation simple-array-float gsl_stats_float_correlation)
+
+(defgeneric stats-spearman (data1 data2 &optional stride1 stride2 n)
   (:documentation
    "This function computes the Spearman rank correlation coefficient between the
 datasets data1 and data2 which must both be of the same length n."))
 
-(defmethod stats-spearman ((data1 vector-double) stride1 (data2 vector-double) stride2 n)
-  (cffi:with-foreign-object (work :double (* 2 n))
-    (gsl_stats_spearman (gsl_vector_ptr (entity data1) 0) stride1
-                        (gsl_vector_ptr (entity data2) 0) stride2 n work)))
+(defmacro make-stats-spearman (class element-type c-func)
+  `(defmethod stats-spearman ((data1 ,class) (data2 ,class)
+                              &optional (stride1 nil) (stride2 nil) (n nil))
+     (anaphoric-stats-arrays
+      (cffi:with-foreign-object (work ,element-type (* 2 sz))
+        (,c-func ptr1 st1 ptr2 st2 sz work)))))
 
-(defmethod stats-spearman ((data1 vector-float) stride1 (data2 vector-float) stride2 n)
-  (cffi:with-foreign-object (work :float (* 2 n))
-    (gsl_stats_float_spearman (gsl_vector_float_ptr (entity data1) 0) stride1
-                              (gsl_vector_float_ptr (entity data2) 0) stride2 n work)))
+(make-stats-spearman simple-array-double :double gsl_stats_spearman)
 
-(defgeneric stats-wmean (w wstride data stride n)
+(make-stats-spearman simple-array-float :float gsl_stats_float_spearman)
+
+(defgeneric stats-wmean (w data &optional  wstride stride n)
   (:documentation
    "This function returns the weighted mean of dataset data with stride and length n,
 using the set of weights w with wstride and length n."))
 
-(defmethod stats-wmean ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wmean (gsl_vector_ptr (entity w) 0) wstride
-                   (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro anaphoric-stats-array-with-weight (&body body)
+  `(let ((wst (if (null wstride) (stride w) wstride))
+         (dst (if (null stride) (stride data) stride))
+         (sz (if (null n) (size data) n)))
+     (cffi:with-pointer-to-vector-data (wptr (entity w))
+       (cffi:with-pointer-to-vector-data (dptr (entity data))
+         ,@body))))
 
-(defmethod stats-wmean ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wmean (gsl_vector_float_ptr (entity w) 0) wstride
-                         (gsl_vector_float_ptr (entity data) 0) stride n))
+(defmacro make-stats-wmean (class c-func)
+  `(defmethod stats-wmean ((w ,class) (data ,class)
+                           &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defgeneric stats-wvariance (w wstride data stride n)
+(make-stats-wmean simple-array-double gsl_stats_wmean)
+
+(make-stats-wmean simple-array-float gsl_stats_float_wmean)
+
+(defgeneric stats-wvariance (w data &optional wstride stride n)
   (:documentation
    "This function returns the estimated variance of the dataset data with stride and
 length n, using the set of weights w with wstride and length n."))
 
-(defmethod stats-wvariance ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wvariance (gsl_vector_ptr (entity w) 0) wstride
-                       (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wvariance (class c-func)
+  `(defmethod stats-wvariance ((w ,class) (data ,class)
+                               &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wvariance ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wvariance (gsl_vector_float_ptr (entity w) 0) wstride
-                             (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wvariance simple-array-double gsl_stats_wvariance)
 
-(defgeneric stats-wvariance-m (w wstride data stride n wmean)
+(make-stats-wvariance simple-array-float gsl_stats_float_wvariance)
+
+(defgeneric stats-wvariance-m (w data wmean &optional wstride stride n)
   (:documentation
    "This functions returns the estimated variance of the weighted dataset data using
 the given weighted mean wmean."))
 
-(defmethod stats-wvariance-m ((w vector-double) wstride (data vector-double) stride n mean)
-  (gsl_stats_wvariance_m (gsl_vector_ptr (entity w) 0) wstride
-                         (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-wvariance-m (class c-func)
+  `(defmethod stats-wvariance-m ((w ,class) (data ,class) wmean
+                                 &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean))))
 
-(defmethod stats-wvariance-m ((w vector-float) wstride (data vector-float) stride n mean)
-  (gsl_stats_float_wvariance_m (gsl_vector_float_ptr (entity w) 0) wstride
-                               (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-wvariance-m simple-array-double gsl_stats_wvariance_m)
 
-(defgeneric stats-wsd (w wstride data stride n)
+(make-stats-wvariance-m simple-array-float gsl_stats_float_wvariance_m)
+
+(defgeneric stats-wsd (w data &optional wstride stride n)
   (:documentation
    "The statndard deviation is defined as the square root of the variance. This function
 return the square root of the corresponding variance function."))
 
-(defmethod stats-wsd ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wsd (gsl_vector_ptr (entity w) 0) wstride
-                 (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wsd (class c-func)
+  `(defmethod stats-wsd ((w ,class) (data ,class)
+                         &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wsd ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wsd (gsl_vector_float_ptr (entity w) 0) wstride
-                       (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wsd simple-array-double gsl_stats_wsd)
 
-(defgeneric stats-wsd-m (w wstride data stride n wmean)
+(make-stats-wsd simple-array-float gsl_stats_float_wsd)
+
+(defgeneric stats-wsd-m (w data wmean &optional wstride stride n)
   (:documentation
    "This function returns the square root of the corresponding variance function
 gsl:stats-wvariance-m."))
 
-(defmethod stats-wsd-m ((w vector-double) wstride (data vector-double) stride n wmean)
-  (gsl_stats_wsd_m (gsl_vector_ptr (entity w) 0) wstride
-                   (gsl_vector_ptr (entity data) 0) stride n wmean))
+(defmacro make-stats-wsd-m (class c-func)
+  `(defmethod stats-wsd-m ((w ,class) (data ,class) wmean
+                           &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean))))
 
-(defmethod stats-wsd-m ((w vector-float) wstride (data vector-float) stride n wmean)
-  (gsl_stats_float_wsd_m (gsl_vector_float_ptr (entity w) 0) wstride
-                         (gsl_vector_float_ptr (entity data) 0) stride n wmean))
+(make-stats-wsd-m simple-array-double gsl_stats_wsd_m)
 
-(defgeneric stats-wvariance-with-fixed-mean (w wstride data stride n mean)
+(make-stats-wsd-m simple-array-float gsl_stats_float_wsd_m)
+
+(defgeneric stats-wvariance-with-fixed-mean (w data mean &optional wstride stride n)
   (:documentation
    "This function computes an unbiased estimate of the variance of the weighted
 dataset when the population mean of the underlying distribution is known a
 priori. In this case the extimator for the variance replaces the sample mean
 by the known population mean."))
 
-(defmethod stats-wvariance-with-fixed-mean ((w vector-double) wstride
-                                            (data vector-double) stride n mean)
-  (gsl_stats_wvariance_with_fixed_mean (gsl_vector_ptr (entity w) 0) wstride
-                                       (gsl_vector_ptr (entity data) 0) stride
-                                       n mean))
+(defmacro make-stats-wvariance-with-fixed-mean (class c-func)
+  `(defmethod stats-wvariance-with-fixed-mean ((w ,class) (data ,class) mean
+                                               &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz mean))))
 
-(defmethod stats-wvariance-with-fixed-mean ((w vector-float) wstride
-                                            (data vector-float) stride n mean)
-  (gsl_stats_float_wvariance_with_fixed_mean (gsl_vector_float_ptr (entity w) 0) wstride
-                                             (gsl_vector_float_ptr (entity data) 0) stride
-                                             n mean))
+(make-stats-wvariance-with-fixed-mean simple-array-double
+                                      gsl_stats_wvariance_with_fixed_mean)
 
-(defgeneric stats-wsd-with-fixed-mean (w wstride data stride n mean)
+(make-stats-wvariance-with-fixed-mean simple-array-float
+                                      gsl_stats_float_wvariance_with_fixed_mean)
+
+(defgeneric stats-wsd-with-fixed-mean (w data mean &optional wstride stride n)
   (:documentation
    "The standard deviation is defined as the square root of the variance. This function
 returns the square root of the correspoding variance function."))
 
-(defmethod stats-wsd-with-fixed-mean ((w vector-double) wstride
-                                      (data vector-double) stride n mean)
-  (gsl_stats_wsd_with_fixed_mean (gsl_vector_ptr (entity w) 0) wstride
-                                 (gsl_vector_ptr (entity data) 0) stride n mean))
+(defmacro make-stats-wsd-with-fixed-mean (class c-func)
+  `(defmethod stats-wsd-with-fixed-mean ((w ,class) (data ,class) mean
+                                         &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz mean))))
 
-(defmethod stats-wsd-with-fixed-mean ((w vector-float) wstride
-                                      (data vector-float) stride n mean)
-  (gsl_stats_float_wsd_with_fixed_mean (gsl_vector_float_ptr (entity w) 0) wstride
-                                       (gsl_vector_float_ptr (entity data) 0) stride n mean))
+(make-stats-wsd-with-fixed-mean simple-array-double gsl_stats_wsd_with_fixed_mean)
 
-(defgeneric stats-wtss (w wstride data stride n)
+(make-stats-wsd-with-fixed-mean simple-array-float gsl_stats_float_wsd_with_fixed_mean)
+
+(defgeneric stats-wtss (w data &optional wstride stride n)
   (:documentation
    "This function return the weighted total sum of squares (TSS) of data about the
 weighted mean."))
 
-(defmethod stats-wtss ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wtss (gsl_vector_ptr (entity w) 0) wstride
-                  (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wtss (class c-func)
+  `(defmethod stats-wtss ((w ,class) (data ,class)
+                          &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wtss ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wtss (gsl_vector_float_ptr (entity w) 0) wstride
-                        (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wtss simple-array-double gsl_stats_wtss)
 
-(defgeneric stats-wtss-m (w wstride data stride n wmean)
+(make-stats-wtss simple-array-float gsl_stats_float_wtss)
+
+(defgeneric stats-wtss-m (w data wmean &optional wstride stride n)
   (:documentation
    "This function return the weighted total sum of squares (TSS) of data about the
 weighted mean."))
 
-(defmethod stats-wtss-m ((w vector-double) wstride (data vector-double) stride n wmean)
-  (gsl_stats_wtss_m (gsl_vector_ptr (entity w) 0) wstride
-                    (gsl_vector_ptr (entity data) 0) stride n wmean))
+(defmacro make-stats-wtss-m (class c-func)
+  `(defmethod stats-wtss-m ((w ,class) (data ,class) wmean
+                            &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean))))
 
-(defmethod stats-wtss-m ((w vector-float) wstride (data vector-float) stride n wmean)
-  (gsl_stats_float_wtss_m (gsl_vector_float_ptr (entity w) 0) wstride
-                          (gsl_vector_float_ptr (entity data) 0) stride n wmean))
+(make-stats-wtss-m simple-array-double gsl_stats_wtss_m)
 
-(defgeneric stats-wabsdev (w wstride data stride n)
+(make-stats-wtss-m simple-array-float gsl_stats_float_wtss_m)
+
+(defgeneric stats-wabsdev (w data &optional wstride stride n)
   (:documentation
    "This function computes the weighted absolute deviation from the weighted mean of
 data."))
 
-(defmethod stats-wabsdev ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wabsdev (gsl_vector_ptr (entity w) 0) wstride
-                     (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wabsdev (class c-func)
+  `(defmethod stats-wabsdev ((w ,class) (data ,class)
+                             &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wabsdev ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wabsdev (gsl_vector_float_ptr (entity w) 0) wstride
-                           (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wabsdev simple-array-double gsl_stats_wabsdev)
 
-(defgeneric stats-wabsdev-m (w wstride data stride n wmean)
+(make-stats-wabsdev simple-array-float gsl_stats_float_wabsdev)
+
+(defgeneric stats-wabsdev-m (w data wmean &optional wstride stride n)
   (:documentation
    "This function computes the absolute deviation of the weighted dataset data about
 the given weighted mean wmean."))
 
-(defmethod stats-wabsdev-m ((w vector-double) wstride (data vector-double) stride n wmean)
-  (gsl_stats_wabsdev_m (gsl_vector_ptr (entity w) 0) wstride
-                       (gsl_vector_ptr (entity data) 0) stride n wmean))
+(defmacro make-stats-wabsdev-m (class c-func)
+  `(defmethod stats-wabsdev-m ((w ,class) (data ,class) wmean
+                               &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean))))
 
-(defmethod stats-wabsdev-m ((w vector-float) wstride (data vector-float) stride n wmean)
-  (gsl_stats_float_wabsdev_m (gsl_vector_float_ptr (entity w) 0) wstride
-                             (gsl_vector_float_ptr (entity data) 0) stride n wmean))
+(make-stats-wabsdev-m simple-array-double gsl_stats_wabsdev_m)
 
-(defgeneric stats-wskew (w wstride data stride n)
+(make-stats-wabsdev-m simple-array-float gsl_stats_float_wabsdev_m)
+
+(defgeneric stats-wskew (w data &optional wstride stride n)
   (:documentation
    "This function computes the weighted skewness of the dataset data."))
 
-(defmethod stats-wskew ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wskew (gsl_vector_ptr (entity w) 0) wstride
-                   (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wskew (class c-func)
+  `(defmethod stats-wskew ((w ,class) (data ,class)
+                           &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wskew ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wskew (gsl_vector_float_ptr (entity w) 0) wstride
-                         (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wskew simple-array-double gsl_stats_wskew)
 
-(defgeneric stats-wskew-m-sd (w wstride data stride n wmean wsd)
+(make-stats-wskew simple-array-float gsl_stats_float_wskew)
+
+(defgeneric stats-wskew-m-sd (w data wmean wsd &optional wstride stride n)
   (:documentation
    "This function computes the weighted skewness of the dataset data using the given
 values of the weighted mean and weighted standard deviation, wmean and wsd."))
 
-(defmethod stats-wskew-m-sd ((w vector-double)  wstride
-                             (data vector-double) stride
-                             n wmean wsd)
-  (gsl_stats_wskew_m_sd (gsl_vector_ptr (entity w) 0) wstride
-                        (gsl_vector_ptr (entity data) 0) stride
-                        n wmean wsd))
+(defmacro make-stats-wskew-m-sd (class c-func)
+  `(defmethod stats-wskew-m-sd ((w ,class) (data ,class) wmean wsd
+                                &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean wsd))))
 
-(defmethod stats-wskew-m-sd ((w vector-float) wstride
-                              (data vector-float) stride
-                              n wmean wsd)
-  (gsl_stats_float_wskew_m_sd (gsl_vector_float_ptr (entity w) 0) wstride
-                              (gsl_vector_float_ptr (entity data) 0) stride
-                              n wmean wsd))
+(make-stats-wskew-m-sd simple-array-double gsl_stats_wskew_m_sd)
 
-(defgeneric stats-wkurtosis (w wstride data stride n)
+(make-stats-wskew-m-sd simple-array-float gsl_stats_float_wskew_m_sd)
+
+(defgeneric stats-wkurtosis (w data &optional wstride stride n)
   (:documentation
    "This function computes the weighted kurtosis of the dataset data."))
 
-(defmethod stats-wkurtosis ((w vector-double) wstride (data vector-double) stride n)
-  (gsl_stats_wkurtosis (gsl_vector_ptr (entity w) 0) wstride
-                       (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-wkurtosis (class c-func)
+  `(defmethod stats-wkurtosis ((w ,class) (data ,class)
+                               &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz))))
 
-(defmethod stats-wkurtosis ((w vector-float) wstride (data vector-float) stride n)
-  (gsl_stats_float_wkurtosis (gsl_vector_float_ptr (entity w) 0) wstride
-                             (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-wkurtosis simple-array-double gsl_stats_wkurtosis)
 
-(defgeneric stats-wkurtosis-m-sd (w wstride data stride n wmean wsd)
+(make-stats-wkurtosis simple-array-float gsl_stats_float_wkurtosis)
+
+(defgeneric stats-wkurtosis-m-sd (w data wmean wsd &optional wstride stride n)
   (:documentation
    "This function computes the weighted kurtosis of the dataset data using the given
 values of the weighted mean and weighted standard deviation, wmean and wsd."))
 
-(defmethod stats-wkurtosis-m-sd ((w vector-double) wstride
-                                 (data vector-double) stride
-                                 n wmean wsd)
-  (gsl_stats_wkurtosis_m_sd (gsl_vector_ptr (entity w) 0) wstride
-                            (gsl_vector_ptr (entity data) 0) stride
-                            n wmean wsd))
+(defmacro make-stats-wkurtosis-m-sd (class c-func)
+  `(defmethod stats-wkurtosis-m-sd ((w ,class) (data ,class) wmean wsd
+                                    &optional (wstride nil) (stride nil) (n nil))
+     (anaphoric-stats-array-with-weight (,c-func wptr wst dptr dst sz wmean wsd))))
 
-(defmethod stats-wkurtosis-m-sd ((w vector-float) wstride
-                                 (data vector-float) stride
-                                 n wmean wsd)
-  (gsl_stats_float_wkurtosis_m_sd (gsl_vector_float_ptr (entity w) 0) wstride
-                                  (gsl_vector_float_ptr (entity data) 0) stride
-                                  n wmean wsd))
+(make-stats-wkurtosis-m-sd simple-array-double gsl_stats_wkurtosis_m_sd)
 
-(defgeneric stats-max (data stride n)
+(make-stats-wkurtosis-m-sd simple-array-float gsl_stats_float_wkurtosis_m_sd)
+
+(defgeneric stats-max (data &optional stride n)
   (:documentation
    "This function returns the maximum value in data, a dataset of length n with stride
 The maximum value is defined as the value of the element x_i which satisfies
@@ -496,13 +558,15 @@ x_i >= x_j for all j.
 If you want instead to find the element with the largest absolute magnitude you will
 need to apply abs to your data before calling this function."))
 
-(defmethod stats-max ((data vector-double) stride n)
-  (gsl_stats_max (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-max (class c-func)
+  `(defmethod stats-max ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-max ((data vector-float) stride n)
-  (gsl_stats_float_max (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-max simple-array-double gsl_stats_max)
 
-(defgeneric stats-min (data stride n)
+(make-stats-max simple-array-float gsl_stats_float_max)
+
+(defgeneric stats-min (data &optional stride n)
   (:documentation
    "This function returns the minimum value in data, a dataset of length n with stride
 The minimum value is defined as the value of the element x_i which satisfies
@@ -510,70 +574,111 @@ x_i <= x_j for all j.
 If you want istead to find the element with the smallest absolute magnitude you will
 need to apply abs to your data before calling this function."))
 
-(defmethod stats-min ((data vector-double) stride n)
-  (gsl_stats_min (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-min (class c-func)
+  `(defmethod stats-min ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-min ((data vector-float) stride n)
-  (gsl_stats_float_min (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-min simple-array-double gsl_stats_min)
 
-(defgeneric stats-minmax (data stride n)
+(make-stats-min simple-array-float gsl_stats_float_min)
+
+(defgeneric stats-minmax (data &optional stride n)
   (:documentation
    "This function finds both the minimum and maximum values min, max in data in a
 single pass."))
 
-(defmethod stats-minmax ((data vector-double) stride n)
-  (cffi:with-foreign-objects ((min :double) (max :double))
-    (gsl_stats_minmax min max (gsl_vector_ptr (entity data) 0) stride n)
-    (values (cffi:mem-ref min :double) (cffi:mem-ref max :double))))
+(defmacro make-stats-minmax (class element-type c-func)
+  `(defmethod stats-minmax ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array
+      (cffi:with-foreign-objects ((min ,element-type) (max ,element-type))
+        (,c-func min max ptr st sz)
+        (values (cffi:mem-ref min ,element-type) (cffi:mem-ref max ,element-type))))))
 
-(defmethod stats-minmax ((data vector-float) stride n)
-  (cffi:with-foreign-objects ((min :float) (max :float))
-    (gsl_stats_float_minmax min max (gsl_vector_float_ptr (entity data) 0) stride n)
-    (values (cffi:mem-ref min :float) (cffi:mem-ref max :float))))
+(make-stats-minmax simple-array-double :double gsl_stats_minmax)
 
-(defgeneric stats-max-index (data stride n)
+(make-stats-minmax simple-array-float :float gsl_stats_float_minmax)
+
+(defgeneric stats-max-index (data &optional stride n)
   (:documentation
    "This function returns the index of the maximum value in data, a dataset of length
 n with stride. The maximum value is defined as the value of the element x_i which
 satisfies x_i >= x_j for all j. When there are several equal maximum elements then
 the first one is chosen."))
 
-(defmethod stats-max-index ((data vector-double) stride n)
-  (gsl_stats_max_index (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-max-index (class c-func)
+  `(defmethod stats-max-index ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-max-index ((data vector-float) stride n)
-  (gsl_stats_float_max_index (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-max-index simple-array-double gsl_stats_max_index)
 
-(defgeneric stats-min-index (data stride n)
+(make-stats-max-index simple-array-float gsl_stats_float_max_index)
+
+(defgeneric stats-min-index (data &optional stride n)
   (:documentation
    "This function returns the index of the minimum value in data, a dataset of length n
 which stride. The minimum value is defined as the value of the element x_i which
 satisfies x_i <= x_j for all j. When there are several equal minimum elements then
 the first one is chosen."))
 
-(defmethod stats-min-index ((data vector-double) stride n)
-  (gsl_stats_min_index (gsl_vector_ptr (entity data) 0) stride n))
+(defmacro make-stats-min-index (class c-func)
+  `(defmethod stats-min-index ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
 
-(defmethod stats-min-index ((data vector-float) stride n)
-  (gsl_stats_float_min_index (gsl_vector_float_ptr (entity data) 0) stride n))
+(make-stats-min-index simple-array-double gsl_stats_min_index)
 
-(defgeneric stats-minmax-index (data stride n)
+(make-stats-min-index simple-array-float gsl_stats_float_min_index)
+
+(defgeneric stats-minmax-index (data &optional stride n)
   (:documentation
    "This function returns the indexes min_index, max_index of the minimum and
 maximum vlaues in data in a single pass."))
 
-(defmethod stats-minmax-index ((data vector-double) stride n)
-  (cffi:with-foreign-objects ((min-index :unsigned-int)
-                              (max-index :unsigned-int))
-    (gsl_stats_minmax_index min-index max-index
-                            (gsl_vector_ptr (entity data) 0) stride n)
-    (values (cffi:mem-ref min-index :unsigned-int)
-            (cffi:mem-ref max-index :unsigned-int))))
+(defmacro make-stats-minmax-index (class c-func)
+  `(defmethod stats-minmax-index ((data ,class) &optional (stride nil) (n nil))
+     (anaphoric-stats-array
+      (cffi:with-foreign-objects ((min-index :unsigned-int)
+                                  (max-index :unsigned-int))
+        (,c-func min-index max-index ptr st sz)
+        (values (cffi:mem-ref min-index :unsigned-int)
+                (cffi:mem-ref max-index :unsigned-int))))))
 
-(defmethod stats-minmax-index ((data vector-float) stride n)
-  (cffi:with-foreign-objects ((min-index :unsigned-int)
-                              (max-index :unsigned-int))
-    (gsl_stats_float_minmax_index min-index max-index
-                                  (gsl_vector_float_ptr (entity data) 0) stride n)
-    (values (cffi:mem-ref min-index :unsigned-int)
-            (cffi:mem-ref max-index :unsigned-int))))
+(make-stats-minmax-index simple-array-double gsl_stats_minmax_index)
+
+(make-stats-minmax-index simple-array-float gsl_stats_float_minmax_index)
+
+(defgeneric stats-median-from-sorted-data (data &optional stride n)
+  (:documentation
+   "This function returns the median value of sorted data, a dataset of length n
+with stride. The elements of the array must be in ascending numerical ordar.
+There are no checks to see whether the data are sorted, so the function should
+always be used first."))
+
+(defmacro make-stats-median-from-sorted-data (class c-func)
+  `(defmethod stats-median-from-sorted-data ((data ,class)
+                                             &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz))))
+
+(make-stats-median-from-sorted-data simple-array-double
+                                    gsl_stats_median_from_sorted_data)
+
+(make-stats-median-from-sorted-data simple-array-float
+                                    gsl_stats_float_median_from_sorted_data)
+
+(defgeneric stats-quantile-from-sorted-data (data f &optional stride n)
+  (:documentation
+   "This function returns a quantile value of sorted data, a double-precision
+array of length n with stride. The elements of the array must be in ascending
+numerical order. The quantile is determined by the f, a fraction 0 between 1.
+For example, to compute the value of the 75th percentile f should have the
+value 0.75."))
+
+(defmacro make-stats-quantile-from-sorted-data (class c-func)
+  `(defmethod stats-quantile-from-sorted-data ((data ,class) f
+                                               &optional (stride nil) (n nil))
+     (anaphoric-stats-array (,c-func ptr st sz f))))
+
+(make-stats-quantile-from-sorted-data simple-array-double
+                                      gsl_stats_quantile_from_sorted_data)
+
+(make-stats-quantile-from-sorted-data simple-array-float
+                                      gsl_stats_float_quantile_from_sorted_data)

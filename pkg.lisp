@@ -243,7 +243,9 @@
            "STATS-MINMAX"
            "STATS-MAX-INDEX"
            "STATS-MIN-INDEX"
-           "STATS-MINMAX-INDEX"))
+           "STATS-MINMAX-INDEX"
+           "STATS-MEDIAN-FROM-SORTED-DATA"
+           "STATS-QUANTILE-FROM-SORTED-DATA"))
 
 (cl:in-package "GSL")
 
