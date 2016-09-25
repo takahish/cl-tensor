@@ -25,7 +25,7 @@
 (defclass rng ()
   ((entity :accessor entity :initarg :entity)))
 
-(defvar *rng-type* gsl_rng_default
+(defvar *rng-default* gsl_rng_default
   "Available gsl_rng_type:
   gsl::gsl_rng_borosh13
   gsl::gsl_rng_coveyou
@@ -90,10 +90,10 @@
   gsl::gsl_rng_waterman14
   gsl::gsl_rng_zuf")
 
-(defvar *rng-seed* gsl_rng_default_seed
+(defvar *rng-default-seed* gsl_rng_default_seed
   "Default seed is 0.")
 
-(defun rng-alloc (type seed)
+(defun rng-alloc (&optional (type *rng-default*) (seed *rng-default-seed*))
   "This function returns a pointer to a newly-created instance of a random number
 generator of type type."
   (let ((rng (make-instance 'rng :entity (gsl_rng_alloc type))))
@@ -172,8 +172,8 @@ and for these generators the minimum value is 1."
 uses their values to set the corresponding library variables *rng-type* and
 *rng-seed*. These global variables are defined as follows,
 
-  (*rng-type* (:pointer (:struct gsl_rng_type)))
-  (*rng-seed* :unsigned-long)
+  (*rng-default* (:pointer (:struct gsl_rng_type)))
+  (*rng-default-seed* :unsigned-long)
 
 The environment variable GSL_RNG_TYPE should be the name of a generator, such
 as taus or mt19937. The environment variable GSL_RNG_SEED should contain the
@@ -182,8 +182,8 @@ function strtoul.
 If you don't specify a generator for GSL_RNG_TYPE then gsl_rng_mt19937 is used as
 the default. The initial value of gsl_rng_default_seed is zero."
   (gsl_rng_env_setup)
-  (setf *rng-type* gsl_rng_default)
-  (setf *rng-seed* gsl_rng_default_seed))
+  (setf *rng-default* gsl_rng_default)
+  (setf *rng-default-seed* gsl_rng_default_seed))
 
 (defun rng-memcpy (dest src)
   "This function copies the random number generator src into the pre-existing generator

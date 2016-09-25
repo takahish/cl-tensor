@@ -112,8 +112,8 @@
            "SORT-ASC"
            "SORT-DESC"
            ;; cl-gsl/rng.lisp
-           "*RNG-TYPE*"
-           "*RNG-SEED*"
+           "*RNG-DEFAULT*"
+           "*RNG-DEFAULT-SEED*"
            "RNG-ALLOC"
            "RNG-SET"
            "RNG-FREE"
@@ -130,7 +130,7 @@
            "RNG-MEMCPY"
            "RNG-CLONE"
            ;; cl-gsl/qrng.lisp
-           "*QRNG-TYPE*"
+           "*QRNG-DEFAULT*"
            "QRNG-ALLOC"
            "QRNG-FREE"
            "QRNG-INIT"

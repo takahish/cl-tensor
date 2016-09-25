@@ -28,7 +28,7 @@
 (defclass qrng ()
   ((entity :accessor entity :initarg :entity)))
 
-(defvar *qrng-type* gsl_qrng_sobol
+(defvar *qrng-default* gsl_qrng_sobol
   "Available gsl_qrng_type:
   gsl_qrng_niederreiter_2
   gsl_qrng_sobol (default)
@@ -49,7 +49,7 @@ code of GSL_ENOMEM."
 
 (defun qrng-init (qrng)
   "This function reinitializes the generator qrng to its starting point. Note that quasi-
-random sequences do not use a seed and always produce the same set of values."  
+random sequences do not use a seed and always produce the same set of values."
   (gsl_qrng_init (entity qrng))
   qrng)
 
