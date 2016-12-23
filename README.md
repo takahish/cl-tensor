@@ -1,6 +1,6 @@
-# cl-gsl
+# cl-sct
 
-CL Foreign Function Interface for GNU Scientific Library.
+Scientific Computing Tools for Common Lisp
 
 #License
 

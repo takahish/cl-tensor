@@ -1,8 +1,9 @@
-;;;; cl-gsl/vector.lisp
+;;;; cl-sct/gsl/vector.lisp
 ;;;;
-;;;; Vectors are defined by a gsl-vector structure which describes a slice of
-;;;; a block. Different vectors can be created which point to the same block.
-;;;; A vector slice is a set of equally-spaced elements of an area of memory.
+;;;; Vectors are defined by a gsl-vector structure which describes a
+;;;; slice of a block. Different vectors can be created which point to
+;;;; the same block.  A vector slice is a set of equally-spaced
+;;;; elements of an area of memory.
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -22,7 +23,7 @@
 (cl:in-package "GSL")
 
 (defclass vector-t ()
-  ((entity :accessor entity :initarg :entity)
+  ((data :accessor data :initarg :data)
    (size :accessor size :initarg :size)
    (stride :accessor stride :initarg :stride)))
 
@@ -35,67 +36,69 @@
 (defclass vector-uint (vector-t) ())
 
 (defun vector-alloc (n &key (element-type :double))
-  "This function creates a vector of length n, returning a pointer to a newly initialized
-vector struct. A new block is allocated for the elements of the vector, and stored in
-the block component of the vector struct. The block is owned by the vector, and
-will be deallocated when the vector is deallocated."
+  "This function creates a vector of length n, returning a pointer to
+a newly initialized vector struct. A new block is allocated for the
+elements of the vector, and stored in the block component of the
+vector struct. The block is owned by the vector, and will be
+deallocated when the vector is deallocated."
   (cond ((eql element-type :double)
          (make-instance 'vector-double
-                        :entity (gsl_vector_alloc n)
+                        :data (gsl_vector_alloc n)
                         :size n
                         :stride 1))
         ((eql element-type :float)
          (make-instance 'vector-float
-                        :entity (gsl_vector_float_alloc n)
+                        :data (gsl_vector_float_alloc n)
                         :size n
                         :stride 1))
         ((eql element-type :int)
          (make-instance 'vector-int
-                        :entity (gsl_vector_int_alloc n)
+                        :data (gsl_vector_int_alloc n)
                         :size n
                         :stride 1))
         ((eql element-type :unsigned-int)
          (make-instance 'vector-uint
-                        :entity (gsl_vector_uint_alloc n)
+                        :data (gsl_vector_uint_alloc n)
                         :size n
                         :stride 1))
         (t (error "unknown element type"))))
 
 (defun vector-calloc (n &key (element-type :double))
-  "This function allocates memory for a vector of length n and initializes all the elements
-of the vector to zero."
+  "This function allocates memory for a vector of length n and
+initializes all the elements of the vector to zero."
   (cond ((eql element-type :double)
          (make-instance 'vector-double
-                        :entity (gsl_vector_calloc n)
+                        :data (gsl_vector_calloc n)
                         :size n
                         :stride 1))
         ((eql element-type :float)
          (make-instance 'vector-float
-                        :entity (gsl_vector_float_calloc n)
+                        :data (gsl_vector_float_calloc n)
                         :size n
                         :stride 1))
         ((eql element-type :int)
          (make-instance 'vector-int
-                        :entity (gsl_vector_int_calloc n)
+                        :data (gsl_vector_int_calloc n)
                         :size n
                         :stride 1))
         ((eql element-type :unsigned-int)
          (make-instance 'vector-uint
-                        :entity (gsl_vector_uint_calloc n)
+                        :data (gsl_vector_uint_calloc n)
                         :size n
                         :stride 1))
         (t (error "unknown element type"))))
 
 (defgeneric vector-free (v &optional result)
   (:documentation
-   "This function frees a previously allocated vector v. If the vector was created using
-gsl-vector-alloc then the block underlying the vector will also be deallocated. If
-the vector has been created from another object then the memory is still owned by
-that object and will not be deallocated."))
+   "This function frees a previously allocated vector v. If the vector
+was created using gsl-vector-alloc then the block underlying the
+vector will also be deallocated. If the vector has been created from
+another object then the memory is still owned by that object and will
+not be deallocated."))
 
-(defmacro make-vector-free (class c-func)
+(defmacro make-vector-free (class func)
   `(defmethod vector-free ((v ,class) &optional (result nil))
-     (,c-func (entity v))
+     (,func (data v))
      result))
 
 (make-vector-free vector-double gsl_vector_free)
@@ -108,12 +111,13 @@ that object and will not be deallocated."))
 
 (defgeneric vector-get (v i)
   (:documentation
-   "This function retruns the i-th element of a vector v. If i lies outside the allowed range
-of 0 to n - 1 then the error handler is invoked and 0 is returned."))
+   "This function retruns the i-th element of a vector v. If i lies
+outside the allowed range of 0 to n - 1 then the error handler is
+invoked and 0 is returned."))
 
-(defmacro make-vector-get (class c-func)
+(defmacro make-vector-get (class func)
   `(defmethod vector-get ((v ,class) i)
-     (,c-func (entity v) i)))
+     (,func (data v) i)))
 
 (make-vector-get vector-double gsl_vector_get)
 
@@ -125,12 +129,13 @@ of 0 to n - 1 then the error handler is invoked and 0 is returned."))
 
 (defgeneric vector-set (v i x)
   (:documentation
-   "This function sets the value of the i-th element of a vector v to x. If i lies outside
-the allowed range of 0 to n - 1 then the error handler is invoked."))
+   "This function sets the value of the i-th element of a vector v to
+x. If i lies outside the allowed range of 0 to n - 1 then the error
+handler is invoked."))
 
-(defmacro make-vector-set (class c-func)
+(defmacro make-vector-set (class func)
   `(defmethod vector-set ((v ,class) i x)
-     (,c-func (entity v) i x)
+     (,func (data v) i x)
      v))
 
 (make-vector-set vector-double gsl_vector_set)
@@ -143,13 +148,13 @@ the allowed range of 0 to n - 1 then the error handler is invoked."))
 
 (defgeneric vector-ptr (v i)
   (:documentation
-   "This function return a pointer to the i-th element of a vector v. If i lies outside
-the allowed range of 0 to n - 1 then the error handler is invoked and a null pointer is
-returned."))
+   "This function return a pointer to the i-th element of a vector
+v. If i lies outside the allowed range of 0 to n - 1 then the error
+handler is invoked and a null pointer is returned."))
 
-(defmacro make-vector-ptr (class c-func)
+(defmacro make-vector-ptr (class func)
   `(defmethod vector-ptr ((v ,class) i)
-     (,c-func (entity v) i)))
+     (,func (data v) i)))
 
 (make-vector-ptr vector-double gsl_vector_ptr)
 
@@ -161,11 +166,12 @@ returned."))
 
 (defgeneric vector-set-all (v x)
   (:documentation
-   "This function sets all the elements of the vector v to the value x."))
+   "This function sets all the elements of the vector v to the value
+x."))
 
-(defmacro make-vector-set-all (class c-func)
+(defmacro make-vector-set-all (class func)
   `(defmethod vector-set-all ((v ,class) x)
-     (,c-func (entity v) x)
+     (,func (data v) x)
      v))
 
 (make-vector-set-all vector-double gsl_vector_set_all)
@@ -180,9 +186,9 @@ returned."))
   (:documentation
    "This function sets all the elements of the vector v to zero."))
 
-(defmacro make-vector-set-zero (class c-func)
+(defmacro make-vector-set-zero (class func)
   `(defmethod vector-set-zero ((v ,class))
-     (,c-func (entity v))
+     (,func (data v))
      v))
 
 (make-vector-set-zero vector-double gsl_vector_set_zero)
@@ -195,12 +201,13 @@ returned."))
 
 (defgeneric vector-set-basis (v i)
   (:documentation
-   "This function makes a basis vector by setting all the elements of the vector v to zero
-except for the i-th element which is set to one."))
+   "This function makes a basis vector by setting all the elements of
+the vector v to zero except for the i-th element which is set to
+one."))
 
-(defmacro make-vector-set-basis (class c-func)
+(defmacro make-vector-set-basis (class func)
   `(defmethod vector-set-basis ((v ,class) i)
-     (,c-func (entity v) i)
+     (,func (data v) i)
      v))
 
 (make-vector-set-basis vector-double gsl_vector_set_basis)
@@ -213,12 +220,12 @@ except for the i-th element which is set to one."))
 
 (defgeneric vector-memcpy (dest src)
   (:documentation
-   "This function copies the elements of the vector src into the vector dest. The two
-vectors must have the same length."))
+   "This function copies the elements of the vector src into the
+vector dest. The two vectors must have the same length."))
 
-(defmacro make-vector-memcpy (class c-func)
+(defmacro make-vector-memcpy (class func)
   `(defmethod vector-memcpy ((dest ,class) (src ,class))
-     (,c-func (entity dest) (entity src))
+     (,func (data dest) (data src))
      dest))
 
 (make-vector-memcpy vector-double gsl_vector_memcpy)
@@ -231,12 +238,12 @@ vectors must have the same length."))
 
 (defgeneric vector-swap (v w)
   (:documentation
-   "This function exhanges the elements of the vectors v and w by copying. The two
-vectors must have the same length."))
+   "This function exhanges the elements of the vectors v and w by
+copying. The two vectors must have the same length."))
 
-(defmacro make-vector-swap (class c-func)
+(defmacro make-vector-swap (class func)
   `(defmethod vector-swap ((v ,class) (w ,class))
-     (,c-func (entity v) (entity w))
+     (,func (data v) (data w))
      (values v w)))
 
 (make-vector-swap vector-double gsl_vector_swap)
@@ -249,11 +256,12 @@ vectors must have the same length."))
 
 (defgeneric vector-swap-elements (v i j)
   (:documentation
-   "This function exchanges the i-th and j-th elements of the vector v in-place."))
+   "This function exchanges the i-th and j-th elements of the vector v
+in-place."))
 
-(defmacro make-vector-swap-elements (class c-func)
+(defmacro make-vector-swap-elements (class func)
   `(defmethod vector-swap-elements ((v ,class) i j)
-     (,c-func (entity v) i j)
+     (,func (data v) i j)
      v))
 
 (make-vector-swap-elements vector-double gsl_vector_swap_elements)
@@ -268,9 +276,9 @@ vectors must have the same length."))
   (:documentation
    "This function reverses the order of the elements of the vector v."))
 
-(defmacro make-vector-reverse (class c-func)
+(defmacro make-vector-reverse (class func)
   `(defmethod vector-reverse ((v ,class))
-     (,c-func (entity v))
+     (,func (data v))
      v))
 
 (make-vector-reverse vector-double gsl_vector_reverse)
@@ -283,13 +291,13 @@ vectors must have the same length."))
 
 (defgeneric vector-add (a b)
   (:documentation
-   "This function adds the elements of vector b to the elements of vector a. The result
-a_i <- a_i + b_i is stored in a and b remains unchanged. The two vectors must have
-the same length."))
+   "This function adds the elements of vector b to the elements of
+vector a. The result a_i <- a_i + b_i is stored in a and b remains
+unchanged. The two vectors must have the same length."))
 
-(defmacro make-vector-add (class c-func)
+(defmacro make-vector-add (class func)
   `(defmethod vector-add ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-vector-add vector-double gsl_vector_add)
@@ -302,13 +310,13 @@ the same length."))
 
 (defgeneric vector-sub (a b)
   (:documentation
-   "This function subtracts the elements of vector b from the elements of vector a. The
-result a_i <- a_i - b_i is stored in a and b remains unchanged. The two vectors must
-have the same length."))
+   "This function subtracts the elements of vector b from the elements
+of vector a. The result a_i <- a_i - b_i is stored in a and b remains
+unchanged. The two vectors must have the same length."))
 
-(defmacro make-vector-sub (class c-func)
+(defmacro make-vector-sub (class func)
   `(defmethod vector-sub ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-vector-sub vector-double gsl_vector_sub)
@@ -321,13 +329,13 @@ have the same length."))
 
 (defgeneric vector-mul (a b)
   (:documentation
-   "This function multiplies the elements of vector a by the elements of vector b. The
-result a_i <- a_i * b_i is stored in a and b remains unchanged. The two vectors must
-have the same length."))
+   "This function multiplies the elements of vector a by the elements
+of vector b. The result a_i <- a_i * b_i is stored in a and b remains
+unchanged. The two vectors must have the same length."))
 
-(defmacro make-vector-mul (class c-func)
+(defmacro make-vector-mul (class func)
   `(defmethod vector-mul ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-vector-mul vector-double gsl_vector_mul)
@@ -340,13 +348,13 @@ have the same length."))
 
 (defgeneric vector-div (a b)
   (:documentation
-   "This function divides the elements of vector a by the elements of vector b. The result
-a_i <- a_i / b_i is stored in a and b remains unchanged. The two vectors must have the
-same length."))
+   "This function divides the elements of vector a by the elements of
+vector b. The result a_i <- a_i / b_i is stored in a and b remains
+unchanged. The two vectors must have the same length."))
 
-(defmacro make-vector-div (class c-func)
+(defmacro make-vector-div (class func)
   `(defmethod vector-div ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-vector-div vector-double gsl_vector_div)
@@ -359,12 +367,12 @@ same length."))
 
 (defgeneric vector-scale (a x)
   (:documentation
-   "This function multiplies the elements of vector a by the constant factor x. The result
-a_i <- x * a_i is stored in a."))
+   "This function multiplies the elements of vector a by the constant
+factor x. The result a_i <- x * a_i is stored in a."))
 
-(defmacro make-vector-scale (class c-func)
+(defmacro make-vector-scale (class func)
   `(defmethod vector-scale ((a ,class) x)
-     (,c-func (entity a) x)
+     (,func (data a) x)
      a))
 
 (make-vector-scale vector-double gsl_vector_scale)
@@ -377,12 +385,12 @@ a_i <- x * a_i is stored in a."))
 
 (defgeneric vector-add-constant (a x)
   (:documentation
-   "This function adds the constant value x to the elements of the vector a. The result
-a_i <- a_i + x is stored in a."))
+   "This function adds the constant value x to the elements of the
+vector a. The result a_i <- a_i + x is stored in a."))
 
-(defmacro make-vector-add-constant (class c-func)
+(defmacro make-vector-add-constant (class func)
   `(defmethod vector-add-constant ((a ,class) x)
-     (,c-func (entity a) x)
+     (,func (data a) x)
      a))
 
 (make-vector-add-constant vector-double gsl_vector_add_constant)
@@ -397,9 +405,9 @@ a_i <- a_i + x is stored in a."))
   (:documentation
    "This function returns the maximum value in the vector v."))
 
-(defmacro make-vector-max (class c-func)
+(defmacro make-vector-max (class func)
   `(defmethod vector-max ((v ,class))
-     (,c-func (entity v))))
+     (,func (data v))))
 
 (make-vector-max vector-double gsl_vector_max)
 
@@ -413,9 +421,9 @@ a_i <- a_i + x is stored in a."))
   (:documentation
    "This function returns the maximum value in the vector v."))
 
-(defmacro make-vector-min (class c-func)
+(defmacro make-vector-min (class func)
   `(defmethod vector-min ((v ,class))
-     (,c-func (entity v))))
+     (,func (data v))))
 
 (make-vector-min vector-double gsl_vector_min)
 
@@ -429,11 +437,11 @@ a_i <- a_i + x is stored in a."))
   (:documentation
    "This function returns the minimum and maximum values in the vector v."))
 
-(defmacro make-vector-minmax (class element-type c-func)
+(defmacro make-vector-minmax (class element-type func)
   `(defmethod vector-minmax ((v ,class))
      (cffi:with-foreign-objects ((min-out ,element-type)
                                  (max-out ,element-type))
-       (,c-func (entity v) min-out max-out)
+       (,func (data v) min-out max-out)
        (values (cffi:mem-ref min-out ,element-type)
                (cffi:mem-ref max-out ,element-type)))))
 
@@ -447,12 +455,13 @@ a_i <- a_i + x is stored in a."))
 
 (defgeneric vector-max-index (v)
   (:documentation
-   "This function returns the index of the maximum value in the vector v. When there
-are several equal maximum elements then the lowest index is returned."))
+   "This function returns the index of the maximum value in the vector
+v. When there are several equal maximum elements then the lowest index
+is returned."))
 
-(defmacro make-vector-max-index (class c-func)
+(defmacro make-vector-max-index (class func)
   `(defmethod vector-max-index ((v ,class))
-     (,c-func (entity v))))
+     (,func (data v))))
 
 (make-vector-max-index vector-double gsl_vector_max_index)
 
@@ -464,13 +473,14 @@ are several equal maximum elements then the lowest index is returned."))
 
 (defgeneric vector-min-index (v)
   (:documentation
-   "This function returns the indices of the minimum and maximum values in the vector v,
-storing them in imin and imax. When there are several equal minimum or maximum
-elements then the lowest indices are returned."))
+   "This function returns the indices of the minimum and maximum
+values in the vector v, storing them in imin and imax. When there are
+several equal minimum or maximum elements then the lowest indices are
+returned."))
 
-(defmacro make-vector-min-index (class c-func)
+(defmacro make-vector-min-index (class func)
   `(defmethod vector-min-index ((v ,class))
-     (,c-func (entity v))))
+     (,func (data v))))
 
 (make-vector-min-index vector-double gsl_vector_min_index)
 
@@ -482,13 +492,14 @@ elements then the lowest indices are returned."))
 
 (defgeneric vector-minmax-index (v)
   (:documentation
-   "This function returns the indices of the minimum and maximum values in the vector v."))
+   "This function returns the indices of the minimum and maximum
+values in the vector v."))
 
-(defmacro make-vector-minmax-index (class c-func)
+(defmacro make-vector-minmax-index (class func)
   `(defmethod vector-minmax-index ((v ,class))
      (cffi:with-foreign-objects ((imin :unsigned-int)
                                  (imax :unsigned-int))
-       (,c-func (entity v) imin imax)
+       (,func (data v) imin imax)
        (values (cffi:mem-ref imin :unsigned-int)
                (cffi:mem-ref imax :unsigned-int)))))
 
@@ -502,11 +513,12 @@ elements then the lowest indices are returned."))
 
 (defgeneric vector-isnull (v)
   (:documentation
-   "This function return t if all the elements of the vector v are zero, and nil otherwise."))
+   "This function return t if all the elements of the vector v are
+zero, and nil otherwise."))
 
-(defmacro make-vector-isnull (class c-func)
+(defmacro make-vector-isnull (class func)
   `(defmethod vector-isnull ((v ,class))
-     (= (,c-func (entity v)) 1)))
+     (= (,func (data v)) 1)))
 
 (make-vector-isnull vector-double gsl_vector_isnull)
 
@@ -518,12 +530,12 @@ elements then the lowest indices are returned."))
 
 (defgeneric vector-ispos (v)
   (:documentation
-   "This function return t if all the elements of the vector v are strictly positive,
-and nil otherwise."))
+   "This function return t if all the elements of the vector v are
+strictly positive, and nil otherwise."))
 
-(defmacro make-vector-ispos (class c-func)
+(defmacro make-vector-ispos (class func)
   `(defmethod vector-ispos ((v ,class))
-     (= (,c-func (entity v)) 1)))
+     (= (,func (data v)) 1)))
 
 (make-vector-ispos vector-double gsl_vector_ispos)
 
@@ -535,12 +547,12 @@ and nil otherwise."))
 
 (defgeneric vector-isneg (v)
   (:documentation
-   "This function return t if all the elements of the vector v are strictly negative,
-and nil otherwise."))
+   "This function return t if all the elements of the vector v are
+strictly negative, and nil otherwise."))
 
-(defmacro make-vector-isneg (class c-func)
+(defmacro make-vector-isneg (class func)
   `(defmethod vector-isneg ((v ,class))
-     (= (,c-func (entity v)) 1)))
+     (= (,func (data v)) 1)))
 
 (make-vector-isneg vector-double gsl_vector_isneg)
 
@@ -552,12 +564,12 @@ and nil otherwise."))
 
 (defgeneric vector-isnonneg (v)
   (:documentation
-   "This function return t if all the elements of the vector v are non-negative, and
-nil otherwise."))
+   "This function return t if all the elements of the vector v are
+non-negative, and nil otherwise."))
 
-(defmacro make-vector-isnonneg (class c-func)
+(defmacro make-vector-isnonneg (class func)
   `(defmethod vector-isnonneg ((v ,class))
-     (= (,c-func (entity v)) 1)))
+     (= (,func (data v)) 1)))
 
 (make-vector-isnonneg vector-double gsl_vector_isnonneg)
 
@@ -569,11 +581,12 @@ nil otherwise."))
 
 (defgeneric vector-equal (u v)
   (:documentation
-   "This function returns 1 if the vector u and v are equal and 0 otherwise."))
+   "This function returns 1 if the vector u and v are equal and 0
+otherwise."))
 
-(defmacro make-vector-equal (class c-func)
+(defmacro make-vector-equal (class func)
   `(defmethod vector-equal ((u ,class) (v ,class))
-     (= (,c-func (entity u) (entity v)) 1)))
+     (= (,func (data u) (data v)) 1)))
 
 (make-vector-equal vector-double gsl_vector_equal)
 
@@ -585,13 +598,13 @@ nil otherwise."))
 
 (defgeneric vector-set-sequence (v seq &optional n)
   (:documentation
-   "This function sets each element of the vector v to each element of the sequence
-seq respectively."))
+   "This function sets each element of the vector v to each element of
+the sequence seq respectively."))
 
-(defmacro make-vector-set-sequence (class set-c-func)
+(defmacro make-vector-set-sequence (class set-func)
   `(defmethod vector-set-sequence ((v ,class) seq &optional (n nil))
      (dotimes (i (if (null n) (size v) n) v)
-       (,set-c-func (entity v) i (elt seq i)))))
+       (,set-func (data v) i (elt seq i)))))
 
 (make-vector-set-sequence vector-double gsl_vector_set)
 
@@ -601,13 +614,16 @@ seq respectively."))
 
 (make-vector-set-sequence vector-uint gsl_vector_uint_set)
 
-(defun make-vector (n &key (initial-element nil) (initial-contents nil) (element-type :double))
-  "This function makes a vector of length n, returning a instance to a newly initialized
-vector class. A new block is allocated for the elements of the vector, and stored in
-the block component of the vector struct. The block is owned by the vector, and will be
+(defun make-vector (n &key (initial-element nil)
+                        (initial-contents nil)
+                        (element-type :double))
+  "This function makes a vector of length n, returning a instance to a
+newly initialized vector class. A new block is allocated for the
+elements of the vector, and stored in the block component of the
+vector struct. The block is owned by the vector, and will be
 deallocated when the vector is deallocated.
-The memory is allocated using vector-calloc, so it can be passed to function which
-vector-free."
+The memory is allocated using vector-calloc, so it can be passed to
+function which vector-free."
   (let ((v (vector-calloc n :element-type element-type)))
     (cond ((not (null initial-element))
            (vector-set-all v initial-element))
@@ -615,39 +631,89 @@ vector-free."
            (vector-set-sequence v initial-contents n))
           (t v))))
 
-(defgeneric vector-to-array (v &optional n)
+(defgeneric vector-to-simple-vector (v &optional n)
   (:documentation
-   "This function return the array whose i-th element is equal to i-th element of the vector."))
+   "This function return the simple-vector whose i-th element is equal
+to i-th element of the vector."))
 
-(defmacro make-vector-to-array (class element-type get-c-func)
-  `(defmethod vector-to-array ((v ,class) &optional (n nil))
-     (let* ((s (if (null n) (size v) n))
-            (a (make-array s :element-type ,element-type)))
-       (dotimes (i s a)
-         (setf (aref a i) (,get-c-func (entity v) i))))))
+(defmacro make-vector-to-simple-vector (class element-type func)
+  `(defmethod vector-to-simple-vector ((v ,class) &optional (n nil))
+     (let* ((size (if (null n) (size v) n))
+            (sv (sct:make-simple-vector size :element-type ,element-type)))
+       (dotimes (i size sv)
+         (setf (aref (sct::data sv) i) (,func (data v) i))))))
 
-(make-vector-to-array vector-double 'double-float gsl_vector_get)
+(make-vector-to-simple-vector vector-double :double gsl_vector_get)
 
-(make-vector-to-array vector-float 'single-float gsl_vector_float_get)
+(make-vector-to-simple-vector vector-float :float gsl_vector_float_get)
 
-(make-vector-to-array vector-int
-                      `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
-                      gsl_vector_int_get)
+(make-vector-to-simple-vector vector-int :int gsl_vector_int_get)
 
-(make-vector-to-array vector-uint
-                      `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
-                      gsl_vector_uint_get)
+(make-vector-to-simple-vector vector-uint :unsigned-int gsl_vector_uint_get)
+
+(defgeneric simple-vector-to-vector (sv &optional n)
+  (:documentation
+   "This function return the simple-vector whose i-th element is equal
+to i-th element of the vector."))
+
+(defmacro make-simple-vector-to-vector (simple-vector-class element-type)
+  `(defmethod simple-vector-to-vector ((sv ,simple-vector-class)
+                                       &optional (n nil))
+     (let* ((size (if (null n) (sct::size sv) n))
+            (v (make-vector size
+                            :element-type ,element-type
+                            :initial-contents (sct::data sv))))
+       v)))
+
+(make-simple-vector-to-vector sct::simple-vector-double :double)
+
+(make-simple-vector-to-vector sct::simple-vector-float :float)
+
+(make-simple-vector-to-vector sct::simple-vector-int :int)
+
+(make-simple-vector-to-vector sct::simple-vector-uint :unsigned-int)
+
+(defgeneric vector-copy-from-simple-vector (v sv)
+  (:documentation
+   "This function copies the elements of the simple-vector simple-v
+into the vector v. The two vectors must have the same length."))
+
+(defmacro make-vector-copy-from-simple-vector (class simple-vector-class func)
+  `(defmethod vector-copy-from-simple-vector ((v ,class)
+                                              (sv ,simple-vector-class))
+     (If (not (= (size v) (sct::size sv)))
+         (error "vector lengths are not equal")
+         (dotimes (i (size v) v)
+           (,func (data v) i (sct:simple-vector-get sv i))))))
+
+(make-vector-copy-from-simple-vector vector-double
+                                     sct::simple-vector-double
+                                     gsl_vector_set)
+
+(make-vector-copy-from-simple-vector vector-float
+                                     sct::simple-vector-float
+                                     gsl_vector_float_set)
+
+(make-vector-copy-from-simple-vector vector-int
+                                     sct::simple-vector-int
+                                     gsl_vector_int_set)
+
+(make-vector-copy-from-simple-vector vector-uint
+                                     sct::simple-vector-uint
+                                     gsl_vector_uint_set)
 
 (defgeneric vector-read (v &optional str n)
   (:documentation
-   "This function reads into the vector v from the open stream str. The vector v must be
-preallocated with the correct length since the function uses the size of v to determine
-how many values to read."))
+   "This function reads into the vector v from the open stream
+str. The vector v must be preallocated with the correct length since
+the function uses the size of v to determine how many values to
+read."))
 
-(defmacro make-vector-read (class set-c-func)
-  `(defmethod vector-read ((v ,class) &optional (str *standard-input*) (n nil))
+(defmacro make-vector-read (class set-func)
+  `(defmethod vector-read ((v ,class)
+                           &optional (str *standard-input*) (n nil))
      (dotimes (i (if (null n) (size v) n) v)
-       (,set-c-func (entity v) i (read str)))))
+       (,set-func (data v) i (read str)))))
 
 (make-vector-read vector-double gsl_vector_set)
 
@@ -659,14 +725,16 @@ how many values to read."))
 
 (defgeneric vector-write (v &optional str n)
   (:documentation
-   "This function writes the elements of the vector v line-by-line to the stream str."))
+   "This function writes the elements of the vector v line-by-line to
+the stream str."))
 
-(defmacro make-vector-write (class element-type get-c-func)
-  `(defmethod vector-write ((v ,class) &optional (str *standard-output*) (n nil))
+(defmacro make-vector-write (class element-type get-func)
+  `(defmethod vector-write ((v ,class)
+                            &optional (str *standard-output*) (n nil))
      (let ((s (if (null n) (size v) n)))
        (format str "; ~A ~A VECTOR~%" s ,element-type)
        (dotimes (i s v)
-         (format str "~S~%" (,get-c-func (entity v) i))))))
+         (format str "~S~%" (,get-func (data v) i))))))
 
 (make-vector-write vector-double :double gsl_vector_get)
 
@@ -680,10 +748,10 @@ how many values to read."))
   (:documentation
    "Apply function to successive elements of vector."))
 
-(defmacro make-vector-map (class set-c-func get-c-func)
+(defmacro make-vector-map (class set-func get-func)
   `(defmethod vector-map (func (v ,class) &optional (n nil))
      (dotimes (i (if (null n) (size v) n) v)
-       (,set-c-func (entity v) i (funcall func (,get-c-func (entity v) i))))))
+       (,set-func (data v) i (funcall func (,get-func (data v) i))))))
 
 (make-vector-map vector-double gsl_vector_set gsl_vector_get)
 
@@ -697,11 +765,11 @@ how many values to read."))
   (:documentation
    "Combine the elements of vector using function."))
 
-(defmacro make-vector-reduce (class get-c-func)
+(defmacro make-vector-reduce (class get-func)
   `(defmethod vector-reduce (func init (v ,class) &optional (n nil))
      (let ((acc init))
        (dotimes (i (if (null n) (size v) n) acc)
-         (setf acc (funcall func acc (,get-c-func (entity v) i)))))))
+         (setf acc (funcall func acc (,get-func (data v) i)))))))
 
 (make-vector-reduce vector-double gsl_vector_get)
 

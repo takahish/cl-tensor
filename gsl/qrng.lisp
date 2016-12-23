@@ -1,11 +1,12 @@
-;;;; cl-gsl/qrng.lisp
+;;;; cl-sct/gsl/qrng.lisp
 ;;;;
-;;;; This file describes functions for generating quasi-random sequences in
-;;;; arbitrary dimensions. A quasi-random sequence progressively covers a
-;;;; d-dimensional space with a set of points that are uniformly distributed.
-;;;; Quasi-random sequences are also known as low-discrepancy sequences. The
-;;;; quasi-random sequence generators use an interface that is similar to the
-;;;; interface for random number generators, except that seeding is not required
+;;;; This file describes functions for generating quasi-random
+;;;; sequences in arbitrary dimensions. A quasi-random sequence
+;;;; progressively covers a d-dimensional space with a set of points
+;;;; that are uniformly distributed.  Quasi-random sequences are also
+;;;; known as low-discrepancy sequences. The quasi-random sequence
+;;;; generators use an interface that is similar to the interface for
+;;;; random number generators, except that seeding is not required
 ;;;; each generator produces a single sequence.
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
@@ -36,30 +37,33 @@
   gsl_qrng_reversehalton")
 
 (defun qrng-alloc (type dimension)
-  "This function returns a pointer to a newly-created instance of a quasi-random sequence
-generator of type and dimension. If there is insufficient memory to create the generator
-then the function returns a null pointer and the error handler is invoked with an error
-code of GSL_ENOMEM."
+  "This function returns a pointer to a newly-created instance of a
+quasi-random sequence generator of type and dimension. If there is
+insufficient memory to create the generator then the function returns
+a null pointer and the error handler is invoked with an error code of
+GSL_ENOMEM."
   (make-instance 'qrng :entity (gsl_qrng_alloc type dimension)))
 
 (defun qrng-free (qrng &optional (result nil))
-  "This function frees all the memory associated with the generator qrng."
+  "This function frees all the memory associated with the generator
+qrng."
   (gsl_qrng_free (entity qrng))
   result)
 
 (defun qrng-init (qrng)
-  "This function reinitializes the generator qrng to its starting point. Note that quasi-
-random sequences do not use a seed and always produce the same set of values."
+  "This function reinitializes the generator qrng to its starting
+point. Note that quasi-random sequences do not use a seed and always
+produce the same set of values."
   (gsl_qrng_init (entity qrng))
   qrng)
 
 (defun qrng-get (qrng dimension)
-  "This function returns n quasi random variates. The space available must match the
-dimension of the generator.
-gsl_qrng_get stores the next point from the sequence generator qrng in the array x. The
-space available for x must match the dimension of the generator. The point x will lie
-in the range 0 < x[i] < 1 for each x[i]. An inline version of this function is used when
-HAVE_INLINE is defined."
+  "This function returns n quasi random variates. The space available
+must match the dimension of the generator. gsl_qrng_get stores the
+next point from the sequence generator qrng in the array x. The space
+available for x must match the dimension of the generator. The point x
+will lie in the range 0 < x[i] < 1 for each x[i]. An inline version of
+this function is used when HAVE_INLINE is defined."
   (let ((acc nil))
     (cffi:with-foreign-object (x :double dimension)
       (gsl_qrng_get (entity qrng) x)
@@ -79,13 +83,13 @@ HAVE_INLINE is defined."
   (gsl_qrng_state (entity qrng)))
 
 (defun qrng-memcpy (dest src)
-  "This function copies the quasi-random sequence generator src into the pre-existing
-generator dest, making dest into an exact copy of src. The two generators must be
-of the same type."
+  "This function copies the quasi-random sequence generator src into
+the pre-existing generator dest, making dest into an exact copy of
+src. The two generators must be of the same type."
   (gsl_qrng_memcpy (entity dest) (entity src))
   dest)
 
 (defun qrng-clone (qrng)
-  "This function returns a pointer to a newly created generator which is an exact copy
-of the generator qrng."
+  "This function returns a pointer to a newly created generator which
+is an exact copy of the generator qrng."
   (make-instance 'qrng :entity (gsl_qrng_clone (entity qrng))))
