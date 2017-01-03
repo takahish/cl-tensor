@@ -653,16 +653,17 @@ to i-th element of the vector."))
 
 (defgeneric simple-vector-to-vector (sv &optional n)
   (:documentation
-   "This function return the simple-vector whose i-th element is equal
-to i-th element of the vector."))
+   "This function return the vector whose i-th element is equal to
+i-th element of the simple-vector."))
 
 (defmacro make-simple-vector-to-vector (simple-vector-class element-type)
   `(defmethod simple-vector-to-vector ((sv ,simple-vector-class)
                                        &optional (n nil))
      (let* ((size (if (null n) (sct::size sv) n))
             (v (make-vector size
-                            :element-type ,element-type
-                            :initial-contents (sct::data sv))))
+                            :initial-contents (sct::data sv)
+                            :element-type ,element-type)))
+
        v)))
 
 (make-simple-vector-to-vector sct::simple-vector-double :double)
@@ -675,8 +676,8 @@ to i-th element of the vector."))
 
 (defgeneric vector-copy-from-simple-vector (v sv)
   (:documentation
-   "This function copies the elements of the simple-vector simple-v
-into the vector v. The two vectors must have the same length."))
+   "This function copies the elements of the simple-vector sv into the
+vector v. The two vectors must have the same length."))
 
 (defmacro make-vector-copy-from-simple-vector (class simple-vector-class func)
   `(defmethod vector-copy-from-simple-vector ((v ,class)

@@ -23,7 +23,7 @@
 (cl:in-package "GSL")
 
 (defclass matrix-t ()
-  ((entity :accessor entity :initarg :entity)
+  ((data :accessor data :initarg :data)
    (size1 :accessor size1 :initarg :size1)
    (size2 :accessor size2 :initarg :size2)
    (tda :accessor tda :initarg :tda)))
@@ -44,25 +44,25 @@ component of the matrix struct. The bclok is owned by the matrix, and
 will be deallocated when the matrix is deallocated."
   (cond ((eql element-type :double)
          (make-instance 'matrix-double
-                        :entity (gsl_matrix_alloc n1 n2)
+                        :data (gsl_matrix_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :float)
          (make-instance 'matrix-float
-                        :entity (gsl_matrix_float_alloc n1 n2)
+                        :data (gsl_matrix_float_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :int)
          (make-instance 'matrix-int
-                        :entity (gsl_matrix_int_alloc n1 n2)
+                        :data (gsl_matrix_int_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :unsigned-int)
          (make-instance 'matrix-uint
-                        :entity (gsl_matrix_uint_alloc n1 n2)
+                        :data (gsl_matrix_uint_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
@@ -73,25 +73,25 @@ will be deallocated when the matrix is deallocated."
 columns and initializes all the elements of the matrix to zero."
   (cond ((eql element-type :double)
          (make-instance 'matrix-double
-                        :entity (gsl_matrix_calloc n1 n2)
+                        :data (gsl_matrix_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :float)
          (make-instance 'matrix-float
-                        :entity (gsl_matrix_float_calloc n1 n2)
+                        :data (gsl_matrix_float_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :int)
          (make-instance 'matrix-int
-                        :entity (gsl_matrix_int_calloc n1 n2)
+                        :data (gsl_matrix_int_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
         ((eql element-type :unsigned-int)
          (make-instance 'matrix-uint
-                        :entity (gsl_matrix_uint_calloc n1 n2)
+                        :data (gsl_matrix_uint_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2))
@@ -103,9 +103,9 @@ columns and initializes all the elements of the matrix to zero."
 was created using gsl_matrix_alloc then the block underlying the
 matrix will also be deallocated."))
 
-(defmacro make-matrix-free (class c-func)
+(defmacro make-matrix-free (class func)
   `(defmethod matrix-free ((m ,class) &optional (result nil))
-     (,c-func (entity m))
+     (,func (data m))
      result))
 
 (make-matrix-free matrix-double gsl_matrix_free)
@@ -123,9 +123,9 @@ j lie outside the allowed range of 0 to n1-1 and 0 to n2-1 then the
 error handler is invoked and 0 is returned. An inline version of this
 function is used when HAVE_INLINE is defined."))
 
-(defmacro make-matrix-get (class c-func)
+(defmacro make-matrix-get (class func)
   `(defmethod matrix-get ((m ,class) i j)
-     (,c-func (entity m) i j)))
+     (,func (data m) i j)))
 
 (make-matrix-get matrix-double gsl_matrix_get)
 
@@ -142,9 +142,9 @@ to x. If i or j lies outside the allowed range of 0 to n1-1 and 0 to
 n2-1 then the error handler is invoked. An inline version of this
 function is used when HAVE_INLINE is defined."))
 
-(defmacro make-matrix-set (class c-func)
+(defmacro make-matrix-set (class func)
   `(defmethod matrix-set ((m ,class) i j x)
-     (,c-func (entity m) i j x)
+     (,func (data m) i j x)
      m))
 
 (make-matrix-set matrix-double gsl_matrix_set)
@@ -161,9 +161,9 @@ function is used when HAVE_INLINE is defined."))
 m. If i or j lie outside the allowed range of 0 to n1-1 and 0 to n2-1
 then the error handler is invoked and a null pointer is returned."))
 
-(defmacro make-matrix-ptr (class c-func)
+(defmacro make-matrix-ptr (class func)
   `(defmethod matrix-ptr ((m ,class) i j)
-     (,c-func (entity m) i j)))
+     (,func (data m) i j)))
 
 (make-matrix-ptr matrix-double gsl_matrix_ptr)
 
@@ -178,9 +178,9 @@ then the error handler is invoked and a null pointer is returned."))
    "This function sets all the elements of the matrix m to the value
 x."))
 
-(defmacro make-matrix-set-all (class c-func)
+(defmacro make-matrix-set-all (class func)
   `(defmethod matrix-set-all ((m ,class) x)
-     (,c-func (entity m) x)
+     (,func (data m) x)
      m))
 
 (make-matrix-set-all matrix-double gsl_matrix_set_all)
@@ -195,9 +195,9 @@ x."))
   (:documentation
    "This function sets all the elements of the matrix m to zero."))
 
-(defmacro make-matrix-set-zero (class c-func)
+(defmacro make-matrix-set-zero (class func)
   `(defmethod matrix-set-zero ((m ,class))
-     (,c-func (entity m))
+     (,func (data m))
      m))
 
 (make-matrix-set-zero matrix-double gsl_matrix_set_zero)
@@ -215,9 +215,9 @@ corresponding elements of the identity matrix m(i,j) = delta(i,j),
 i.e. a unit diagonal with all off-diagonal elements zero. This applies
 to both square and rectangular matrices."))
 
-(defmacro make-matrix-set-identity (class c-func)
+(defmacro make-matrix-set-identity (class func)
   `(defmethod matrix-set-identity ((m ,class))
-     (,c-func (entity m))
+     (,func (data m))
      m))
 
 (make-matrix-set-identity matrix-double gsl_matrix_set_identity)
@@ -233,9 +233,9 @@ to both square and rectangular matrices."))
    "This function copies the elements of the matrix src into the
 matrix dest. The two matrices must have the same size."))
 
-(defmacro make-matrix-memcpy (class c-func)
+(defmacro make-matrix-memcpy (class func)
   `(defmethod matrix-memcpy ((dest ,class) (src ,class))
-     (,c-func (entity dest) (entity src))
+     (,func (data dest) (data src))
      dest))
 
 (make-matrix-memcpy matrix-double gsl_matrix_memcpy)
@@ -251,9 +251,9 @@ matrix dest. The two matrices must have the same size."))
    "This function exchanges the elements of the matrices m1 and m2 by
 copying. The two matrices must have the same size."))
 
-(defmacro make-matrix-swap (class c-func)
+(defmacro make-matrix-swap (class func)
   `(defmethod matrix-swap ((m1 ,class) (m2 ,class))
-     (,c-func (entity m1) (entity m2))
+     (,func (data m1) (data m2))
      (values m1 m2)))
 
 (make-matrix-swap matrix-double gsl_matrix_swap)
@@ -270,9 +270,9 @@ copying. The two matrices must have the same size."))
 into the vector v. The length of the vector must be the same as the
 length of the column."))
 
-(defmacro make-matrix-get-row (v-class m-class c-func)
+(defmacro make-matrix-get-row (v-class m-class func)
   `(defmethod matrix-get-row ((v ,v-class) (m ,m-class) i)
-     (,c-func (entity v) (entity m) i)
+     (,func (data v) (data m) i)
      v))
 
 (make-matrix-get-row vector-double matrix-double gsl_matrix_get_row)
@@ -289,9 +289,9 @@ length of the column."))
 m into the vector v. The length of the vector must be the same as
 the length of the row."))
 
-(defmacro make-matrix-get-col (v-class m-class c-func)
+(defmacro make-matrix-get-col (v-class m-class func)
   `(defmethod matrix-get-col ((v ,v-class) (m ,m-class) j)
-     (,c-func (entity v) (entity m) j)
+     (,func (data v) (data m) j)
      v))
 
 (make-matrix-get-col vector-double matrix-double gsl_matrix_get_col)
@@ -308,9 +308,9 @@ the length of the row."))
 row of the matrix m. The length of the vector must be the same as
 the length of the column."))
 
-(defmacro make-matrix-set-row (m-class v-class c-func)
+(defmacro make-matrix-set-row (m-class v-class func)
   `(defmethod matrix-set-row ((m ,m-class) i (v ,v-class))
-     (,c-func (entity m) i (entity v))
+     (,func (data m) i (data v))
      m))
 
 (make-matrix-set-row matrix-double vector-double gsl_matrix_set_row)
@@ -327,9 +327,9 @@ the length of the column."))
 column of the matrix m. The length of the vector must be the same
 as the length of the row."))
 
-(defmacro make-matrix-set-col (m-class v-class c-func)
+(defmacro make-matrix-set-col (m-class v-class func)
   `(defmethod matrix-set-col ((m ,m-class) j (v ,v-class))
-     (,c-func (entity m) j (entity v))
+     (,func (data m) j (data v))
      m))
 
 (make-matrix-set-col matrix-double vector-double gsl_matrix_set_col)
@@ -345,9 +345,9 @@ as the length of the row."))
    "This function exchanges the i-th and j-th rows of the matrix m
 in-place."))
 
-(defmacro make-matrix-swap-rows (class c-func)
+(defmacro make-matrix-swap-rows (class func)
   `(defmethod matrix-swap-rows ((m ,class) i j)
-     (,c-func (entity m) i j)
+     (,func (data m) i j)
      m))
 
 (make-matrix-swap-rows matrix-double gsl_matrix_swap_rows)
@@ -363,9 +363,9 @@ in-place."))
    "This function exchanges the i-th and j-th columns of the matrix m
 in-place."))
 
-(defmacro make-matrix-swap-columns (class c-func)
+(defmacro make-matrix-swap-columns (class func)
   `(defmethod matrix-swap-columns ((m ,class) i j)
-     (,c-func (entity m) i j)
+     (,func (data m) i j)
      m))
 
 (make-matrix-swap-columns matrix-double gsl_matrix_swap_columns)
@@ -382,9 +382,9 @@ in-place."))
 m inplace. The matrix must be square for this operation to be
 possible."))
 
-(defmacro make-matrix-swap-rowcol (class c-func)
+(defmacro make-matrix-swap-rowcol (class func)
   `(defmethod matrix-swap-rowcol ((m ,class) i j)
-     (,c-func (entity m) i j)
+     (,func (data m) i j)
      m))
 
 (make-matrix-swap-rowcol matrix-double gsl_matrix_swap_rowcol)
@@ -402,9 +402,9 @@ src by copying the elements of src into dest. This function works for
 all matrices provided that the dimensions of the matrix dest match the
 transposed dimensions of the matrix src."))
 
-(defmacro make-matrix-transpose-memcpy (class c-func)
+(defmacro make-matrix-transpose-memcpy (class func)
   `(defmethod matrix-transpose-memcpy ((dest ,class) (src ,class))
-     (,c-func (entity dest) (entity src))
+     (,func (data dest) (data src))
      dest))
 
 (make-matrix-transpose-memcpy matrix-double gsl_matrix_transpose_memcpy)
@@ -421,9 +421,9 @@ transposed dimensions of the matrix src."))
 the elements of the matrix in-place. The matrix must be square for
 this operation to be possible."))
 
-(defmacro make-matrix-transpose (class c-func)
+(defmacro make-matrix-transpose (class func)
   `(defmethod matrix-transpose ((m ,class))
-     (,c-func (entity m))
+     (,func (data m))
      m))
 
 (make-matrix-transpose matrix-double gsl_matrix_transpose)
@@ -441,9 +441,9 @@ matrix a. The result a(i,j) <- a(i,j) + b(i,j) is stored in a and b
 remains unchanged. The two matrices must have the same
 dimensions."))
 
-(defmacro make-matrix-add (class c-func)
+(defmacro make-matrix-add (class func)
   `(defmethod matrix-add ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-matrix-add matrix-double gsl_matrix_add)
@@ -460,9 +460,9 @@ dimensions."))
 of matrix a. The result a(i,j) <- a(i,j) - b(i,j) is stored in a and b
 remains unchanged."))
 
-(defmacro make-matrix-sub (class c-func)
+(defmacro make-matrix-sub (class func)
   `(defmethod matrix-sub ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-matrix-sub matrix-double gsl_matrix_sub)
@@ -479,9 +479,9 @@ remains unchanged."))
 of matrix a. The result a(i,j) <- a(i,j) - b(i,j) is stored in a and b
 remains unchanged. The two matrices must have the same dimensions."))
 
-(defmacro make-matrix-mul-elements (class c-func)
+(defmacro make-matrix-mul-elements (class func)
   `(defmethod matrix-mul-elements ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-matrix-mul-elements matrix-double gsl_matrix_mul_elements)
@@ -498,9 +498,9 @@ remains unchanged. The two matrices must have the same dimensions."))
 of matrix b. The result a(i,j) <- a(i,j) * b(i,j) is stored in a and b
 remains unchanged. The two matrices must have the same dimensions."))
 
-(defmacro make-matrix-div-elements (class c-func)
+(defmacro make-matrix-div-elements (class func)
   `(defmethod matrix-div-elements ((a ,class) (b ,class))
-     (,c-func (entity a) (entity b))
+     (,func (data a) (data b))
      a))
 
 (make-matrix-div-elements matrix-double gsl_matrix_div_elements)
@@ -516,9 +516,9 @@ remains unchanged. The two matrices must have the same dimensions."))
    "This function multiplies the elements of matrix a by the constant
 factor x. The result a(i,j) <- a(i,j) * x is stored in a."))
 
-(defmacro make-matrix-scale (class c-func)
+(defmacro make-matrix-scale (class func)
   `(defmethod matrix-scale ((a ,class) x)
-     (,c-func (entity a) x)
+     (,func (data a) x)
      a))
 
 (make-matrix-scale matrix-double gsl_matrix_scale)
@@ -534,9 +534,9 @@ factor x. The result a(i,j) <- a(i,j) * x is stored in a."))
    "This function adds the constant value x to the elements of the
 matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
 
-(defmacro make-matrix-add-constant (class c-func)
+(defmacro make-matrix-add-constant (class func)
   `(defmethod matrix-add-constant ((a ,class) x)
-     (,c-func (entity a) x)
+     (,func (data a) x)
      a))
 
 (make-matrix-add-constant matrix-double gsl_matrix_add_constant)
@@ -551,9 +551,9 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
   (:documentation
    "This function returns the maximum value in the matrix m."))
 
-(defmacro make-matrix-max (class c-func)
+(defmacro make-matrix-max (class func)
   `(defmethod matrix-max ((m ,class))
-     (,c-func (entity m))))
+     (,func (data m))))
 
 (make-matrix-max matrix-double gsl_matrix_max)
 
@@ -567,9 +567,9 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
   (:documentation
    "This function returns the minimum value in the matrix m."))
 
-(defmacro make-matrix-min (class c-func)
+(defmacro make-matrix-min (class func)
   `(defmethod matrix-min ((m ,class))
-     (,c-func (entity m))))
+     (,func (data m))))
 
 (make-matrix-min matrix-double gsl_matrix_min)
 
@@ -584,11 +584,11 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
    "This function returns the minimum and maximum values in the matrix
 m, storing them in min-out and max-out."))
 
-(defmacro make-matrix-minmax (class element-type c-func)
+(defmacro make-matrix-minmax (class element-type func)
   `(defmethod matrix-minmax ((m ,class))
      (cffi:with-foreign-objects ((min-out ,element-type)
                                  (max-out ,element-type))
-       (,c-func (entity m) min-out max-out)
+       (,func (data m) min-out max-out)
        (values (cffi:mem-ref min-out ,element-type)
                (cffi:mem-ref max-out ,element-type)))))
 
@@ -607,11 +607,11 @@ matrix m, storing them in imax and jmax. When there are several
 equal maximum elements then the first element found is returned,
 searching in row-major order."))
 
-(defmacro make-matrix-max-index (class c-func)
+(defmacro make-matrix-max-index (class func)
   `(defmethod matrix-max-index ((m ,class))
      (cffi:with-foreign-objects ((imax :unsigned-int)
                                  (jmax :unsigned-int))
-       (,c-func (entity m) imax jmax)
+       (,func (data m) imax jmax)
        (values (cffi:mem-ref imax :unsigned-int)
                (cffi:mem-ref jmax :unsigned-int)))))
 
@@ -630,11 +630,11 @@ matrix m, storing them in imin and jmin. When there are several equal
 minimum elements then the first element found is returned, searching
 in row-major order."))
 
-(defmacro make-matrix-min-index (class c-func)
+(defmacro make-matrix-min-index (class func)
   `(defmethod matrix-min-index ((m ,class))
      (cffi:with-foreign-objects ((imin :unsigned-int)
                                  (jmin :unsigned-int))
-       (,c-func (entity m) imin jmin)
+       (,func (data m) imin jmin)
        (values (cffi:mem-ref imin :unsigned-int)
                (cffi:mem-ref jmin :unsigned-int)))))
 
@@ -654,13 +654,13 @@ and (imax,jmax). When there are several equal min- imum or maximum
 elements then the first elements found are returned, searching in
 row-major order."))
 
-(defmacro make-matrix-minmax-index (class c-func)
+(defmacro make-matrix-minmax-index (class func)
   `(defmethod matrix-minmax-index ((m ,class))
      (cffi:with-foreign-objects ((imin :unsigned-int)
                                  (jmin :unsigned-int)
                                  (imax :unsigned-int)
                                  (jmax :unsigned-int))
-       (,c-func (entity m) imin jmin imax jmax)
+       (,func (data m) imin jmin imax jmax)
        (values (cffi:mem-ref imin :unsigned-int)
                (cffi:mem-ref jmin :unsigned-int)
                (cffi:mem-ref imax :unsigned-int)
@@ -679,9 +679,9 @@ row-major order."))
    "This functions return t if all the elements of the matrix m are
 zero, and nil otherwise."))
 
-(defmacro make-matrix-isnull (class c-func)
+(defmacro make-matrix-isnull (class func)
   `(defmethod matrix-isnull ((m ,class))
-     (= (,c-func (entity m)) 1)))
+     (= (,func (data m)) 1)))
 
 (make-matrix-isnull matrix-double gsl_matrix_isnull)
 
@@ -696,9 +696,9 @@ zero, and nil otherwise."))
    "This functions return t if all the elements of the matrix m are
 strictly positive, and nil otherwise."))
 
-(defmacro make-matrix-ispos (class c-func)
+(defmacro make-matrix-ispos (class func)
   `(defmethod matrix-ispos ((m ,class))
-     (= (,c-func (entity m)) 1)))
+     (= (,func (data m)) 1)))
 
 (make-matrix-ispos matrix-double gsl_matrix_ispos)
 
@@ -713,9 +713,9 @@ strictly positive, and nil otherwise."))
    "This functions return t if all the elements of the matrix m are
 strictly negative, and nil otherwise."))
 
-(defmacro make-matrix-isneg (class c-func)
+(defmacro make-matrix-isneg (class func)
   `(defmethod matrix-isneg ((m ,class))
-     (= (,c-func (entity m)) 1)))
+     (= (,func (data m)) 1)))
 
 (make-matrix-isneg matrix-double gsl_matrix_isneg)
 
@@ -730,9 +730,9 @@ strictly negative, and nil otherwise."))
    "This functions return t if all the elements of the matrix m are
 non-negative, and nil otherwise."))
 
-(defmacro make-matrix-isnonneg (class c-func)
+(defmacro make-matrix-isnonneg (class func)
   `(defmethod matrix-isnonneg ((m ,class))
-     (= (,c-func (entity m)) 1)))
+     (= (,func (data m)) 1)))
 
 (make-matrix-isnonneg matrix-double gsl_matrix_isnonneg)
 
@@ -747,9 +747,9 @@ non-negative, and nil otherwise."))
    "This function returns t if the matrices a and b are equal (by
 comparison of element values) and nil otherwise."))
 
-(defmacro make-matrix-equal (class c-func)
+(defmacro make-matrix-equal (class func)
   `(defmethod matrix-equal ((a ,class) (b ,class))
-     (= (,c-func (entity a) (entity b)) 1)))
+     (= (,func (data a) (data b)) 1)))
 
 (make-matrix-equal matrix-double gsl_matrix_equal)
 
@@ -764,14 +764,15 @@ comparison of element values) and nil otherwise."))
    "This function sets each element of the matrix m to each element of
 the sequence seq respectively."))
 
-(defmacro make-matrix-set-sequence (class set-c-func)
-  `(defmethod matrix-set-sequence ((m ,class) seq &optional (n1 nil) (n2 nil))
+(defmacro make-matrix-set-sequence (class func)
+  `(defmethod matrix-set-sequence ((m ,class) seq
+                                   &optional (n1 nil) (n2 nil))
      (let ((s1 (if (null n1) (size1 m) n1))
            (s2 (if (null n2) (size2 m) n2))
            (idx 0))
        (dotimes (i s1 m)
          (dotimes (j s2)
-           (,set-c-func (entity m) i j (elt seq idx))
+           (,func (data m) i j (elt seq idx))
            (setf idx (1+ idx)))))))
 
 (make-matrix-set-sequence matrix-double gsl_matrix_set)
@@ -787,13 +788,14 @@ the sequence seq respectively."))
    "This function sets each element of the matrix m to each element of
 the 2 dimensions array respectively."))
 
-(defmacro make-matrix-set-2darray (class set-c-func)
-  `(defmethod matrix-set-2darray ((m ,class) 2darray &optional (n1 nil) (n2 nil))
+(defmacro make-matrix-set-2darray (class func)
+  `(defmethod matrix-set-2darray ((m ,class) 2darray
+                                  &optional (n1 nil) (n2 nil))
      (let ((s1 (if (null n1) (size1 m) n1))
            (s2 (if (null n2) (size2 m) n2)))
        (dotimes (i s1 m)
          (dotimes (j s2)
-           (,set-c-func (entity m) i j (aref 2darray i j)))))))
+           (,func (data m) i j (aref 2darray i j)))))))
 
 (make-matrix-set-2darray matrix-double gsl_matrix_set)
 
@@ -828,72 +830,103 @@ functions which gsl-matrix-free, or released using free-alien."
                   (matrix-set-2darray m initial-contents n1 n2))))
           (t m))))
 
-(defgeneric matrix-to-array (m &optional n1 n2)
+(defgeneric matrix-to-simple-matrix (m &optional n1 n2)
   (:documentation
-   "This function return the array whose elements is equal to elements
-of the matrix."))
-
-(defmacro make-matrix-to-array (class element-type get-c-func)
-  `(defmethod matrix-to-array ((m ,class) &optional (n1 nil) (n2 nil))
-     (let* ((s1 (if (null n1) (size1 m) n1))
-            (s2 (if (null n2) (size2 m) n2))
-            (acc (make-array (* s1 s2) :element-type ,element-type)))
-       (dotimes (i s1 acc)
-         (dotimes (j s2)
-           (setf (aref acc (+ (* i s2) j)) (,get-c-func (entity m) i j)))))))
-
-(make-matrix-to-array matrix-double 'double-float gsl_matrix_get)
-
-(make-matrix-to-array matrix-float 'single-float gsl_matrix_float_get)
-
-(make-matrix-to-array matrix-int
-                      `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
-                      gsl_matrix_int_get)
-
-(make-matrix-to-array matrix-uint
-                      `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
-                      gsl_matrix_uint_get)
-
-(defgeneric matrix-to-2darray (m &optional n1 n2)
-  (:documentation
-   "This function return the 2darray whose elements is equal to
+   "This function returns the simple-matrix whose elements is equal to
 elements of the matrix."))
 
-(defmacro make-matrix-to-2darray (class element-type get-c-func)
-  `(defmethod matrix-to-2darray ((m ,class) &optional (n1 nil) (n2 nil))
+(defmacro make-matrix-to-simple-matrix (class element-type func)
+  `(defmethod matrix-to-simple-matrix ((m ,class)
+                                       &optional (n1 nil) (n2 nil))
      (let* ((s1 (if (null n1) (size1 m) n1))
             (s2 (if (null n2) (size2 m) n2))
-            (acc (make-array (list s1 s2) :element-type ,element-type)))
-       (dotimes (i s1 acc)
+            (sm (sct:make-simple-matrix s1 s2 :element-type ,element-type)))
+       (dotimes (i s1 sm)
          (dotimes (j s2)
-           (setf (aref acc i j) (,get-c-func (entity m) i j)))))))
+           (setf (aref (sct::data sm) (+ (* i (sct::tda sm) j)))
+                 (,func (data m) i j)))))))
 
-(make-matrix-to-2darray matrix-double 'double-float gsl_matrix_get)
+(make-matrix-to-simple-matrix matrix-double :double gsl_matrix_get)
 
-(make-matrix-to-2darray matrix-float 'single-float gsl_matrix_float_get)
+(make-matrix-to-simple-matrix matrix-float :float gsl_matrix_float_get)
 
-(make-matrix-to-2darray matrix-int
-                        `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
-                        gsl_matrix_int_get)
+(make-matrix-to-simple-matrix matrix-int :int gsl_matrix_int_get)
 
-(make-matrix-to-2darray matrix-uint
-                        `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
-                        gsl_matrix_uint_get)
+(make-matrix-to-simple-matrix matrix-uint :unsigned-int gsl_matrix_uint_get)
+
+(defgeneric simple-matrix-to-matrix (sm &optional n1 n2)
+  (:documentation
+   "This function returns the matrix whose elements is equal to
+elements of the simple-matrix."))
+
+(defmacro make-simple-matrix-to-matrix (simple-matrix-class element-type)
+  `(defmethod simple-matrix-to-matrix ((sm ,simple-matrix-class)
+                                       &optional (n1 nil) (n2 nil))
+     (let* ((s1 (if (null n1) (sct::size1 sm) n1))
+            (s2 (if (null n2) (sct::size2 sm) n2))
+            (m (make-matrix s1 s2
+                            :initial-contents (sct::data sm)
+                            :element-type ,element-type)))
+       m)))
+
+(make-simple-matrix-to-matrix sct::simple-matrix-double :double)
+
+(make-simple-matrix-to-matrix sct::simple-matrix-float :float)
+
+(make-simple-matrix-to-matrix sct::simple-matrix-int :int)
+
+(make-simple-matrix-to-matrix sct::simple-matrix-uint :unsigned-int)
+
+(defgeneric matrix-copy-from-simple-matrix (m sm)
+  (:documentation
+   "This function copies the elements of the simple-matrix sm into the
+matrix m. The two matrices must have the same size."))
+
+(defmacro make-matrix-copy-from-simple-matrix (class
+                                               simple-matrix-class
+                                               func)
+  `(defmethod matrix-copy-from-simple-matrix ((m ,class)
+                                             (sm ,simple-matrix-class))
+     (if (or (not (= (size1 m) (sct::size1 sm)))
+             (not (= (size2 m) (sct::size2 sm))))
+         (error "matrix sizes are different")
+         (dotimes (i (size1 m) m)
+           (dotimes (j (size2 m))
+             (,func (data m) i j
+                    (sct::simple-matrix-get sm i j)))))))
+
+(make-matrix-copy-from-simple-matrix matrix-double
+                                     sct::simple-matrix-double
+                                     gsl_matrix_set)
+
+(make-matrix-copy-from-simple-matrix matrix-float
+                                     sct::simple-matrix-float
+                                     gsl_matrix_float_set)
+
+(make-matrix-copy-from-simple-matrix matrix-int
+                                     sct::simple-matrix-int
+                                     gsl_matrix_int_set)
+
+(make-matrix-copy-from-simple-matrix matrix-uint
+                                     sct::simple-matrix-uint
+                                     gsl_matrix_uint_set)
 
 (defgeneric matrix-read (m &optional str n1 n2)
   (:documentation
-   "This function reads into the matrix m from the open stream stream
+   "This function reads into the matrix m from the open stream str
 in binary format. The matrix m must be preallocated with the
 correct dimensions since the function uses the size of m to
 determine how many bytes to read."))
 
-(defmacro make-matrix-read (class set-c-func)
-  `(defmethod matrix-read ((m ,class) &optional (str *standard-input*) (n1 nil) (n2 nil))
+(defmacro make-matrix-read (class func)
+  `(defmethod matrix-read ((m ,class)
+                           &optional (str *standard-input*)
+                             (n1 nil) (n2 nil))
      (let ((s1 (if (null n1) (size1 m) n1))
            (s2 (if (null n2) (size2 m) n2)))
        (dotimes (i s1 m)
          (dotimes (j s2)
-           (,set-c-func (entity m) i j (read str)))))))
+           (,func (data m) i j (read str)))))))
 
 (make-matrix-read matrix-double gsl_matrix_set)
 
@@ -908,16 +941,18 @@ determine how many bytes to read."))
    "This function writes the elements of the matrix m to the
 stream."))
 
-(defmacro make-matrix-write (class element-type get-c-func)
-  `(defmethod matrix-write ((m ,class) &optional (str *standard-output*) (n1 nil) (n2 nil))
+(defmacro make-matrix-write (class element-type func)
+  `(defmethod matrix-write ((m ,class)
+                            &optional (str *standard-output*)
+                              (n1 nil) (n2 nil))
      (let ((s1 (if (null n1) (size1 m) n1))
            (s2 (if (null n2) (size2 m) n2)))
        (format str "; ~A X ~A ~A MATRIX~%" s1 s2 ,element-type)
        (dotimes (i s1 m)
          (dotimes (j s2)
            (if (eql j (- s2 1))
-               (format str "~S~%" (,get-c-func (entity m) i j))
-               (format str "~S~C" (,get-c-func (entity m) i j) #\tab)))))))
+               (format str "~S~%" (,func (data m) i j))
+               (format str "~S~C" (,func (data m) i j) #\tab)))))))
 
 (make-matrix-write matrix-double :double gsl_matrix_get)
 

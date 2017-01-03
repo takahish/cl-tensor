@@ -17,10 +17,13 @@
 
 (cl:in-package "SCT")
 
+;;; simple-vector
+
 (defclass simple-vector-t ()
   ((data :accessor data :initarg :data)
    (size :accessor size :initarg :size)
-   (stride :accessor stride :initarg :stride)))
+   (stride :accessor stride :initarg :stride)
+   (owner :accessor owner :initarg :owner)))
 
 (defclass simple-vector-double (simple-vector-t) ())
 
@@ -31,8 +34,8 @@
 (defclass simple-vector-uint (simple-vector-t) ())
 
 (defun make-simple-vector (n &key (element-type :double)
-                              (initial-element nil)
-                              (initial-contents nil))
+                               (initial-element nil)
+                               (initial-contents nil))
   (cond
     ;; element type: double
     ((and (eql element-type :double)
@@ -42,7 +45,8 @@
                                       :element-type 'double-float
                                       :initial-element initial-element)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((and (eql element-type :double)
           (not (null initial-contents)))
      (make-instance 'simple-vector-double
@@ -50,14 +54,16 @@
                                       :element-type 'double-float
                                       :initial-contents initial-contents)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((eql element-type :double)
      (make-instance 'simple-vector-double
                     :data (make-array n
                                       :element-type 'double-float
                                       :initial-element 0.0d0)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ;; element type: float
     ((and (eql element-type :float)
           (not (null initial-element)))
@@ -66,7 +72,8 @@
                                       :element-type 'single-float
                                       :initial-element initial-element)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((and (eql element-type :float)
           (not (null initial-contents)))
      (make-instance  'simple-vector-float
@@ -74,14 +81,16 @@
                                        :element-type 'single-float
                                        :initial-contents initial-contents)
                      :size n
-                     :stride 1))
+                     :stride 1
+                     :owner t))
     ((eql element-type :float)
      (make-instance  'simple-vector-float
                      :data (make-array n
                                        :element-type 'single-float
                                        :initial-element 0.0)
                      :size n
-                     :stride 1))
+                     :stride 1
+                     :owner t))
     ;; element type: int
     ((and (eql element-type :int)
           (not (null initial-element)))
@@ -91,7 +100,8 @@
                                       :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-element initial-element)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((and (eql element-type :int)
           (not (null initial-contents)))
      (make-instance 'simple-vector-int
@@ -100,7 +110,8 @@
                                       :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-contents initial-contents)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((eql element-type :int)
      (make-instance 'simple-vector-int
                     :data (make-array n
@@ -108,7 +119,8 @@
                                       :element-type `(signed-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-element 0)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ;; element type: unsigned-int
     ((and (eql element-type :unsigned-int)
           (not (null initial-element)))
@@ -118,7 +130,8 @@
                                       :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-element initial-element)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((and (eql element-type :unsigned-int)
           (not (null initial-contents)))
      (make-instance 'simple-vector-uint
@@ -127,7 +140,8 @@
                                       :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-contents initial-contents)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     ((eql element-type :unsigned-int)
      (make-instance 'simple-vector-uint
                     :data (make-array n
@@ -135,8 +149,24 @@
                                       :element-type `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8))
                                       :initial-element 0)
                     :size n
-                    :stride 1))
+                    :stride 1
+                    :owner t))
     (t (error "unsapported element type"))))
+
+;;; simple-vector-view
+
+(defclass simple-vector-t-view ()
+  ((shared-vector :accessor shared-vector :initarg :shared-vector)))
+
+(defclass simple-vector-double-view (simple-vector-t-view) ())
+
+(defclass simple-vector-float-view (simple-vector-t-view) ())
+
+(defclass simple-vector-int-view (simple-vector-t-view) ())
+
+(defclass simple-vector-uint-view (simple-vector-t-view) ())
+
+;;; functions
 
 (defgeneric simple-vector-get (v i)
   (:documentation
@@ -194,7 +224,7 @@ the vector v to zero except for the i-th element which is set to one."))
      (dotimes (j (size v))
        (setf (aref (data v) (* j (stride v))) ,zero))
      ;; aref delegate range check.
-     (setf (aref (data v) i) ,one)
+     (setf (aref (data v) (* i (stride v))) ,one)
      v))
 
 (make-simple-vector-set-basis simple-vector-double 0.0d0 1.0d0)
@@ -207,27 +237,93 @@ the vector v to zero except for the i-th element which is set to one."))
 
 (defgeneric simple-vector-subvector (v offset n)
   (:documentation
-   "This function return a subvector of another vector v. The start of
-the new vector is offset by offset elements from the start of the
-original vector."))
+   "This function return a vector view of a subvector of another
+vector v. The start of the new vector is offset by offset elements
+from the start of the original vector. The new vector has n
+elements."))
 
-(defmacro make-simple-vector-subvector (class element-type)
-  `(defmethod simple-vector-subvector ((v ,class) offset n)
-     (if (= n 0)
-         (error "vector length n must be positive integer")
-         (let ((sub (make-simple-vector n :element-type ,element-type)))
-           ;; aref delegate range check.
-           (dotimes (i n sub)
-             (setf (aref (data sub) i)
-                   (aref (data v) (* (+ offset i) (stride v)))))))))
+(defmacro make-simple-vector-subvector (vector-class view-class)
+  `(defmethod simple-vector-subvector ((v ,vector-class) offset n)
+     (cond
+       ((<= n 0)
+        (error "vector length n must be positive integer"))
+       ((>= (+ offset (- n 1)) (size v))
+        (error "view would extend past end of vector"))
+       (t
+        (let ((view (make-instance (quote ,view-class)))
+              (sub (make-instance (quote ,vector-class)))
+              (element-type (second (type-of (data v)))))
+          ;; set sub
+          (setf (data sub) (make-array n
+                                       :displaced-to (data v)
+                                       :displaced-index-offset offset
+                                       :element-type element-type)
+                (size sub) n
+                (stride sub) (stride v)
+                (owner sub) nil)
+          ;; set view
+          (setf (shared-vector view) sub)
+          view)))))
 
-(make-simple-vector-subvector simple-vector-double :double)
+(make-simple-vector-subvector simple-vector-double
+                              simple-vector-double-view)
 
-(make-simple-vector-subvector simple-vector-float :float)
+(make-simple-vector-subvector simple-vector-float
+                              simple-vector-float-view)
 
-(make-simple-vector-subvector simple-vector-int :int)
+(make-simple-vector-subvector simple-vector-int
+                              simple-vector-int-view)
 
-(make-simple-vector-subvector simple-vector-uint :unsigned-int)
+(make-simple-vector-subvector simple-vector-uint
+                              simple-vector-uint-view)
+
+(defun simple-vector-view-array (base n &key (element-type :double))
+  "This function return a vector view of an array. The start of the
+new vector is given by base and has n elements."
+  (if (= n 0)
+      (error "vector length n must be positive integer")
+      (cond
+        ((eql element-type :double)
+         ;; element type: double
+         (let ((view (make-instance 'simple-vector-double-view))
+               (v (make-instance 'simple-vector-double)))
+           (setf (data v) base
+                 (size v) n
+                 (stride v) 1
+                 (owner v) nil)
+           (setf (shared-vector view) v)
+           view))
+        ;; element type: float
+        ((eql element-type :float)
+         (let ((view (make-instance 'simple-vector-float-view))
+               (v (make-instance 'simple-vector-float)))
+           (setf (data v) base
+                 (size v) n
+                 (stride v) 1
+                 (owner v) nil)
+           (setf (shared-vector view) v)
+           view))
+        ;; element type: int
+        ((eql element-type :int)
+         (let ((view (make-instance 'simple-vector-int-view))
+               (v (make-instance 'simple-vector-int)))
+           (setf (data v) base
+                 (size v) n
+                 (stride v) 1
+                 (owner v) nil)
+           (setf (shared-vector view) v)
+           view))
+         ;; element type: unsigned-int
+         ((eql element-type :unsigned-int)
+          (let ((view (make-instance 'simple-vector-uint-view))
+                (v (make-instance 'simple-vector-uint)))
+            (setf (data v) base
+                  (size v) n
+                  (stride v) 1
+                  (owner v) nil)
+            (setf (shared-vector view) v)
+            view))
+         (t "unsapported element type"))))
 
 (defgeneric simple-vector-copy (dest src)
   (:documentation
@@ -547,30 +643,21 @@ function uses the size of a to determine how many values to read."))
    "This function writes the elements of the array a line-by-line to
 the stream str."))
 
-(defmethod simple-vector-write ((a simple-vector-t)
-                                &optional (str *standard-output*) (n nil))
-  (dotimes (i (if (null n) (size a) n) a)
-    (format str "~S~%" (simple-vector-get a i))))
+(defmacro make-simple-vector-write (class element-type)
+  `(defmethod simple-vector-write ((a ,class)
+                                   &optional (str *standard-output*) (n nil))
+     (let ((s (if (null n) (size a) n)))
+       (format str "; ~A ~A SIMPLE-VECTOR~%" s ,element-type)
+       (dotimes (i s a)
+         (format str "~S~%" (simple-vector-get a i))))))
 
-(defmethod simple-vector-write ((a simple-vector-double)
-                                &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-VECTOR~%" (if (null n) (size a) n) :double)
-  (call-next-method))
+(make-simple-vector-write simple-vector-double :double)
 
-(defmethod simple-vector-write ((a simple-vector-float)
-                                &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-VECTOR~%" (if (null n) (size a) n) :float)
-  (call-next-method))
+(make-simple-vector-write simple-vector-float :float)
 
-(defmethod simple-vector-write ((a simple-vector-int)
-                                &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-VECTOR~%" (if (null n) (size a) n) :int)
-  (call-next-method))
+(make-simple-vector-write simple-vector-int :int)
 
-(defmethod simple-vector-write ((a simple-vector-uint)
-                                &optional (str *standard-output*) (n nil))
-  (format str "; ~A ~A SIMPLE-VECTOR~%" (if (null n) (size a) n) :unsigned-int)
-  (call-next-method))
+(make-simple-vector-write simple-vector-uint :unsigned-int)
 
 (defgeneric simple-vector-map (func a &optional n)
   (:documentation
