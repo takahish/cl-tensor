@@ -33,10 +33,34 @@
 
 (defclass simple-vector-uint (simple-vector-t) ())
 
-(defun make-simple-vector (n &key (element-type :double)
+(defun make-simple-vector (n &key (element-type :t)
                                (initial-element nil)
                                (initial-contents nil))
   (cond
+    ;; default
+    ((and (eql element-type :t)
+          (not (null initial-element)))
+     (make-instance 'simple-vector-t
+                    :data (make-array n
+                                      :initial-element initial-element)
+                    :size n
+                    :stride 1
+                    :owner t))
+    ((and (eql element-type :t)
+          (not (null initial-contents)))
+     (make-instance 'simple-vector-t
+                    :data (make-array n
+                                      :initial-contents initial-contents)
+                    :size n
+                    :stride 1
+                    :owner t))
+    ((eql element-type :t)
+     (make-instance 'simple-vector-t
+                    :data (make-array n
+                                      :initial-element nil)
+                    :size n
+                    :stride 1
+                    :owner t))
     ;; element type: double
     ((and (eql element-type :double)
           (not (null initial-element)))
@@ -168,6 +192,14 @@
 
 ;;; functions
 
+(defgeneric simple-vector-coerce (v element-type))
+
+(defmethod simple-vector-coerce ((v simple-vector-t) element-type)
+  (let ((alt (make-simple-vector (size v) :element-type element-type)))
+    (dotimes (i (size v) alt)
+      (setf (aref (data alt) (* i (stride alt)))
+            (aref (data v) (* i (stride v)))))))
+
 (defgeneric simple-vector-get (v i)
   (:documentation
    "This function retruns the i-th element of a vector v. If i lies
@@ -206,6 +238,8 @@ handler is invoked."))
      (dotimes (i (size v) v)
        (setf (aref (data v) (* i (stride v))) ,zero))))
 
+(make-simple-vector-set-zero simple-vector-t nil)
+
 (make-simple-vector-set-zero simple-vector-double 0.0d0)
 
 (make-simple-vector-set-zero simple-vector-float 0.0)
@@ -226,6 +260,8 @@ the vector v to zero except for the i-th element which is set to one."))
      ;; aref delegate range check.
      (setf (aref (data v) (* i (stride v))) ,one)
      v))
+
+(make-simple-vector-set-basis simple-vector-t nil t)
 
 (make-simple-vector-set-basis simple-vector-double 0.0d0 1.0d0)
 
@@ -265,6 +301,9 @@ elements."))
           (setf (shared-vector view) sub)
           view)))))
 
+(make-simple-vector-subvector simple-vector-t
+                              simple-vector-t-view)
+
 (make-simple-vector-subvector simple-vector-double
                               simple-vector-double-view)
 
@@ -277,14 +316,26 @@ elements."))
 (make-simple-vector-subvector simple-vector-uint
                               simple-vector-uint-view)
 
-(defun simple-vector-view-array (base n &key (element-type :double))
+(defun simple-vector-view-array (base n &key (element-type :t))
   "This function return a vector view of an array. The start of the
 new vector is given by base and has n elements."
   (if (= n 0)
       (error "vector length n must be positive integer")
       (cond
-        ((eql element-type :double)
-         ;; element type: double
+        ;; default
+        ((and (eql element-type :t)
+              (typep base `(simple-vector ,n)))
+         (let ((view (make-instance 'simple-vector-t-view))
+               (v (make-instance 'simple-vector-t)))
+           (setf (data v) base
+                 (size v) n
+                 (stride v) 1
+                 (owner v) nil)
+           (setf (shared-vector view) v)
+           view))
+        ;; element type: double
+        ((and (eql element-type :double)
+              (typep base `(simple-array double-float (,n))))
          (let ((view (make-instance 'simple-vector-double-view))
                (v (make-instance 'simple-vector-double)))
            (setf (data v) base
@@ -294,7 +345,8 @@ new vector is given by base and has n elements."
            (setf (shared-vector view) v)
            view))
         ;; element type: float
-        ((eql element-type :float)
+        ((and (eql element-type :float)
+              (typep base `(simple-array single-float (,n))))
          (let ((view (make-instance 'simple-vector-float-view))
                (v (make-instance 'simple-vector-float)))
            (setf (data v) base
@@ -304,7 +356,8 @@ new vector is given by base and has n elements."
            (setf (shared-vector view) v)
            view))
         ;; element type: int
-        ((eql element-type :int)
+        ((and (eql element-type :int)
+              (typep base `(simple-array (signed-byte ,(* (cffi:foreign-type-size :int) 8)) (,n))))
          (let ((view (make-instance 'simple-vector-int-view))
                (v (make-instance 'simple-vector-int)))
            (setf (data v) base
@@ -313,8 +366,9 @@ new vector is given by base and has n elements."
                  (owner v) nil)
            (setf (shared-vector view) v)
            view))
-         ;; element type: unsigned-int
-         ((eql element-type :unsigned-int)
+        ;; element type: unsigned-int
+        ((and (eql element-type :unsigned-int)
+              (typep base `(simple-array (unsigned-byte ,(* (cffi:foreign-type-size :int) 8)) (,n))))
           (let ((view (make-instance 'simple-vector-uint-view))
                 (v (make-instance 'simple-vector-uint)))
             (setf (data v) base
@@ -323,28 +377,20 @@ new vector is given by base and has n elements."
                   (owner v) nil)
             (setf (shared-vector view) v)
             view))
-         (t "unsapported element type"))))
+        (t "unsapported element type"))))
 
 (defgeneric simple-vector-copy (dest src)
   (:documentation
    "This function copies the elements of the vector src into the
 vector dest. The two vectors must have the same length."))
 
-(defmacro make-simple-vector-copy (class)
-  `(defmethod simple-vector-copy ((dest ,class) (src ,class))
-     (if (not (= (size dest) (size src)))
-         (error "vector lengths are not equal")
-         (dotimes (j (size src) dest)
-           (setf (aref (data dest) (* (stride dest) j))
-                 (aref (data src) (* (stride src) j)))))))
-
-(make-simple-vector-copy simple-vector-double)
-
-(make-simple-vector-copy simple-vector-float)
-
-(make-simple-vector-copy simple-vector-int)
-
-(make-simple-vector-copy simple-vector-uint)
+(defmethod simple-vector-copy ((dest simple-vector-t)
+                               (src simple-vector-t))
+  (if (not (= (size dest) (size src)))
+      (error "vector lengths are not equal")
+      (dotimes (j (size src) dest)
+        (setf (aref (data dest) (* (stride dest) j))
+              (aref (data src) (* (stride src) j))))))
 
 (defgeneric simple-vector-swap-elements (v i j)
   (:documentation
@@ -374,22 +420,13 @@ in-place."))
 vector a. The result ai <- ai + bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmacro make-simple-vector-add (class)
-  `(defmethod simple-vector-add ((a ,class) (b ,class))
-     (if (not (= (size a) (size b)))
-         (error "vectors must have same length")
-         (dotimes (i (size a) a)
-           (setf (aref (data a) (* i (stride a)))
-                 (+ (aref (data a) (* i (stride a)))
-                    (aref (data b) (* i (stride b)))))))))
-
-(make-simple-vector-add simple-vector-double)
-
-(make-simple-vector-add simple-vector-float)
-
-(make-simple-vector-add simple-vector-int)
-
-(make-simple-vector-add simple-vector-uint)
+(defmethod simple-vector-add ((a simple-vector-t) (b simple-vector-t))
+  (if (not (= (size a) (size b)))
+      (error "vectors must have same length")
+      (dotimes (i (size a) a)
+        (setf (aref (data a) (* i (stride a)))
+              (+ (aref (data a) (* i (stride a)))
+                 (aref (data b) (* i (stride b))))))))
 
 (defgeneric simple-vector-sub (a b)
   (:documentation
@@ -397,22 +434,13 @@ unchanged. The two vectors must have the same length."))
 of vector a. The result ai <- ai − bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmacro make-simple-vector-sub (class)
-  `(defmethod simple-vector-sub ((a ,class) (b ,class))
-     (if (not (= (size a) (size b)))
-         (error "vectors must have same length")
-         (dotimes (i (size a) a)
-           (setf (aref (data a) (* i (stride a)))
-                 (- (aref (data a) (* i (stride a)))
-                    (aref (data b) (* i (stride b)))))))))
-
-(make-simple-vector-sub simple-vector-double)
-
-(make-simple-vector-sub simple-vector-float)
-
-(make-simple-vector-sub simple-vector-int)
-
-(make-simple-vector-sub simple-vector-uint)
+(defmethod simple-vector-sub ((a simple-vector-t) (b simple-vector-t))
+  (if (not (= (size a) (size b)))
+      (error "vectors must have same length")
+      (dotimes (i (size a) a)
+        (setf (aref (data a) (* i (stride a)))
+              (- (aref (data a) (* i (stride a)))
+                 (aref (data b) (* i (stride b))))))))
 
 (defgeneric simple-vector-mul (a b)
   (:documentation
@@ -420,22 +448,13 @@ unchanged. The two vectors must have the same length."))
 of vector b. The result ai <- ai ∗ bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmacro make-simple-vector-mul (class)
-  `(defmethod simple-vector-mul ((a ,class) (b ,class))
-     (if (not (= (size a) (size b)))
-         (error "vectors must have same length")
-         (dotimes (i (size a) a)
-           (setf (aref (data a) (* i (stride a)))
-                 (* (aref (data a) (* i (stride a)))
-                    (aref (data b) (* i (stride b)))))))))
-
-(make-simple-vector-mul simple-vector-double)
-
-(make-simple-vector-mul simple-vector-float)
-
-(make-simple-vector-mul simple-vector-int)
-
-(make-simple-vector-mul simple-vector-uint)
+(defmethod simple-vector-mul ((a simple-vector-t) (b simple-vector-t))
+  (if (not (= (size a) (size b)))
+      (error "vectors must have same length")
+      (dotimes (i (size a) a)
+        (setf (aref (data a) (* i (stride a)))
+              (* (aref (data a) (* i (stride a)))
+                 (aref (data b) (* i (stride b))))))))
 
 (defgeneric simple-vector-div (a b)
   (:documentation
@@ -443,22 +462,13 @@ unchanged. The two vectors must have the same length."))
 vector b. The result ai <- ai/bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmacro make-simple-vector-div (class)
-  `(defmethod simple-vector-div ((a ,class) (b ,class))
-     (if (not (= (size a) (size b)))
-         (error "vectors must have same length")
-         (dotimes (i (size a) a)
-           (setf (aref (data a) (* i (stride a)))
-                 (/ (aref (data a) (* i (stride a)))
-                    (aref (data b) (* i (stride b)))))))))
-
-(make-simple-vector-div simple-vector-double)
-
-(make-simple-vector-div simple-vector-float)
-
-(make-simple-vector-div simple-vector-int)
-
-(make-simple-vector-div simple-vector-uint)
+(defmethod simple-vector-div ((a simple-vector-t) (b simple-vector-t))
+  (if (not (= (size a) (size b)))
+      (error "vectors must have same length")
+      (dotimes (i (size a) a)
+        (setf (aref (data a) (* i (stride a)))
+              (/ (aref (data a) (* i (stride a)))
+                 (aref (data b) (* i (stride b))))))))
 
 (defgeneric simple-vector-scale (a x)
   (:documentation
@@ -534,6 +544,11 @@ maximum elements then the lowest indices are returned."))
    "This function return T if all the elements of the vector v are
 zero, and NIL otherwise."))
 
+(defmethod simple-vector-isnull ((v simple-vector-t))
+  (dotimes (i (size v) t)
+    (if (not (null (aref (data v) (* (stride v) i))))
+        (return nil))))
+
 (defmacro make-simple-vector-isnull (class zero)
   `(defmethod simple-vector-isnull ((v ,class))
      (dotimes (i (size v) t)
@@ -548,6 +563,7 @@ zero, and NIL otherwise."))
 
 (make-simple-vector-isnull simple-vector-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-vector-ispos (v)
   (:documentation
    "This function return T if all the elements of the vector v are
@@ -567,6 +583,7 @@ strictly positive, and NIL otherwise."))
 
 (make-simple-vector-ispos simple-vector-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-vector-isneg (v)
   (:documentation
    "This function return T if all the elements of the vector v are
@@ -586,6 +603,7 @@ strictly negative, and NIL otherwise."))
 
 (make-simple-vector-isneg simple-vector-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-vector-isnonneg (v)
   (:documentation
    "This function return T if all the elements of the vector v are
@@ -605,6 +623,7 @@ non-negative respectively, and NIL otherwise."))
 
 (make-simple-vector-isnonneg simple-vector-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-vector-equal (u v)
   (:documentation
    "This function returns T if the vectors u and v are equal (by
@@ -650,6 +669,8 @@ the stream str."))
        (format str "; ~A ~A SIMPLE-VECTOR~%" s ,element-type)
        (dotimes (i s a)
          (format str "~S~%" (simple-vector-get a i))))))
+
+(make-simple-vector-write simple-vector-t :t)
 
 (make-simple-vector-write simple-vector-double :double)
 

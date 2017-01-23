@@ -34,10 +34,37 @@
 
 (defclass simple-matrix-uint (simple-matrix-t) ())
 
-(defun make-simple-matrix (n1 n2 &key (element-type :double)
+(defun make-simple-matrix (n1 n2 &key (element-type :t)
                                    (initial-element nil)
                                    (initial-contents nil))
   (cond
+    ;; default
+    ((and (eql element-type :t)
+          (not (null initial-element)))
+     (make-instance 'simple-matrix-t
+                    :data (make-array (* n1 n2)
+                                      :initial-element initial-element)
+                    :size1 n1
+                    :size2 n2
+                    :tda n2
+                    :owner t))
+    ((and (eql element-type :t)
+          (not (null initial-contents)))
+     (make-instance 'simple-matrix-t
+                    :data (make-array (* n1 n2)
+                                      :initial-contents initial-contents)
+                    :size1 n1
+                    :size2 n2
+                    :tda n2
+                    :owner t))
+    ((eql element-type :t)
+     (make-instance 'simple-matrix-t
+                    :data (make-array (* n1 n2)
+                                      :initial-element nil)
+                    :size1 n1
+                    :size2 n2
+                    :tda n2
+                    :owner t))
     ;; element type: double
     ((and (eql element-type :double)
           (not (null initial-element)))
@@ -84,7 +111,7 @@
      (make-instance 'simple-matrix-float
                     :data (make-array (* n1 n2)
                                       :element-type 'single-float
-                                      :initial-element initial-element)
+                                      :initial-contents initial-contents)
                     :size1 n1
                     :size2 n2
                     :tda n2
@@ -181,6 +208,16 @@
 
 ;;; functions
 
+(defgeneric simple-matrix-coerce (m element-type))
+
+(defmethod simple-matrix-coerce ((m simple-matrix-t) element-type)
+  (let ((alt (make-simple-matrix (size1 m) (size2 m)
+                                 :element-type element-type)))
+    (dotimes (i (size1 m) alt)
+      (dotimes (j (size2 m))
+        (setf (aref (data alt) (+ (* i (tda alt)) j))
+              (aref (data m) (+ (* i (tda m)) j)))))))
+
 (defgeneric simple-matrix-get (m i j)
   (:documentation
    "This function return the (i,j)-th element of a matrix m. If i or j
@@ -230,6 +267,8 @@ x."))
        (dotimes (j (size2 m))
          (setf (aref (data m) (+ (* i (tda m)) j)) ,zero)))))
 
+(make-simple-matrix-set-zero simple-matrix-double nil)
+
 (make-simple-matrix-set-zero simple-matrix-double 0.0d0)
 
 (make-simple-matrix-set-zero simple-matrix-float 0.0)
@@ -251,6 +290,8 @@ to both square and rectangular matrices."))
        (dotimes (j (size2 m))
          (setf (aref (data m) (+ (* i (tda m)) j))
                (if (= i j) ,one ,zero))))))
+
+(make-simple-matrix-set-identity simple-matrix-double nil t)
 
 (make-simple-matrix-set-identity simple-matrix-double 0.0d0 1.0d0)
 
@@ -298,6 +339,9 @@ physical number of columns in memory given by tda is unchanged."))
           ;; set view
           (setf (shared-matrix view) sub)
           view)))))
+
+(make-simple-matrix-submatrix simple-matrix-t
+                              simple-matrix-t-view)
 
 (make-simple-matrix-submatrix simple-matrix-double
                               simple-matrix-double-view)
@@ -347,6 +391,10 @@ physical number of columns in memory is also given by n2."))
           (setf (shared-matrix view) m)
           view)))))
 
+(make-simple-matrix-view-vector simple-vector-t
+                                simple-matrix-t
+                                simple-matrix-t-view)
+
 (make-simple-matrix-view-vector simple-vector-double
                                 simple-matrix-double
                                 simple-matrix-double-view)
@@ -390,6 +438,10 @@ range."))
            (setf (shared-vector view) row)
            view))))
 
+(make-simple-matrix-row simple-vector-t
+                        simple-matrix-t
+                        simple-vector-t-view)
+
 (make-simple-matrix-row simple-vector-double
                         simple-matrix-double
                         simple-vector-double-view)
@@ -432,6 +484,10 @@ out of range."))
            ;; set view
            (setf (shared-vector view) column)
            view))))
+
+(make-simple-matrix-column simple-vector-t
+                           simple-matrix-t
+                           simple-vector-t-view)
 
 (make-simple-matrix-column simple-vector-double
                            simple-matrix-double
@@ -481,6 +537,10 @@ elements."))
           ;; set view
           (setf (shared-vector view) subrow)
           view)))))
+
+(make-simple-matrix-subrow simple-vector-t
+                           simple-matrix-t
+                           simple-vector-t-view)
 
 (make-simple-matrix-subrow simple-vector-double
                            simple-matrix-double
@@ -532,6 +592,10 @@ containing n elements."))
           (setf (shared-vector view) subcolumn)
           view)))))
 
+(make-simple-matrix-subcolumn simple-vector-t
+                              simple-matrix-t
+                              simple-vector-t-view)
+
 (make-simple-matrix-subcolumn simple-vector-double
                               simple-matrix-double
                               simple-vector-double-view)
@@ -573,6 +637,10 @@ matrix."))
        ;; set view
        (setf (shared-vector view) diagonal)
        view)))
+
+(make-simple-matrix-diagonal simple-vector-t
+                             simple-matrix-t
+                             simple-vector-t-view)
 
 (make-simple-matrix-diagonal simple-vector-double
                              simple-matrix-double
@@ -618,6 +686,10 @@ of the matrix corresponds to k = 0."))
            (setf (shared-vector view) sub)
            view))))
 
+(make-simple-matrix-subdiagonal simple-vector-t
+                                simple-matrix-t
+                                simple-vector-t-view)
+
 (make-simple-matrix-subdiagonal simple-vector-double
                                 simple-matrix-double
                                 simple-vector-double-view)
@@ -661,6 +733,10 @@ the matrix corresponds to k = 0."))
            (setf (shared-vector view) super)
            view))))
 
+(make-simple-matrix-superdiagonal simple-vector-t
+                                  simple-matrix-t
+                                  simple-vector-t-view)
+
 (make-simple-matrix-superdiagonal simple-vector-double
                                   simple-matrix-double
                                   simple-vector-double-view)
@@ -682,23 +758,15 @@ the matrix corresponds to k = 0."))
    "This function copies the elements of the matrix src into the
 matrix dest. The two matrices must have the same size."))
 
-(defmacro make-simple-matrix-copy (class)
-  `(defmethod simple-matrix-copy ((dest ,class) (src ,class))
-     (if (or (not (= (size1 src) (size1 dest)))
-             (not (= (size2 src) (size2 dest))))
-         (error "matrix sizes are different")
-         (dotimes (i (size1 src) dest)
-           (dotimes (j (size2 src))
-             (setf (aref (data dest) (+ (* i (tda dest)) j))
-                   (aref (data src) (+ (* i (tda src)) j))))))))
-
-(make-simple-matrix-copy simple-matrix-double)
-
-(make-simple-matrix-copy simple-matrix-float)
-
-(make-simple-matrix-copy simple-matrix-int)
-
-(make-simple-matrix-copy simple-matrix-uint)
+(defmethod simple-matrix-copy ((dest simple-matrix-t)
+                               (src simple-matrix-t))
+  (if (or (not (= (size1 src) (size1 dest)))
+          (not (= (size2 src) (size2 dest))))
+      (error "matrix sizes are different")
+      (dotimes (i (size1 src) dest)
+        (dotimes (j (size2 src))
+          (setf (aref (data dest) (+ (* i (tda dest)) j))
+                (aref (data src) (+ (* i (tda src)) j)))))))
 
 (defgeneric simple-matrix-get-row (v m i)
   (:documentation
@@ -706,25 +774,17 @@ matrix dest. The two matrices must have the same size."))
 into the vector v. The length of the vector must be the same as the
 length of the row."))
 
-(defmacro make-simple-matrix-get-row (vclass mclass)
-  `(defmethod simple-matrix-get-row ((v ,vclass) (m ,mclass) i)
-     (cond
-       ((>= i (size1 m))
-        (error "row index is out of range"))
-       ((not (= (size v) (size2 m)))
-        (error "matrix row size and vector length are not equal"))
-       (t
-        (dotimes (j (size2 m) v)
-          (setf (aref (data v) (* (stride v) j))
-                (aref (data m) (+ (* i (tda m)) j))))))))
-
-(make-simple-matrix-get-row simple-vector-double simple-matrix-double)
-
-(make-simple-matrix-get-row simple-vector-float simple-matrix-float)
-
-(make-simple-matrix-get-row simple-vector-int simple-matrix-int)
-
-(make-simple-matrix-get-row simple-vector-uint simple-matrix-uint)
+(defmethod simple-matrix-get-row ((v simple-vector-t)
+                                  (m simple-matrix-t) i)
+  (cond
+    ((>= i (size1 m))
+     (error "row index is out of range"))
+    ((not (= (size v) (size2 m)))
+     (error "matrix row size and vector length are not equal"))
+    (t
+     (dotimes (j (size2 m) v)
+       (setf (aref (data v) (* (stride v) j))
+             (aref (data m) (+ (* i (tda m)) j)))))))
 
 (defgeneric simple-matrix-set-row (m i v)
   (:documentation
@@ -732,25 +792,17 @@ length of the row."))
 row of the matrix m. The length of the vector must be the same as the
 length of the row."))
 
-(defmacro make-simple-matrix-set-row (mclass vclass)
-  `(defmethod simple-matrix-set-row ((m ,mclass) i (v ,vclass))
-     (cond
-       ((>= i (size1 m))
-        (error "row index is out of range"))
-       ((not (= (size v) (size2 m)))
-        (error "matrix row size and vector length are not equal"))
-       (t
-        (dotimes (j (size2 m) v)
-          (setf (aref (data m) (+ (* i (tda m)) j))
-                (aref (data v) (* (stride v) j))))))))
-
-(make-simple-matrix-set-row simple-matrix-double simple-vector-double)
-
-(make-simple-matrix-set-row simple-matrix-float simple-vector-float)
-
-(make-simple-matrix-set-row simple-matrix-int simple-vector-int)
-
-(make-simple-matrix-set-row simple-matrix-uint simple-vector-uint)
+(defmethod simple-matrix-set-row ((m simple-matrix-t) i
+                                  (v simple-vector-t))
+  (cond
+    ((>= i (size1 m))
+     (error "row index is out of range"))
+    ((not (= (size v) (size2 m)))
+     (error "matrix row size and vector length are not equal"))
+    (t
+     (dotimes (j (size2 m) v)
+       (setf (aref (data m) (+ (* i (tda m)) j))
+             (aref (data v) (* (stride v) j)))))))
 
 (defgeneric simple-matrix-get-col (v m j)
   (:documentation
@@ -758,25 +810,17 @@ length of the row."))
 m into the vector v. The length of the vector must be the same as the
 length of the column."))
 
-(defmacro make-simple-matrix-get-col (vclass mclass)
-  `(defmethod simple-matrix-get-col ((v ,vclass) (m ,mclass) j)
-     (cond
-       ((>= j (size2 m))
-        (error "column index is out of range"))
-       ((not (= (size v) (size1 m)))
-        (error "matrix column size and vector length are not equal"))
-       (t
-        (dotimes (i (size1 m) v)
-          (setf (aref (data v) (* (stride v) i))
-                (aref (data m) (+ (* i (tda m)) j))))))))
-
-(make-simple-matrix-get-col simple-vector-double simple-matrix-double)
-
-(make-simple-matrix-get-col simple-vector-float simple-matrix-float)
-
-(make-simple-matrix-get-col simple-vector-int simple-matrix-int)
-
-(make-simple-matrix-get-col simple-vector-uint simple-matrix-uint)
+(defmethod simple-matrix-get-col ((v simple-vector-t)
+                                  (m simple-matrix-t) j)
+  (cond
+    ((>= j (size2 m))
+     (error "column index is out of range"))
+    ((not (= (size v) (size1 m)))
+     (error "matrix column size and vector length are not equal"))
+    (t
+     (dotimes (i (size1 m) v)
+       (setf (aref (data v) (* (stride v) i))
+             (aref (data m) (+ (* i (tda m)) j)))))))
 
 (defgeneric simple-matrix-set-col (m j v)
   (:documentation
@@ -784,25 +828,17 @@ length of the column."))
 column of the matrix m. The length of the vector must be the same
 as the length of the column."))
 
-(defmacro make-simple-matrix-set-col (mclass vclass)
-  `(defmethod simple-matrix-set-col ((m ,mclass) j (v ,vclass))
-     (cond
-       ((>= j (size2 m))
-        (error "column index is out of range"))
-       ((not (= (size v) (size1 m)))
-        (error "matrix column size and vector length are not equal"))
-       (t
-        (dotimes (i (size1 m) v)
-          (setf (aref (data m) (+ (* i (tda m)) j))
-                (aref (data v) (* (stride v) i))))))))
-
-(make-simple-matrix-set-col simple-matrix-double simple-vector-double)
-
-(make-simple-matrix-set-col simple-matrix-float simple-vector-float)
-
-(make-simple-matrix-set-col simple-matrix-int simple-vector-int)
-
-(make-simple-matrix-set-col simple-matrix-uint simple-vector-uint)
+(defmethod simple-matrix-set-col ((m simple-matrix-t) j
+                                  (v simple-vector-t))
+  (cond
+    ((>= j (size2 m))
+     (error "column index is out of range"))
+    ((not (= (size v) (size1 m)))
+     (error "matrix column size and vector length are not equal"))
+    (t
+     (dotimes (i (size1 m) v)
+       (setf (aref (data m) (+ (* i (tda m)) j))
+             (aref (data v) (* (stride v) i)))))))
 
 (defgeneric simple-matrix-swap-rows (m i j)
   (:documentation
@@ -847,23 +883,15 @@ src by copying the elements of src into dest. This function works for
 all matrices provided that the dimensions of the matrix dest match the
 transposed dimensions of the matrix src."))
 
-(defmacro make-simple-matrix-transpose (class)
-  `(defmethod simple-matrix-transpose ((dest ,class) (src ,class))
-     (if (or (not (= (size2 dest) (size1 src)))
-             (not (= (size1 dest) (size2 src))))
-         (error "dimensions of dext matrix must be transpose of rsc matrix")
-         (dotimes (i (size1 dest) dest)
-           (dotimes (j (size2 dest))
-             (setf (aref (data dest) (+ (* i (tda dest)) j))
-                   (aref (data src) (+ (* j (tda src)) i))))))))
-
-(make-simple-matrix-transpose simple-matrix-double)
-
-(make-simple-matrix-transpose simple-matrix-float)
-
-(make-simple-matrix-transpose simple-matrix-int)
-
-(make-simple-matrix-transpose simple-matrix-uint)
+(defmethod simple-matrix-transpose ((dest simple-matrix-t)
+                                    (src simple-matrix-t))
+  (if (or (not (= (size2 dest) (size1 src)))
+          (not (= (size1 dest) (size2 src))))
+      (error "dimensions of dext matrix must be transpose of rsc matrix")
+      (dotimes (i (size1 dest) dest)
+        (dotimes (j (size2 dest))
+          (setf (aref (data dest) (+ (* i (tda dest)) j))
+                (aref (data src) (+ (* j (tda src)) i)))))))
 
 (defgeneric simple-matrix-add (a b)
   (:documentation
@@ -871,24 +899,15 @@ transposed dimensions of the matrix src."))
 matrix a. The result a(i, j) <- a(i, j) + b(i, j) is stored in a and b
 remains unchanged. The two matrices must have the same dimensions."))
 
-(defmacro make-simple-matrix-add (class)
-  `(defmethod simple-matrix-add ((a ,class) (b ,class))
-     (if (or (not (= (size1 b) (size1 a)))
-             (not (= (size2 b) (size2 a))))
-         (error "matrices must have same dimensions")
-         (dotimes (i (size1 a) a)
-           (dotimes (j (size2 a))
-             (setf (aref (data a) (+ (* i (tda a)) j))
-                   (+ (aref (data a) (+ (* (tda a)) j))
-                      (aref (data b) (+ (* (tda b)) j)))))))))
-
-(make-simple-matrix-add simple-matrix-double)
-
-(make-simple-matrix-add simple-matrix-float)
-
-(make-simple-matrix-add simple-matrix-int)
-
-(make-simple-matrix-add simple-matrix-uint)
+(defmethod simple-matrix-add ((a simple-matrix-t) (b simple-matrix-t))
+  (if (or (not (= (size1 b) (size1 a)))
+          (not (= (size2 b) (size2 a))))
+      (error "matrices must have same dimensions")
+      (dotimes (i (size1 a) a)
+        (dotimes (j (size2 a))
+          (setf (aref (data a) (+ (* i (tda a)) j))
+                (+ (aref (data a) (+ (* (tda a)) j))
+                   (aref (data b) (+ (* (tda b)) j))))))))
 
 (defgeneric simple-matrix-sub (a b)
   (:documentation
@@ -897,24 +916,15 @@ of matrix a. The result a(i, j) <- a(i, j) − b(i, j) is stored in a
 and b remains unchanged. The two matrices must have the same
 dimensions."))
 
-(defmacro make-simple-matrix-sub (class)
-  `(defmethod simple-matrix-sub ((a ,class) (b ,class))
-     (if (or (not (= (size1 b) (size1 a)))
-             (not (= (size2 b) (size2 a))))
-         (error "matrices must have same dimensions")
-         (dotimes (i (size1 a) a)
-           (dotimes (j (size2 a))
-             (setf (aref (data a) (+ (* i (tda a)) j))
-                   (+ (aref (data a) (+ (* (tda a)) j))
-                      (aref (data b) (+ (* (tda b)) j)))))))))
-
-(make-simple-matrix-sub simple-matrix-double)
-
-(make-simple-matrix-sub simple-matrix-float)
-
-(make-simple-matrix-sub simple-matrix-int)
-
-(make-simple-matrix-sub simple-matrix-uint)
+(defmethod simple-matrix-sub ((a simple-matrix-t) (b simple-matrix-t))
+  (if (or (not (= (size1 b) (size1 a)))
+          (not (= (size2 b) (size2 a))))
+      (error "matrices must have same dimensions")
+      (dotimes (i (size1 a) a)
+        (dotimes (j (size2 a))
+          (setf (aref (data a) (+ (* i (tda a)) j))
+                (+ (aref (data a) (+ (* (tda a)) j))
+                   (aref (data b) (+ (* (tda b)) j))))))))
 
 (defgeneric simple-matrix-mul-elements (a b)
   (:documentation
@@ -922,24 +932,15 @@ dimensions."))
 of matrix b. The result a(i, j) <- a(i, j) ∗ b(i, j) is stored in a and
 b remains unchanged. The two matrices must have the same dimensions."))
 
-(defmacro make-simple-matrix-mul-elements (class)
-  `(defmethod simple-matrix-mul-elements ((a ,class) (b ,class))
-     (if (or (not (= (size1 b) (size1 a)))
-             (not (= (size2 b) (size2 a))))
-         (error "matrices must have same dimensions")
-         (dotimes (i (size1 a) a)
-           (dotimes (j (size2 a))
-             (setf (aref (data a) (+ (* i (tda a)) j))
-                   (* (aref (data a) (+ (* i (tda a)) j))
-                      (aref (data b) (+ (* i (tda b)) j)))))))))
-
-(make-simple-matrix-mul-elements simple-matrix-double)
-
-(make-simple-matrix-mul-elements simple-matrix-float)
-
-(make-simple-matrix-mul-elements simple-matrix-int)
-
-(make-simple-matrix-mul-elements simple-matrix-uint)
+(defmethod simple-matrix-mul-elements ((a simple-matrix-t) (b simple-matrix-t))
+  (if (or (not (= (size1 b) (size1 a)))
+          (not (= (size2 b) (size2 a))))
+      (error "matrices must have same dimensions")
+      (dotimes (i (size1 a) a)
+        (dotimes (j (size2 a))
+          (setf (aref (data a) (+ (* i (tda a)) j))
+                (* (aref (data a) (+ (* i (tda a)) j))
+                   (aref (data b) (+ (* i (tda b)) j))))))))
 
 (defgeneric simple-matrix-div-elements (a b)
   (:documentation
@@ -947,64 +948,37 @@ b remains unchanged. The two matrices must have the same dimensions."))
 matrix b. The result a(i, j) <- a(i, j)/b(i, j) is stored in a and b
 remains unchanged. The two matrices must have the same dimensions."))
 
-(defmacro make-simple-matrix-div-elements (class)
-  `(defmethod simple-matrix-div-elements ((a ,class) (b ,class))
-     (if (or (not (= (size1 b) (size1 a)))
-             (not (= (size2 b) (size2 a))))
-         (error "matrices must have same dimensions")
-         (dotimes (i (size1 a) a)
-           (dotimes (j (size2 a))
-             (setf (aref (data a) (+ (* i (tda a)) j))
-                   (* (aref (data a) (+ (* i (tda a)) j))
-                      (aref (data b) (+ (* i (tda b)) j)))))))))
-
-(make-simple-matrix-div-elements simple-matrix-double)
-
-(make-simple-matrix-div-elements simple-matrix-float)
-
-(make-simple-matrix-div-elements simple-matrix-int)
-
-(make-simple-matrix-div-elements simple-matrix-uint)
+(defmethod simple-matrix-div-elements ((a simple-matrix-t) (b simple-matrix-t))
+  (if (or (not (= (size1 b) (size1 a)))
+          (not (= (size2 b) (size2 a))))
+      (error "matrices must have same dimensions")
+      (dotimes (i (size1 a) a)
+        (dotimes (j (size2 a))
+          (setf (aref (data a) (+ (* i (tda a)) j))
+                (* (aref (data a) (+ (* i (tda a)) j))
+                   (aref (data b) (+ (* i (tda b)) j))))))))
 
 (defgeneric simple-matrix-scale (a x)
   (:documentation
    "This function multiplies the elements of matrix a by the constant
 factor x. The result a(i, j) <- xa(i, j) is stored in a."))
 
-(defmacro make-simple-matrix-scale (class)
-  `(defmethod simple-matrix-scale ((a ,class) x)
-     (dotimes (i (size1 a) a)
-       (dotimes (j (size2 a))
-         (setf (aref (data a) (+ (* i (tda a)) j))
-               (* (aref (data a) (+ (* i (tda a)) j)) x))))))
-
-(make-simple-matrix-scale simple-matrix-double)
-
-(make-simple-matrix-scale simple-matrix-float)
-
-(make-simple-matrix-scale simple-matrix-int)
-
-(make-simple-matrix-scale simple-matrix-uint)
+(defmethod simple-matrix-scale ((a simple-matrix-t) x)
+  (dotimes (i (size1 a) a)
+    (dotimes (j (size2 a))
+      (setf (aref (data a) (+ (* i (tda a)) j))
+            (* (aref (data a) (+ (* i (tda a)) j)) x)))))
 
 (defgeneric simple-matrix-add-constant (a x)
   (:documentation
    "This function adds the constant value x to the elements of the
 matrix a. The result a(i, j) <- a(i, j) + x is stored in a."))
 
-(defmacro make-simple-matrix-add-constant (class)
-  `(defmethod simple-matrix-add-constant ((a ,class) x)
-     (dotimes (i (size1 a) a)
-       (dotimes (j (size2 a))
-         (setf (aref (data a) (+ (* i (tda a)) j))
-               (+ (aref (data a) (+ (* i (tda a)) j)) x))))))
-
-(make-simple-matrix-add-constant simple-matrix-double)
-
-(make-simple-matrix-add-constant simple-matrix-float)
-
-(make-simple-matrix-add-constant simple-matrix-int)
-
-(make-simple-matrix-add-constant simple-matrix-uint)
+(defmethod simple-matrix-add-constant ((a simple-matrix-t) x)
+  (dotimes (i (size1 a) a)
+    (dotimes (j (size2 a))
+      (setf (aref (data a) (+ (* i (tda a)) j))
+            (+ (aref (data a) (+ (* i (tda a)) j)) x)))))
 
 (defgeneric simple-matrix-max (m)
   (:documentation
@@ -1068,6 +1042,12 @@ row-major order."))
    "Ths function returns t if all the elements of the matrix m are
 zero, and nil otherwise."))
 
+(defmethod simple-matrix-isnull ((m simple-matrix-t))
+  (dotimes (i (size1 m) t)
+    (dotimes (j (size2 m))
+      (if (not (null (aref (data m) (+ (* i (tda m)) j))))
+          (return nil)))))
+
 (defmacro make-simple-matrix-isnull (class zero)
   `(defmethod simple-matrix-isnull ((m ,class))
      (dotimes (i (size1 m) t)
@@ -1083,6 +1063,7 @@ zero, and nil otherwise."))
 
 (make-simple-matrix-isnull simple-matrix-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-matrix-ispos (m)
   (:documentation
    "This function returns t if all the elements of the matrix m are
@@ -1103,6 +1084,7 @@ strictly positive, and nil otherwise."))
 
 (make-simple-matrix-ispos simple-matrix-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-matrix-isneg (m)
   (:documentation
    "This function returns t if all the elements of the matrix m are
@@ -1123,6 +1105,7 @@ strictly negative, and nil otherwise."))
 
 (make-simple-matrix-isneg simple-matrix-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-matrix-isnonneg (m)
   (:documentation
    "This function returns t if all the elements of the matrix m are
@@ -1143,6 +1126,7 @@ non-negative, and nil otherwise."))
 
 (make-simple-matrix-isnonneg simple-matrix-uint 0)
 
+;; numeric variable type only
 (defgeneric simple-matrix-equal (a b)
   (:documentation
    "This function returns t if the matrices a and b are equal (by
@@ -1178,12 +1162,11 @@ determine how many bytes to read."))
                                &optional (str *standard-input*)
                                  (n1 nil) (n2 nil))
   (let ((s1 (if (null n1) (size1 m) n1))
-        (s2 (if (null n2) (size2 m) n2))
-        (element-type (second (type-of (data m)))))
+        (s2 (if (null n2) (size2 m) n2)))
     (dotimes (i s1 m)
       (dotimes (j s2)
         (setf (aref (data m) (+ (* i (tda m)) j))
-              (coerce (read str) element-type))))))
+              (read str))))))
 
 (defgeneric simple-matrix-write (m &optional str n1 n2)
   (:documentation
@@ -1202,6 +1185,8 @@ stream."))
            (if (= j (- s2 1))
                (format str "~S~%" (aref (data m) (+ (* i (tda m)) j)))
                (format str "~S~C" (aref (data m) (+ (* i (tda m)) j)) #\tab)))))))
+
+(make-simple-matrix-write simple-matrix-t :t)
 
 (make-simple-matrix-write simple-matrix-double :double)
 
