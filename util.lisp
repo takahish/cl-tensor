@@ -17,6 +17,7 @@
 
 (cl:in-package "SCT")
 
+
 (defun last1 (lst)
   (car (last lst)))
 
@@ -26,3 +27,19 @@
                    ((atom x) (cons x acc))
                    (t (rec (car x) (rec (cdr x) acc))))))
     (rec x nil)))
+
+(defun range (max &key (min 0) (step 1))
+  (labels ((rec (x acc)
+             (if (= x max)
+                 (nreverse acc)
+                 (rec (+ x step) (cons x acc)))))
+    (rec min nil)))
+
+(defmacro while (test &body body)
+  `(do ()
+     ((not ,test))
+     ,@body))
+
+(defmacro with-gensyms (syms &body body)
+  `(let ,(mapcar #'(lambda (s) `(,s (gensym))) syms)
+     ,@body))
