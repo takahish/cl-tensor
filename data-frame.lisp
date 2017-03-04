@@ -211,7 +211,7 @@ stream stream."
   (defun initialize-index ()
     (setf index 0)))
 
-(defun data-frame-read-csv (file &key (delimiter #\,) (header nil))
+(defun data-frame-read-csv (file &key (delimiter #\,))
   (let* ((path (pathname file))
          (n1 (file-row-count path))
          (n2 (file-column-count path delimiter))
