@@ -1,4 +1,4 @@
-;;;; cl-sct/vector.lisp
+;;;; cl-scl/vector.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -15,13 +15,13 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:in-package "SCT")
+(cl:in-package "SCL")
 
 
 ;;; element-type
 
 (defvar *vector-element-type*
-  `((:t . t)
+  `((:any . t)
     (:double . double-float)
     (:float . single-float)
     (:int . (signed-byte ,(* (cffi:foreign-type-size :int) 8)))
@@ -31,7 +31,7 @@
   (cdr (assoc element-type *vector-element-type*)))
 
 (defvar *vector-element-nil*
-  '((:t . nil)
+  '((:any . nil)
     (:double . 0.0d0)
     (:float . 0.0)
     (:int . 0)
@@ -41,7 +41,7 @@
   (cdr (assoc element-type *vector-element-nil*)))
 
 (defvar *vector-element-t*
-  '((:t . t)
+  '((:any . t)
     (:double . 1.0d0)
     (:float . 1.0)
     (:int . 1)
@@ -55,7 +55,7 @@
 
 (defun vector-data-type (element-type n)
   (cond
-    ((eq element-type :t)
+    ((eq element-type :any)
      `(simple-vector ,n))
     ((or (eq element-type :double)
          (eq element-type :float)
@@ -67,22 +67,25 @@
 
 ;;; vector
 
+;; abstract: vector-t
 (defclass vector-t ()
   ((data :accessor data :initarg :data)
    (size :accessor size :initarg :size)
    (stride :accessor stride :initarg :stride)
    (owner :accessor owner :initarg :owner)))
 
-(defclass vector-double (vector-t) ())
+(defclass vector-any (vector-t) ())
 
-(defclass vector-float (vector-t) ())
+(defclass vector-double (vector-any) ())
 
-(defclass vector-int (vector-t) ())
+(defclass vector-float (vector-any) ())
 
-(defclass vector-uint (vector-t) ())
+(defclass vector-int (vector-any) ())
+
+(defclass vector-uint (vector-any) ())
 
 (defvar *vector-type*
-  '((:t . vector-t)
+  '((:any . vector-any)
     (:double . vector-double)
     (:float . vector-float)
     (:int . vector-int)
@@ -91,7 +94,7 @@
 (defun vector-type (element-type)
   (cdr (assoc element-type *vector-type*)))
 
-(defun make-vector (n &key (element-type :t)
+(defun make-vector (n &key (element-type :any)
                         (initial-element nil) (initial-contents nil))
   (cond
     ((not (null initial-element))
@@ -125,16 +128,18 @@
 (defclass vector-t-view ()
   ((shared-vector :accessor shared-vector :initarg :shared-vector)))
 
-(defclass vector-double-view (vector-t-view) ())
+(defclass vector-any-view (vector-t-view) ())
 
-(defclass vector-float-view (vector-t-view) ())
+(defclass vector-double-view (vector-any-view) ())
 
-(defclass vector-int-view (vector-t-view) ())
+(defclass vector-float-view (vector-any-view) ())
 
-(defclass vector-uint-view (vector-t-view) ())
+(defclass vector-int-view (vector-any-view) ())
+
+(defclass vector-uint-view (vector-any-view) ())
 
 (defvar *vector-view-type*
-  '((:t . vector-t-view)
+  '((:any . vector-any-view)
     (:double . vector-double-view)
     (:float . vector-float-view)
     (:int . vector-int-view)
@@ -151,7 +156,7 @@
    "Return a copy of vector with elements coerced element type
 element-type."))
 
-(defmethod vector-coerce ((v vector-t) element-type)
+(defmethod vector-coerce ((v vector-any) element-type)
   (let ((alt (make-vector (size v) :element-type element-type))
         (etype (vector-element-type element-type)))
     (dotimes (i (size v) alt)
@@ -164,7 +169,7 @@ element-type."))
 outside the allowed range of 0 to n - 1 then the error handler is
 invoked."))
 
-(defmethod vector-get ((v vector-t) i)
+(defmethod vector-get ((v vector-any) i)
   ;; aref delegate range check.
   (aref (data v) (* i (stride v))))
 
@@ -174,7 +179,7 @@ invoked."))
 x. If i lies outside the allowed range of 0 to n - 1 then the error
 handler is invoked."))
 
-(defmethod vector-set ((v vector-t) i x)
+(defmethod vector-set ((v vector-any) i x)
   ;; aref delegate range check.
   (setf (aref (data v) (* i (stride v))) x)
   v)
@@ -183,7 +188,7 @@ handler is invoked."))
   (:documentation
    "This function sets all the elements of the vector v to the value x."))
 
-(defmethod vector-set-all ((v vector-t) x)
+(defmethod vector-set-all ((v vector-any) x)
   (dotimes (i (size v) v)
     (setf (aref (data v) (* i (stride v))) x)))
 
@@ -198,7 +203,7 @@ handler is invoked."))
        (dotimes (i (size v) v)
          (setf (aref (data v) (* i (stride v))) ,zero)))))
 
-(make-vector-set-zero :t)
+(make-vector-set-zero :any)
 
 (make-vector-set-zero :double)
 
@@ -224,7 +229,7 @@ the vector v to zero except for the i-th element which is set to one."))
        (setf (aref (data v) (* i (stride v))) ,one)
        v)))
 
-(make-vector-set-basis :t)
+(make-vector-set-basis :any)
 
 (make-vector-set-basis :double)
 
@@ -266,7 +271,7 @@ elements."))
             (setf (shared-vector view) sub)
             view))))))
 
-(make-vector-subvector :t)
+(make-vector-subvector :any)
 
 (make-vector-subvector :double)
 
@@ -276,7 +281,7 @@ elements."))
 
 (make-vector-subvector :uint)
 
-(defun vector-view-array (base n &key (element-type :t))
+(defun vector-view-array (base n &key (element-type :any))
   "This function return a vector view of an array. The start of the
 new vector is given by base and has n elements."
   (cond
@@ -299,7 +304,7 @@ new vector is given by base and has n elements."
    "This function copies the elements of the vector src into the
 vector dest. The two vectors must have the same length."))
 
-(defmethod vector-copy ((dest vector-t) (src vector-t))
+(defmethod vector-copy ((dest vector-any) (src vector-any))
   (if (not (= (size dest) (size src)))
       (error "vector lengths are not equal")
       (dotimes (j (size src) dest)
@@ -311,7 +316,7 @@ vector dest. The two vectors must have the same length."))
    "This function exchanges the i-th and j-th elements of the vector v
 in-place."))
 
-(defmethod vector-swap-elements ((v vector-t) i j)
+(defmethod vector-swap-elements ((v vector-any) i j)
   ;; aref delegate range check.
   (if (not (= i j))
       (progn
@@ -323,7 +328,7 @@ in-place."))
   (:documentation
    "This function reverses the order of the elements of the vector v."))
 
-(defmethod vector-reverse ((v vector-t))
+(defmethod vector-reverse ((v vector-any))
   ;; identity wrap up nreaverse, because STYLE-WARNING has occurred.
   (identity (nreverse (data v)))
   v)
@@ -334,7 +339,7 @@ in-place."))
 vector a. The result ai <- ai + bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmethod vector-add ((a vector-t) (b vector-t))
+(defmethod vector-add ((a vector-any) (b vector-any))
   (if (not (= (size a) (size b)))
       (error "vectors must have same length")
       (dotimes (i (size a) a)
@@ -348,7 +353,7 @@ unchanged. The two vectors must have the same length."))
 of vector a. The result ai <- ai − bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmethod vector-sub ((a vector-t) (b vector-t))
+(defmethod vector-sub ((a vector-any) (b vector-any))
   (if (not (= (size a) (size b)))
       (error "vectors must have same length")
       (dotimes (i (size a) a)
@@ -362,7 +367,7 @@ unchanged. The two vectors must have the same length."))
 of vector b. The result ai <- ai ∗ bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmethod vector-mul ((a vector-t) (b vector-t))
+(defmethod vector-mul ((a vector-any) (b vector-any))
   (if (not (= (size a) (size b)))
       (error "vectors must have same length")
       (dotimes (i (size a) a)
@@ -376,7 +381,7 @@ unchanged. The two vectors must have the same length."))
 vector b. The result ai <- ai/bi is stored in a and b remains
 unchanged. The two vectors must have the same length."))
 
-(defmethod vector-div ((a vector-t) (b vector-t))
+(defmethod vector-div ((a vector-any) (b vector-any))
   (if (not (= (size a) (size b)))
       (error "vectors must have same length")
       (dotimes (i (size a) a)
@@ -389,7 +394,7 @@ unchanged. The two vectors must have the same length."))
    "This function multiplies the elements of vector a by the constant
 factor x. The result ai <- xai is stored in a."))
 
-(defmethod vector-scale ((a vector-t) x)
+(defmethod vector-scale ((a vector-any) x)
   (dotimes (i (size a) a)
     (setf (aref (data a) (* i (stride a)))
           (* (aref (data a) (* i (stride a))) x))))
@@ -399,7 +404,7 @@ factor x. The result ai <- xai is stored in a."))
    "This function adds the constant value x to the elements of the
 vector a. The result ai <- ai + x is stored in a."))
 
-(defmethod vector-add-constant ((a vector-t) x)
+(defmethod vector-add-constant ((a vector-any) x)
   (dotimes (i (size a) a)
     (setf (aref (data a) (* i (stride a)))
           (+ (aref (data a) (* i (stride a))) x))))
@@ -408,21 +413,21 @@ vector a. The result ai <- ai + x is stored in a."))
   (:documentation
    "This function returns the maximum value in the vector v."))
 
-(defmethod vector-max ((v vector-t))
+(defmethod vector-max ((v vector-any))
   (reduce #'max (data v)))
 
 (defgeneric vector-min (v)
   (:documentation
    "This function returns the minimum value in the vector v."))
 
-(defmethod vector-min ((v vector-t))
+(defmethod vector-min ((v vector-any))
   (reduce #'min (data v)))
 
 (defgeneric vector-minmax (v)
   (:documentation
    "This function returns the minimum and maximum values in the vector v."))
 
-(defmethod vector-minmax ((v vector-t))
+(defmethod vector-minmax ((v vector-any))
   (values (reduce #'min (data v)) (reduce #'max (data v))))
 
 (defgeneric vector-max-index (v)
@@ -431,7 +436,7 @@ vector a. The result ai <- ai + x is stored in a."))
 v. When there are several equal maximum elements then the lowest
 index is returned."))
 
-(defmethod vector-max-index ((v vector-t))
+(defmethod vector-max-index ((v vector-any))
   (position (reduce #'max (data v)) (data v)))
 
 (defgeneric vector-min-index (v)
@@ -440,7 +445,7 @@ index is returned."))
 v. When there are several equal minimum elements then the lowest
 index is returned."))
 
-(defmethod vector-min-index ((v vector-t))
+(defmethod vector-min-index ((v vector-any))
   (position (reduce #'min (data v)) (data v)))
 
 (defgeneric vector-minmax-index (v)
@@ -449,7 +454,7 @@ index is returned."))
 values in the vector v. When there are several equal minimum or
 maximum elements then the lowest indices are returned."))
 
-(defmethod vector-minmax-index ((v vector-t))
+(defmethod vector-minmax-index ((v vector-any))
   (values (position (reduce #'min (data v)) (data v))
           (position (reduce #'max (data v)) (data v))))
 
@@ -571,7 +576,7 @@ comparison of element values) and NIL otherwise."))
 array a must be preallocated with the correct length since the
 function uses the size of a to determine how many values to read."))
 
-(defmethod vector-read ((a vector-t)
+(defmethod vector-read ((a vector-any)
                         &optional (stream *standard-input*) (n nil))
   (dotimes (i (if (null n) (size a) n) a)
     (vector-set a i (read stream))))
@@ -589,7 +594,7 @@ the stream str."))
          (dotimes (i s v)
            (format stream "~S~%" (vector-get v i)))))))
 
-(make-vector-write :t)
+(make-vector-write :any)
 
 (make-vector-write :double)
 
@@ -607,15 +612,16 @@ the stream str."))
       (vector-write v stream)
       (progn
         (vector-write v stream *print-object-vector-size*)
-        (format stream "; omitted ~A entries~%" (- (size v) *print-object-vector-size*)))))
+        (format stream "; omitted ~A entries~%"
+                (- (size v) *print-object-vector-size*)))))
 
-;; vector-t print-object
-(defmethod print-object ((v vector-t) stream)
+;; vector-any print-object
+(defmethod print-object ((v vector-any) stream)
   (print-vector v stream)
   (call-next-method))
 
-;; vector-t-view print-object
-(defmethod print-object ((view vector-t-view) stream)
+;; vector-any-view print-object
+(defmethod print-object ((view vector-any-view) stream)
   (print-vector (shared-vector view) stream)
   (call-next-method))
 
@@ -623,7 +629,7 @@ the stream str."))
   (:documentation
    "Apply function to successive elements of array."))
 
-(defmethod vector-map (func (a vector-t) &optional (n nil))
+(defmethod vector-map (func (a vector-any) &optional (n nil))
   (dotimes (i (if (null n) (size a) n) a)
     (vector-set a i (funcall func (vector-get a i)))))
 
@@ -631,7 +637,7 @@ the stream str."))
   (:documentation
    "Combine the elements of array using function."))
 
-(defmethod vector-reduce (func init (a vector-t) &optional (n nil))
+(defmethod vector-reduce (func init (a vector-any) &optional (n nil))
   (let ((acc init))
     (dotimes (i (if (null n) (size a) n) acc)
       (setf acc (funcall func acc (vector-get a i))))))
@@ -641,7 +647,7 @@ the stream str."))
    "Return the number of elements in a vector satisfying a test with
 item, which defaults to eql."))
 
-(defmethod vector-count-if (item (v vector-t) &key (test #'eql))
+(defmethod vector-count-if (item (v vector-any) &key (test #'eql))
   (let ((count 0))
     (dotimes (i (size v) count)
       (if (funcall test item (aref (data v) (* (stride v) i)))
@@ -652,7 +658,7 @@ item, which defaults to eql."))
    "Return a copy of vector with elements satisfying the test (default
 is eql) with item removed."))
 
-(defmethod vector-remove-if (item (v vector-t) &key (test #'eql))
+(defmethod vector-remove-if (item (v vector-any) &key (test #'eql))
   (let ((alt (make-vector (- (size v) (vector-count-if item v :test test))))
         (j 0))
     (dotimes (i (size v) alt)

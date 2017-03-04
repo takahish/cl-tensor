@@ -1,4 +1,4 @@
-;;;; cl-sct/data-frame.lisp
+;;;; cl-scl/data-frame.lisp
 
 ;;;; Copyright (C) 2017 Takahiro Ishikawa
 ;;;;
@@ -15,7 +15,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:in-package "SCT")
+(cl:in-package "SCL")
 
 
 ;;; data-frame
@@ -26,6 +26,8 @@
    (size2 :accessor size2 :initarg :size2)
    (index :accessor index :initarg :index)
    (names :accessor names :initarg :names)))
+
+(defclass data-frame-any (data-frame-t) ())
 
 (defun make-default-names-list (n2)
   (mapcar #'(lambda (x)
@@ -41,21 +43,21 @@
         (nms (if (null names) (make-default-names-list n2) names)))
     (cond
       ((not (null initial-element))
-       (make-instance 'data-frame-t
+       (make-instance 'data-frame-any
                       :data (make-matrix n1 n2 :initial-element initial-element)
                       :size1 n1
                       :size2 n2
                       :index (make-array n1 :initial-contents idx)
                       :names (make-array n2 :initial-contents nms)))
       ((not (null initial-contents))
-       (make-instance 'data-frame-t
+       (make-instance 'data-frame-any
                       :data (make-matrix n1 n2 :initial-contents (flatten initial-contents))
                       :size1 n1
                       :size2 n2
                       :index (make-array n1 :initial-contents idx)
                       :names (make-array n2 :initial-contents nms)))
       (t
-       (make-instance 'data-frame-t
+       (make-instance 'data-frame-any
                       :data (make-matrix n1 n2)
                       :size1 n1
                       :size2 n2
@@ -64,6 +66,16 @@
 
 
 ;;; function
+
+(defun data-frame-set-index (df index)
+  "This function copies the elements of the index into the index of
+data-frame df."
+  (setf (index df) (make-array (size1 df) :initial-contents index)))
+
+(defun data-frame-set-names (df names)
+  "This function copies the elements of the names into the
+names of data-frame df."
+  (setf (names df) (make-array (size2 df) :initial-contents names)))
 
 (defun data-frame-row (df index)
   "This function returns a vector view of the row of index of the
@@ -151,12 +163,67 @@ stream stream."
                  (- (size1 df) *print-object-data-frame-size1*)
                  (- (size2 df) *print-object-data-frame-size2*)))))
 
-; data-frame-t print-object
-(defmethod print-object ((df data-frame-t) stream)
+;; data-frame-any print-object
+(defmethod print-object ((df data-frame-any) stream)
   (print-data-frame df stream)
   (call-next-method))
 
-(defun data-frame-read-tsv (df file)
-  (with-open-file (stream file :direction :input)
-    (data-frame-read df stream))
-  df)
+(defun file-row-count (path)
+  (with-open-file (stream path :direction :input)
+    (loop with buffer = (make-string 4096
+                                     :element-type 'character
+                                     :initial-element #\NULL)
+       for bytes = (read-sequence buffer stream)
+       until (= bytes 0)
+       sum (count #\Newline buffer :end bytes))))
+
+(defun file-column-count (path delimiter &key (test #'eql))
+  (with-open-file (stream path :direction :input)
+    (let ((line (read-line stream)))
+      (1+ (count-if #'(lambda (c)
+                        (funcall test c (coerce delimiter 'character)))
+                    line)))))
+
+(defun file-buffer-count (path)
+  (with-open-file (stream path :direction :input :element-type 'character)
+    (file-length stream)))
+
+(defun split-string (string delimiter)
+   (loop for i = 0 then (1+ j)
+      as j = (position (coerce delimiter 'character) string :start i)
+      collect (subseq string i j)
+      while j))
+
+(defun split-buffer (buffer delimiter)
+  (flatten (mapcar #'(lambda (line)
+                       (split-string line (coerce delimiter 'character)))
+                   (split-string buffer #\Newline))))
+
+;; sharing of index
+(let ((index 0))
+  (defun set-elements (df lst)
+    (if (null lst)
+        df
+        (progn
+          (setf (aref (data (data df)) index) (read-from-string (car lst)))
+          (incf index)
+          (set-elements df (cdr lst)))))
+  (defun initialize-index ()
+    (setf index 0)))
+
+(defun data-frame-read-csv (file &key (delimiter #\,) (header nil))
+  (let* ((path (pathname file))
+         (n1 (file-row-count path))
+         (n2 (file-column-count path delimiter))
+         (size (file-buffer-count path))
+         (df (make-data-frame n1 n2))
+         (buffer (make-string size
+                              :element-type 'character
+                              :initial-element #\NULL)))
+    (with-open-file (stream path :direction :input)
+      (read-sequence buffer stream)
+      (mapcar #'(lambda (line)
+                  (set-elements df (split-string line (coerce delimiter 'character))))
+              (split-string (string-trim '(#\Space #\Tab #\Newline) buffer) #\Newline))
+      (initialize-index)
+      df)))

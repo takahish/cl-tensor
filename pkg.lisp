@@ -1,4 +1,4 @@
-;;;; cl-sct/pkg.lisp
+;;;; cl-scl/pkg.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -15,13 +15,13 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:defpackage "SCT"
+(cl:defpackage "SCL"
   (:use "CL")
-  (:export ;; cl-sct/util.lisp
+  (:export ;; cl-scl/util.lisp
            "LAST1"
            "FLATTEN"
            "WHILE"
-           ;; cl-sct/vector.lisp
+           ;; cl-scl/vector.lisp
            "MAKE-VECTOR"
            "VECTOR-COERCE"
            "VECTOR-GET"
@@ -57,7 +57,7 @@
            "VECTOR-REDUCE"
            "VECTOR-COUNT-IF"
            "VECTOR-REMOVE-IF"
-           ;; cl-sct/matrix.lisp
+           ;; cl-scl/matrix.lisp
            "MAKE-MATRIX"
            "MATRIX-COERCE"
            "MATRIX-GET"
@@ -101,12 +101,14 @@
            "MATRIX-EQUAL"
            "MATRIX-READ"
            "MATRIX-WRITE"
-           ;; cl-sct/data-frame.lisp
+           ;; cl-scl/data-frame.lisp
            "MAKE-DATA-FRAME"
+           "DATA-FRAME-SET-NAMES"
+           "DATA-FRAME-SET-INDEX"
            "DATA-FRAME-ROW"
            "DATA-FRAME-COLUMN"
            "DATA-FRAME-GET-ROW"
            "DATA-FRAME-SET-ROW"
            "DATA-FRAME-GET-COL"
            "DATA-FRAME-SET-COL"
-           "DATA-FRAME-READ-TSV"))
+           "DATA-FRAME-READ-CSV"))
