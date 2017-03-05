@@ -1,4 +1,4 @@
-;;;; cl-sct/gsl/qrng.lisp
+;;;; cl-scl/gsl/qrng.lisp
 ;;;;
 ;;;; This file describes functions for generating quasi-random
 ;;;; sequences in arbitrary dimensions. A quasi-random sequence

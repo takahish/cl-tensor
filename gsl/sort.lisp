@@ -1,4 +1,4 @@
-;;;; cl-sct/gsl/sort.lisp
+;;;; cl-scl/gsl/sort.lisp
 ;;;;
 ;;;; This file describes functions for sorting data, both directly and
 ;;;; indirectly (using an index). All the functions use the heapsort
@@ -28,6 +28,9 @@
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
 (cl:in-package "GSL")
+
+
+;; functions
 
 (defmacro make-compare-func (name element-type &body body)
   `(cffi:defcallback ,name :int ((a :pointer) (b :pointer))
@@ -80,81 +83,73 @@
    "This function sorts the n elements of the vector into ascending
 order."))
 
-(defmacro make-sort-asc-simple-vector (class element-type func)
+(defmacro make-sort-asc-scl-vector (class element-type func)
   `(defmethod sort-asc ((v ,class) &optional (n nil))
-     (let ((size (if (null n) (sct::size v) n)))
-       (cffi:with-pointer-to-vector-data (data (sct::data v))
+     (let ((size (if (null n) (scl::size v) n)))
+       (cffi:with-pointer-to-vector-data (data (scl::data v))
          (gsl_heapsort data size
                        (cffi:foreign-type-size ,element-type)
                        (cffi:callback ,func))
          v))))
 
-(make-sort-asc-simple-vector sct::simple-vector-double
-                             :double <-double)
+(make-sort-asc-scl-vector scl::vector-double :double <-double)
 
-(make-sort-asc-simple-vector sct::simple-vector-float
-                             :float <-float)
+(make-sort-asc-scl-vector scl::vector-float :float <-float)
 
-(make-sort-asc-simple-vector sct::simple-vector-int
-                             :int <-int)
+(make-sort-asc-scl-vector scl::vector-int :int <-int)
 
-(make-sort-asc-simple-vector sct::simple-vector-uint
-                             :unsigned-int <-uint)
+(make-sort-asc-scl-vector scl::vector-uint :unsigned-int <-uint)
 
-(defmacro make-sort-asc-vector (class element-type compare-func)
+(defmacro make-sort-asc-gsl-vector (class element-type func)
   `(defmethod sort-asc ((v ,class) &optional (n nil))
-     (let ((size (if (null n) (size v) n)))
+     (let ((size (if (null n) (scl::size v) n)))
        (gsl_heapsort (vector-ptr v 0) size
                      (cffi:foreign-type-size ,element-type)
-                     (cffi:callback ,compare-func))
+                     (cffi:callback ,func))
        v)))
 
-(make-sort-asc-vector vector-double :double <-double)
+(make-sort-asc-gsl-vector gsl-vector-double :double <-double)
 
-(make-sort-asc-vector vector-float :float <-float)
+(make-sort-asc-gsl-vector gsl-vector-float :float <-float)
 
-(make-sort-asc-vector vector-int :int <-int)
+(make-sort-asc-gsl-vector gsl-vector-int :int <-int)
 
-(make-sort-asc-vector vector-uint :unsigned-int <-uint)
+(make-sort-asc-gsl-vector gsl-vector-uint :unsigned-int <-uint)
 
 (defgeneric sort-desc (v &optional n)
   (:documentation
    "This function sorts the n elements of the vector into descending
 order."))
 
-(defmacro make-sort-desc-simple-vector (class element-type func)
+(defmacro make-sort-desc-scl-vector (class element-type func)
   `(defmethod sort-desc ((v ,class) &optional (n nil))
-     (let ((size (if (null n) (sct::size v) n)))
-       (cffi:with-pointer-to-vector-data (data (sct::data v))
+     (let ((size (if (null n) (scl::size v) n)))
+       (cffi:with-pointer-to-vector-data (data (scl::data v))
          (gsl_heapsort data size
                        (cffi:foreign-type-size ,element-type)
                        (cffi:callback ,func))
          v))))
 
-(make-sort-desc-simple-vector sct::simple-vector-double
-                              :double >-double)
+(make-sort-desc-scl-vector scl::vector-double :double >-double)
 
-(make-sort-desc-simple-vector sct::simple-vector-float
-                              :float >-float)
+(make-sort-desc-scl-vector scl::vector-float :float >-float)
 
-(make-sort-desc-simple-vector sct::simple-vector-int
-                              :int >-int)
+(make-sort-desc-scl-vector scl::vector-int :int >-int)
 
-(make-sort-desc-simple-vector sct::simple-vector-uint
-                              :unsigned-int >-uint)
+(make-sort-desc-scl-vector scl::vector-uint :unsigned-int >-uint)
 
-(defmacro make-sort-desc-vector (class element-type func)
+(defmacro make-sort-desc-gsl-vector (class element-type func)
   `(defmethod sort-desc ((v ,class) &optional (n nil))
-     (let ((size (if (null n) (size v) n)))
+     (let ((size (if (null n) (scl::size v) n)))
        (gsl_heapsort (vector-ptr v 0) size
                      (cffi:foreign-type-size ,element-type)
                      (cffi:callback ,func))
        v)))
 
-(make-sort-desc-vector vector-double :double >-double)
+(make-sort-desc-gsl-vector gsl-vector-double :double >-double)
 
-(make-sort-desc-vector vector-float :float >-float)
+(make-sort-desc-gsl-vector gsl-vector-float :float >-float)
 
-(make-sort-desc-vector vector-int :int >-int)
+(make-sort-desc-gsl-vector gsl-vector-int :int >-int)
 
-(make-sort-desc-vector vector-uint :unsigned-int >-uint)
+(make-sort-desc-gsl-vector gsl-vector-uint :unsigned-int >-uint)

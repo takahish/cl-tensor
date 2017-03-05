@@ -1,4 +1,4 @@
-;;;; cl-sct/gsl/pkg.lisp
+;;;; cl-scl/gsl/pkg.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -17,7 +17,7 @@
 
 (cl:defpackage "GSL"
   (:use "CL")
-  (:export ;; cl-sct/gsl/vector.lisp
+  (:export ;; cl-scl/gsl/vector.lisp
            "VECTOR-ALLOC"
            "VECTOR-CALLOC"
            "VECTOR-FREE"
@@ -50,14 +50,10 @@
            "VECTOR-EQUAL"
            "VECTOR-SET-SEQUENCE"
            "MAKE-VECTOR"
-           "VECTOR-TO-SIMPLE-VECTOR"
-           "SIMPLE-VECTOR-TO-VECTOR"
-           "VECTOR-COPY-FROM-SIMPLE-VECTOR"
            "VECTOR-READ"
            "VECTOR-WRITE"
-           "VECTOR-MAP"
-           "VECTOR-REDUCE"
-           ;; cl-sct/gsl/matrix.lisp
+           "VECTOR-COPY-FROM-SCL-VECTOR"
+           ;; cl-scl/gsl/matrix.lisp
            "MATRIX-ALLOC"
            "MATRIX-CALLOC"
            "MATRIX-FREE"
@@ -98,15 +94,13 @@
            "MATRIX-SET-SEQUENCE"
            "MATRIX-SET-2DARRAY"
            "MAKE-MATRIX"
-           "MATRIX-TO-SIMPLE-MATRIX"
-           "SIMPLE-MATRIX-TO-MATRIX"
-           "MATRIX-COPY-FROM-SIMPLE-MATRIX"
            "MATRIX-READ"
            "MATRIX-WRITE"
-           ;; cl-sct/gsl/sort.lisp
+           "MATRIX-COPY-FROM-SCL-MATRIX"
+           ;; cl-scl/gsl/sort.lisp
            "SORT-ASC"
            "SORT-DESC"
-           ;; cl-sct/gsl/rng.lisp
+           ;; cl-scl/gsl/rng.lisp
            "*RNG-DEFAULT*"
            "*RNG-DEFAULT-SEED*"
            "RNG-ALLOC"
@@ -124,7 +118,7 @@
            "RNG-ENV-SETUP"
            "RNG-MEMCPY"
            "RNG-CLONE"
-           ;; cl-sct/gsl/qrng.lisp
+           ;; cl-scl/gsl/qrng.lisp
            "*QRNG-DEFAULT*"
            "QRNG-ALLOC"
            "QRNG-FREE"
@@ -135,7 +129,7 @@
            "QRNG-STATE"
            "QRNG-MEMCPY"
            "QRNG-CLONE"
-           ;; cl-sct/gsl/randist.lisp
+           ;; cl-scl/gsl/randist.lisp
            "*RNG*"
            "RAN-GAUSSIAN"
            "RAN-GAUSSIAN-PDF"
@@ -200,7 +194,7 @@
            "RAN-BINOMIAL-PDF"
            "CDF-BINOMIAL-P"
            "CDF-BINOMIAL-Q"
-           ;; cl-sct/gsl/stats.lisp
+           ;; cl-scl/gsl/stats.lisp
            "STATS-MEAN"
            "STATS-VARIANCE"
            "STATS-VARIANCE-M"

@@ -1,4 +1,4 @@
-;;;; cl-sct/gsl/randist.lisp
+;;;; cl-scl/gsl/randist.lisp
 ;;;;
 ;;;; This file describes for generating random variates and computing
 ;;;; their probability distributions. Samples from the distributions
@@ -23,7 +23,6 @@
 
 (cl:in-package "GSL")
 
-(defvar *rng* (gsl:rng-alloc))
 
 (defun gen-ran (n fn &rest args)
   "This function returns n random variates using gsl random umber
