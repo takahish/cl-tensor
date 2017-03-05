@@ -1,4 +1,4 @@
-;;;; cl-sct/util.lisp
+;;;; sct/util.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;

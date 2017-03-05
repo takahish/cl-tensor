@@ -1,4 +1,4 @@
-;;;; cl-scl/data-frame.lisp
+;;;; scl/data-frame.lisp
 
 ;;;; Copyright (C) 2017 Takahiro Ishikawa
 ;;;;
@@ -16,53 +16,6 @@
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
 (cl:in-package "SCL")
-
-
-;;; data-frame
-
-(defclass data-frame-t ()
-  ((data :accessor data :initarg :data)
-   (size1 :accessor size1 :initarg :size1)
-   (size2 :accessor size2 :initarg :size2)
-   (index :accessor index :initarg :index)
-   (names :accessor names :initarg :names)))
-
-(defclass data-frame-any (data-frame-t) ())
-
-(defun make-default-names-list (n2)
-  (mapcar #'(lambda (x)
-              (intern (concatenate 'string "V" (write-to-string x))))
-          (range (1+ n2) :min 1)))
-
-(defun make-default-index-list (n1)
-  (range (1+ n1) :min 1))
-
-(defun make-data-frame (n1 n2 &key (initial-element nil) (initial-contents nil)
-                                (names nil) (index nil))
-  (let ((idx (if (null index) (make-default-index-list n1) index))
-        (nms (if (null names) (make-default-names-list n2) names)))
-    (cond
-      ((not (null initial-element))
-       (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2 :initial-element initial-element)
-                      :size1 n1
-                      :size2 n2
-                      :index (make-array n1 :initial-contents idx)
-                      :names (make-array n2 :initial-contents nms)))
-      ((not (null initial-contents))
-       (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2 :initial-contents (flatten initial-contents))
-                      :size1 n1
-                      :size2 n2
-                      :index (make-array n1 :initial-contents idx)
-                      :names (make-array n2 :initial-contents nms)))
-      (t
-       (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2)
-                      :size1 n1
-                      :size2 n2
-                      :index (make-array n1 :initial-contents idx)
-                      :names (make-array n2 :initial-contents nms))))))
 
 
 ;;; function
@@ -188,26 +141,27 @@ stream stream."
   (with-open-file (stream path :direction :input :element-type 'character)
     (file-length stream)))
 
-(defun split-string (string delimiter)
-   (loop for i = 0 then (1+ j)
-      as j = (position (coerce delimiter 'character) string :start i)
-      collect (subseq string i j)
-      while j))
+(defun split-buffer (buffer delimiter length)
+  (let ((stack (make-array length))
+        (index 0))
+    (loop for i = 0 then (1+ j)
+       as j = (position (coerce delimiter 'character) buffer :start i)
+       do (progn
+            (setf (aref stack index) (subseq buffer i j))
+            (incf index))
+       while (and j (< index length)))
+    stack))
 
-(defun split-buffer (buffer delimiter)
-  (flatten (mapcar #'(lambda (line)
-                       (split-string line (coerce delimiter 'character)))
-                   (split-string buffer #\Newline))))
+(defun split-line (line delimiter length)
+  (split-buffer line delimiter length))
 
 ;; sharing of index
 (let ((index 0))
-  (defun set-elements (df lst)
-    (if (null lst)
-        df
-        (progn
-          (setf (aref (data (data df)) index) (read-from-string (car lst)))
-          (incf index)
-          (set-elements df (cdr lst)))))
+  (defun set-row-elements (df line length)
+    (dotimes (j length)
+      (setf (aref (data (data df)) index)
+            (read-from-string (svref line j)))
+      (incf index)))
   (defun initialize-index ()
     (setf index 0)))
 
@@ -222,8 +176,13 @@ stream stream."
                               :initial-element #\NULL)))
     (with-open-file (stream path :direction :input)
       (read-sequence buffer stream)
-      (mapcar #'(lambda (line)
-                  (set-elements df (split-string line (coerce delimiter 'character))))
-              (split-string (string-trim '(#\Space #\Tab #\Newline) buffer) #\Newline))
-      (initialize-index)
-      df)))
+      (let ((lines (split-buffer buffer #\Newline n1)))
+        (dotimes (i n1)
+          (set-row-elements df
+                            (split-line (string-trim '(#\Space #\Tab #\Newline)
+                                                     (svref lines i))
+                                        (coerce delimiter 'character)
+                                        n2)
+                            n2))
+        (initialize-index)
+        df))))

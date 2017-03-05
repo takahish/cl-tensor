@@ -1,4 +1,4 @@
-;;;; cl-scl/pkg.lisp
+;;;; scl/pkg.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -17,12 +17,13 @@
 
 (cl:defpackage "SCL"
   (:use "CL")
-  (:export ;; cl-scl/util.lisp
+  (:export ;; scl/util.lisp
            "LAST1"
            "FLATTEN"
            "WHILE"
-           ;; cl-scl/vector.lisp
+           ;; scl/vector-type.lisp
            "MAKE-VECTOR"
+           ;; scl/vector.lisp
            "VECTOR-COERCE"
            "VECTOR-GET"
            "VECTOR-SET"
@@ -57,8 +58,9 @@
            "VECTOR-REDUCE"
            "VECTOR-COUNT-IF"
            "VECTOR-REMOVE-IF"
-           ;; cl-scl/matrix.lisp
+           ;; scl/matrix-type.lisp
            "MAKE-MATRIX"
+           ;; scl/matrix.lisp
            "MATRIX-COERCE"
            "MATRIX-GET"
            "MATRIX-SET"
@@ -101,8 +103,9 @@
            "MATRIX-EQUAL"
            "MATRIX-READ"
            "MATRIX-WRITE"
-           ;; cl-scl/data-frame.lisp
+           ;; scl/data-frame-type.lisp
            "MAKE-DATA-FRAME"
+           ;; scl/data-frame.lisp
            "DATA-FRAME-SET-NAMES"
            "DATA-FRAME-SET-INDEX"
            "DATA-FRAME-ROW"
