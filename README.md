@@ -1,6 +1,6 @@
-# cl-sct
+# cl-scl
 
-Scientific Computing Tools for Common Lisp
+Scientific Computing Library for Common Lisp
 
 #License
 
