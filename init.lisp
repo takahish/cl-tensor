@@ -1,6 +1,0 @@
-(ql:quickload :cffi)
-(load "./pkg.lisp")
-(load "./util.lisp")
-(load "./vector.lisp")
-(load "./matrix.lisp")
-(load "./data-frame.lisp")
