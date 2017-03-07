@@ -1,4 +1,4 @@
-;;;; cl-scl/gsl/sort.lisp
+;;;; gsl/sort.lisp
 ;;;;
 ;;;; This file describes functions for sorting data, both directly and
 ;;;; indirectly (using an index). All the functions use the heapsort
@@ -12,7 +12,7 @@
 ;;;; be consistent across different platforms when using these
 ;;;; functions.
 
-;;;; Copyright (C) 2016 Takahiro Ishikawa
+;;;; Copyright (C) 2016, 2017 Takahiro Ishikawa
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 (cl:in-package "GSL")
 
 
-;; functions
+;;; function
 
 (defmacro make-compare-func (name element-type &body body)
   `(cffi:defcallback ,name :int ((a :pointer) (b :pointer))

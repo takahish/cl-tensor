@@ -1,4 +1,4 @@
-;;;; cl-scl/gsl/pkg.lisp
+;;;; gsl/pkg.lisp
 
 ;;;; Copyright (C) 2016 Takahiro Ishikawa
 ;;;;
@@ -17,10 +17,13 @@
 
 (cl:defpackage "GSL"
   (:use "CL")
-  (:export ;; cl-scl/gsl/vector.lisp
+  (:export ;; gsl/vector-type.lisp
            "VECTOR-ALLOC"
            "VECTOR-CALLOC"
            "VECTOR-FREE"
+           "VECTOR-SET-SEQUENCE"
+           "MAKE-VECTOR"
+           ;; gsl/vector.lisp
            "VECTOR-GET"
            "VECTOR-SET"
            "VECTOR-PTR"
@@ -48,15 +51,17 @@
            "VECTOR-ISNEG"
            "VECTOR-ISNONNEG"
            "VECTOR-EQUAL"
-           "VECTOR-SET-SEQUENCE"
-           "MAKE-VECTOR"
            "VECTOR-READ"
            "VECTOR-WRITE"
            "VECTOR-COPY-FROM-SCL-VECTOR"
-           ;; cl-scl/gsl/matrix.lisp
+           ;; gsl/matrix-type.lisp
            "MATRIX-ALLOC"
            "MATRIX-CALLOC"
            "MATRIX-FREE"
+           "MATRIX-SET-SEQUENCE"
+           "MATRIX-SET-2DARRAY"
+           "MAKE-MATRIX"
+           ;; gsl/matrix.lisp
            "MATRIX-GET"
            "MATRIX-SET"
            "MATRIX-PTR"
@@ -91,21 +96,19 @@
            "MATRIX-ISNEG"
            "MATRIX-ISNONNEG"
            "MATRIX-EQUAL"
-           "MATRIX-SET-SEQUENCE"
-           "MATRIX-SET-2DARRAY"
-           "MAKE-MATRIX"
            "MATRIX-READ"
            "MATRIX-WRITE"
            "MATRIX-COPY-FROM-SCL-MATRIX"
-           ;; cl-scl/gsl/sort.lisp
+           ;; gsl/sort.lisp
            "SORT-ASC"
            "SORT-DESC"
-           ;; cl-scl/gsl/rng.lisp
+           ;; gsl/rng-type.lisp
            "*RNG-DEFAULT*"
            "*RNG-DEFAULT-SEED*"
            "RNG-ALLOC"
            "RNG-SET"
            "RNG-FREE"
+           ;; gsl/rng.lisp
            "RNG-GET"
            "RNG-UNIFORM"
            "RNG-UNIFORM-POS"
@@ -118,18 +121,19 @@
            "RNG-ENV-SETUP"
            "RNG-MEMCPY"
            "RNG-CLONE"
-           ;; cl-scl/gsl/qrng.lisp
+           ;; gsl/qrng-type.lisp
            "*QRNG-DEFAULT*"
            "QRNG-ALLOC"
            "QRNG-FREE"
            "QRNG-INIT"
+           ;; gsl/qrng.lisp
            "QRNG-GET"
            "QRNG-NAME"
            "QRNG-SIZE"
            "QRNG-STATE"
            "QRNG-MEMCPY"
            "QRNG-CLONE"
-           ;; cl-scl/gsl/randist.lisp
+           ;; gsl/randist.lisp
            "*RNG*"
            "RAN-GAUSSIAN"
            "RAN-GAUSSIAN-PDF"
@@ -194,7 +198,7 @@
            "RAN-BINOMIAL-PDF"
            "CDF-BINOMIAL-P"
            "CDF-BINOMIAL-Q"
-           ;; cl-scl/gsl/stats.lisp
+           ;; gsl/stats.lisp
            "STATS-MEAN"
            "STATS-VARIANCE"
            "STATS-VARIANCE-M"

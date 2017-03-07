@@ -1,4 +1,4 @@
-;;;; cl-scl/gsl/randist.lisp
+;;;; gsl/randist.lisp
 ;;;;
 ;;;; This file describes for generating random variates and computing
 ;;;; their probability distributions. Samples from the distributions
@@ -6,7 +6,7 @@
 ;;;; number generators in the library as an underlying source of
 ;;;; randomness.
 
-;;;; Copyright (C) 2016 Takahiro Ishikawa
+;;;; Copyright (C) 2016, 2017 Takahiro Ishikawa
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 (cl:in-package "GSL")
 
+
+;;; function
 
 (defun gen-ran (n fn &rest args)
   "This function returns n random variates using gsl random umber

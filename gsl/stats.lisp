@@ -1,4 +1,4 @@
-;;;; cl-scl/gsl/stats.lisp
+;;;; gsl/stats.lisp
 ;;;;
 ;;;; This file describes the statistical functions in the library. The
 ;;;; basic statistical functions include routines to compute the mean,
@@ -8,7 +8,7 @@
 ;;;; recurrence relations to compute average quantities in a stable
 ;;;; way, without large intermediate values that might overflow.
 
-;;;; Copyright (C) 2016 Takahiro Ishikawa
+;;;; Copyright (C) 2016, 2017 Takahiro Ishikawa
 ;;;;
 ;;;; This program is free software: you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 (cl:in-package "GSL")
 
 
-;;; functions
+;;; function
 
 (defgeneric stats-mean (v &optional stride n)
   (:documentation
