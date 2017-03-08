@@ -137,52 +137,11 @@ stream stream."
                         (funcall test c (coerce delimiter 'character)))
                     line)))))
 
-(defun file-buffer-count (path)
-  (with-open-file (stream path :direction :input :element-type 'character)
-    (file-length stream)))
-
-(defun split-buffer (buffer delimiter length)
-  (let ((stack (make-array length))
-        (index 0))
-    (loop for i = 0 then (1+ j)
-       as j = (position (coerce delimiter 'character) buffer :start i)
-       do (progn
-            (setf (aref stack index) (subseq buffer i j))
-            (incf index))
-       while (and j (< index length)))
-    stack))
-
-(defun split-line (line delimiter length)
-  (split-buffer line delimiter length))
-
-;; sharing of index
-(let ((index 0))
-  (defun set-row-elements (df line length)
-    (dotimes (j length)
-      (setf (aref (data (data df)) index)
-            (read-from-string (svref line j)))
-      (incf index)))
-  (defun initialize-index ()
-    (setf index 0)))
-
-(defun data-frame-read-csv (file &key (delimiter #\,))
+(defun data-frame-read-tsv (file)
   (let* ((path (pathname file))
          (n1 (file-row-count path))
-         (n2 (file-column-count path delimiter))
-         (size (file-buffer-count path))
-         (df (make-data-frame n1 n2))
-         (buffer (make-string size
-                              :element-type 'character
-                              :initial-element #\NULL)))
+         (n2 (file-column-count path #\Tab))
+         (df (make-data-frame n1 n2)))
     (with-open-file (stream path :direction :input)
-      (read-sequence buffer stream)
-      (let ((lines (split-buffer buffer #\Newline n1)))
-        (dotimes (i n1)
-          (set-row-elements df
-                            (split-line (string-trim '(#\Space #\Tab #\Newline)
-                                                     (svref lines i))
-                                        (coerce delimiter 'character)
-                                        n2)
-                            n2))
-        (initialize-index)
-        df))))
+      (matrix-read (data df) stream n1 n2))
+    df))
