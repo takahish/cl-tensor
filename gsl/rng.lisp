@@ -33,7 +33,7 @@
         (dotimes (i n (nreverse acc))
           (push (apply fn args) acc)))))
 
-(defun rng-get (&optional (n nil) (rng *rng*))
+(defun rng-get (rng &optional (n nil))
   "This function returns a random integer from the generator rng. The
 minimum and maximum values depend on the algorithm used, but all
 integers in the range [min,max] are equally likely. The values of min
@@ -41,7 +41,7 @@ and max can be determined using the auxiliary functions (rng-max rng)
 and (rng-min rng)."
   (gen-rng n #'gsl_rng_get (pointer rng)))
 
-(defun rng-uniform (&optional (n nil) (rng *rng*))
+(defun rng-uniform (rng &optional (n nil))
   "This function retruns a double precision floating point number
 uniformly distributed in the range [0,1). The range includes 0.0 but
 excludes 1.0. The value is typically obtained by dividing the result
@@ -52,14 +52,14 @@ maximum number of bits that can be portably represented in a single
 unsigned-log)"
   (gen-rng n #'gsl_rng_uniform (pointer rng)))
 
-(defun rng-uniform-pos (&optional (n nil) (rng *rng*))
+(defun rng-uniform-pos (rng &optional (n nil))
   "This function returns a positive double precision floating point
 number uniformly distributed in the range (0,1), excluding both 0.0
 and 1.0. The number is obtained by sampling the generator with the
 algorithm of gsl-rng-uniform until a non-zero value is obtained."
   (gen-rng n #'gsl_rng_uniform_pos (pointer rng)))
 
-(defun rng-uniform-int (k &optional (n nil) (rng *rng*))
+(defun rng-uniform-int (rng k &optional (n nil))
   "This functions a random integer from 0 to n-1 inclusive by scaling
 down and/or discarding samples from the generator rng. All integers in
 range [0,n-1] are produced with equal probability. For generators with
@@ -69,25 +69,25 @@ with the correct probability."
            (coerce k `(unsigned-byte
                        ,(* (cffi:foreign-type-size :unsigned-long) 8)))))
 
-(defun rng-name (&optional (rng *rng*))
+(defun rng-name (rng)
   "This function return a pointer to the name of the generator."
   (gsl_rng_name (pointer rng)))
 
-(defun rng-max (&optional (rng *rng*))
+(defun rng-max (rng)
   "rng-max returns the largest value that rng-get can return."
   (gsl_rng_max (pointer rng)))
 
-(defun rng-min (&optional (rng *rng*))
+(defun rng-min (rng)
   "rng-min returns the smallest value that rng-get can return. Usually
 this value is zero. There are smallest generators with algorithms that
 cannot return zero, and for these generators the minimum value is 1."
   (gsl_rng_min (pointer rng)))
 
-(defun rng-state (&optional (rng *rng*))
+(defun rng-state (rng)
   "This function return a pointer to the state of generator rng."
   (gsl_rng_state (pointer rng)))
 
-(defun rng-size (&optional (rng *rng*))
+(defun rng-size (rng)
   "This function return a pointer to the size of generator rng."
   (gsl_rng_size (pointer rng)))
 
@@ -111,14 +111,14 @@ zero."
   (setf *rng-default* gsl_rng_default)
   (setf *rng-default-seed* gsl_rng_default_seed))
 
-(defun rng-memcpy (dest &optional (src *rng*))
+(defun rng-memcpy (dest src)
   "This function copies the random number generator src into the
 pre-existing generator dest, making dest into an exact copy of
 src. The two generators must be of the same type."
   (gsl_rng_memcpy (pointer dest) (pointer src))
   dest)
 
-(defun rng-clone (&optional (rng *rng*))
+(defun rng-clone (rng)
   "This function returns a pointer to a newly created generator which
 is an exact copy of the generator rng."
   (make-instance 'rng :pointer (gsl_rng_clone (pointer rng))))

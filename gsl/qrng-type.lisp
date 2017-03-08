@@ -47,15 +47,13 @@ a null pointer and the error handler is invoked with an error code of
 GSL_ENOMEM."
   (make-instance 'qrng :pointer (gsl_qrng_alloc type dimension)))
 
-(defvar *qrng* (qrng-alloc))
-
-(defun qrng-free (&optional (qrng *qrng*) (result nil))
+(defun qrng-free (qrng &optional (result nil))
   "This function frees all the memory associated with the generator
 qrng."
   (gsl_qrng_free (pointer qrng))
   result)
 
-(defun qrng-init (&optional (qrng *qrng*))
+(defun qrng-init (qrng)
   "This function reinitializes the generator qrng to its starting
 point. Note that quasi-random sequences do not use a seed and always
 produce the same set of values."

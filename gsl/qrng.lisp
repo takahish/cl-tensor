@@ -29,7 +29,7 @@
 
 ;;; function
 
-(defun qrng-get-coordinates (&optional (dimension 2) (qrng *qrng*))
+(defun qrng-get-coordinates (qrng &optional (dimension 2))
   "This function returns n quasi random variates. The space available
 must match the dimension of the generator. gsl_qrng_get stores the
 next point from the sequence generator qrng in the array x. The space
@@ -42,33 +42,33 @@ this function is used when HAVE_INLINE is defined."
       (dotimes (i dimension (nreverse coodinates))
         (push (cffi:mem-aref x :double i) coodinates)))))
 
-(defun qrng-get (&optional n (dimension 2) (qrng *qrng*))
+(defun qrng-get (qrng &optional n (dimension 2))
   (if (or (null n) (< n 1))
-      (qrng-get-coordinates dimension qrng)
+      (qrng-get-coordinates qrng dimension)
       (let ((acc nil))
         (dotimes (i n (nreverse acc))
           (push (qrng-get-coordinates dimension qrng) acc)))))
 
-(defun qrng-name (&optional (qrng *qrng*))
+(defun qrng-name (qrng)
   "This function returns a pointer to the name of the generator."
   (gsl_qrng_name (pointer qrng)))
 
-(defun qrng-size (&optional (qrng *qrng*))
+(defun qrng-size (qrng)
   "This functions return a pointer to the size."
   (gsl_qrng_size (pointer qrng)))
 
-(defun qrng-state (&optional (qrng *qrng*))
+(defun qrng-state (qrng)
   "This functions return a pointer to the state of generator qrng."
   (gsl_qrng_state (pointer qrng)))
 
-(defun qrng-memcpy (dest &optional (src *qrng*))
+(defun qrng-memcpy (dest src)
   "This function copies the quasi-random sequence generator src into
 the pre-existing generator dest, making dest into an exact copy of
 src. The two generators must be of the same type."
   (gsl_qrng_memcpy (pointer dest) (pointer src))
   dest)
 
-(defun qrng-clone (&optional (qrng *qrng*))
+(defun qrng-clone (qrng)
   "This function returns a pointer to a newly created generator which
 is an exact copy of the generator qrng."
   (make-instance 'qrng :pointer (gsl_qrng_clone (pointer qrng))))

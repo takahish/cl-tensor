@@ -134,7 +134,6 @@
            "QRNG-MEMCPY"
            "QRNG-CLONE"
            ;; gsl/randist.lisp
-           "*RNG*"
            "RAN-GAUSSIAN"
            "RAN-GAUSSIAN-PDF"
            "RAN-GAUSSIAN-ZIGGURAT"

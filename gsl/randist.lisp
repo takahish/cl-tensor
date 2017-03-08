@@ -55,7 +55,7 @@ environment variables GSL_RNG_TYPE and GSL_RNG_SEED."
 
 ;;; The Gaussian Distribution
 
-(defun ran-gaussian (sigma &optional (n nil) (rng *rng*))
+(defun ran-gaussian (rng sigma &optional (n nil))
   "This function returns n Gaussian random variates, with mean zero
 and standard deviation sigma. Use the transformation z = mu + x on the
 numbers returned by gsl-ran-gaussian to obtain a Gaussian distribution
@@ -70,20 +70,20 @@ Gaussian distribution with standard deviation sigma."
   (gsl_ran_gaussian_pdf (coerce x 'double-float)
                         (coerce sigma 'double-float)))
 
-(defun ran-gaussian-ziggurat (sigma &optional (n nil) (rng *rng*))
+(defun ran-gaussian-ziggurat (rng sigma &optional (n nil))
   "This function computes n Gaussian random variates using the
 alternative Marsaglia- Tsang ziggurat methods. The Ziggurat algorithm
 is the fastest available algorithm in most cases."
   (gen-ran n #'gsl_ran_gaussian_ziggurat (pointer rng)
            (coerce sigma 'double-float)))
 
-(defun ran-gaussian-ratio-method (sigma &optional (n nil) (rng *rng*))
+(defun ran-gaussian-ratio-method (rng sigma &optional (n nil))
   "This function computes n Gaussian random variates using the
 alternative Kinderman- Monahoan-Leva ratio methods."
   (gen-ran n #'gsl_ran_gaussian_ratio_method (pointer rng)
            (coerce sigma 'double-float)))
 
-(defun ran-ugaussian (&optional (n nil) (rng *rng*))
+(defun ran-ugaussian (rng &optional (n nil))
   "This function returns n unit Gaussian random variates, with mean
 zero and standard deviation sigma zero."
   (gen-ran n #'gsl_ran_ugaussian (pointer rng)))
@@ -93,7 +93,7 @@ zero and standard deviation sigma zero."
 unit Gaussian distribution."
   (gsl_ran_ugaussian_pdf (coerce x 'double-float)))
 
-(defun ran-ugaussian-ratio-method (&optional (n nil) (rng *rng*))
+(defun ran-ugaussian-ratio-method (rng &optional (n nil))
   "This function computes n unit Gaussian random variates using the
 alternative Kinderman- Monahoan-Leva ratio methods."
   (gen-ran n #'gsl_ran_ugaussian_ratio_method (pointer rng)))
@@ -144,7 +144,7 @@ inverses for the unit Gaussian distribution."
 
 ;;; The Gaussian Tail Distribution
 
-(defun ran-gaussian-tail (a sigma &optional (n nil) (rng *rng*))
+(defun ran-gaussian-tail (rng a sigma &optional (n nil))
   "This function provides random variates from the upper tail of a
 Gaussian distribution with standard deviation sigma. The values
 returned are lagger than the lower limit a, which must be
@@ -161,7 +161,7 @@ limit a."
                              (coerce a 'double-float)
                              (coerce sigma 'double-float)))
 
-(defun ran-ugaussian-tail (a &optional (n nil) (rng *rng*))
+(defun ran-ugaussian-tail (rng a &optional (n nil))
   "This function compute result for the tail of a unit Gaussian
 distribution."
   (gen-ran n #'gsl_ran_ugaussian_tail (pointer rng)
@@ -175,7 +175,7 @@ distribution."
 
 ;;; The Bivariate Gaussian Distribution
 
-(defun ran-bivariate-gaussian (sigma-x sigma-y rho &optional (n nil) (rng *rng*))
+(defun ran-bivariate-gaussian (rng sigma-x sigma-y rho &optional (n nil))
   "This function generates a pair of correlated Gaussian variates,
 with mean zero, correlation coefficient rho and standard deviations
 sigma-x and sigma-y in the x and y directions."
@@ -195,7 +195,7 @@ sigma-y and correlation coefficient rho."
 
 ;;; The Exponential Distribution
 
-(defun ran-exponential (mu &optional (n nil) (rng *rng*))
+(defun ran-exponential (rng mu &optional (n nil))
   "This function returns a random variate from the exponential
 distribution with mean mu."
   (gen-ran n #'gsl_ran_exponential (pointer rng)
@@ -233,7 +233,7 @@ inverses for the exponential distribution with mean mu."
 
 ;;; The Laplace Distribution
 
-(defun ran-laplace (a &optional (n nil) (rng *rng*))
+(defun ran-laplace (rng a &optional (n nil))
   "This function returns n random variates from the Laplace
 distribution with width a."
   (gen-ran n #'gsl_ran_laplace (pointer rng)
@@ -271,7 +271,7 @@ inverses for the Laplace distribution with width a."
 
 ;;; The chi-squared distribution
 
-(defun ran-chisq (nu &optional (n nil) (rng *rng*))
+(defun ran-chisq (rng nu &optional (n nil))
   "This function returns n random variate from the chi-squared
 distribution with nu degrees of freedom."
   (gen-ran n #'gsl_ran_chisq (pointer rng)
@@ -309,7 +309,7 @@ inverses for the chi-squared distribution with nu degrees of freedom."
 
 ;;; The F-distribution
 
-(defun ran-fdist (nu1 nu2 &optional (n nil) (rng *rng*))
+(defun ran-fdist (rng nu1 nu2 &optional (n nil))
   "This function returns n random variate from the F-distribution with
 degrees of freedom nu1 and nu2."
   (gen-ran n #'gsl_ran_fdist (pointer rng)
@@ -353,7 +353,7 @@ inverses for the F-distribution with nu1 and nu2 degrees of freedom."
 
 ;;; The t-distribution
 
-(defun ran-tdist (nu &optional (n nil) (rng *rng*))
+(defun ran-tdist (rng nu &optional (n nil))
   "This function returns n random variates from the t-distribution."
   (gen-ran n #'gsl_ran_tdist (pointer rng)
            (coerce nu 'double-float)))
@@ -394,7 +394,7 @@ inverses for the t-distribution with nu degrees of freedom."
 ;;; spherical surface.  They can be used as random directions, for
 ;;; example in the steps of a random walk.
 
-(defun ran-dir-2d (&optional (n nil) (rng *rng*))
+(defun ran-dir-2d (rng &optional (n nil))
   "This function returns a random direction vector v = (x, y) in two
 dimensions. The vector is normalized such that |v|^2 = x^2 + y^2 =
 1. The obvious way to do this is to take a uniform random number
@@ -409,7 +409,7 @@ those that are outside the unit circle), and dividing by sqrt(x^2 +
 y^2)."
   (gen-pair-ran n #'gsl_ran_dir_2d (pointer rng)))
 
-(defun ran-dir-2d-trig-method (&optional (n nil) (rng *rng*))
+(defun ran-dir-2d-trig-method (rng &optional (n nil))
   "This function returns a random direction vector v = (x, y) in two
 dimensions. The vector is normalized such that |v|^2 = x^2 + y^2 =
 1. The obvious way to do this is to take a uniform random number
@@ -426,7 +426,7 @@ y^2)."
 
 ;;; The Poission Distribution
 
-(defun ran-poisson (mu &optional (n nil) (rng *rng*))
+(defun ran-poisson (rng mu &optional (n nil))
   "This function returns a random integer from the Poisson
 distribution with mean mu."
   (gen-ran n #'gsl_ran_poisson (pointer rng)
@@ -455,7 +455,7 @@ for the Poisson distribution with parameter mu."
 
 ;;; The Bernoulli Distribution
 
-(defun ran-bernoulli (p &optional (n nil) (rng *rng*))
+(defun ran-bernoulli (rng p &optional (n nil))
   "This function returns either 0 or 1, the result of a Bernoulli
 trial with probability p."
   (gen-ran n #'gsl_ran_bernoulli (pointer rng)
@@ -468,7 +468,7 @@ Bernoulli distribution with probability parameter p."
 
 ;;; The Binomial Distribution
 
-(defun ran-binomial (p size &optional (n nil) (rng *rng*))
+(defun ran-binomial (rng p size &optional (n nil))
   "This function returns m random integers from the binomial
 distribution, the number of successes in n independent trials with
 probability p."
