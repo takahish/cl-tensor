@@ -90,10 +90,15 @@ associated with it."
   (gsl_histogram_free (pointer h))
   result)
 
+(defmacro with-histogram ((var &rest histogram-alloc-args) &body body)
+  `(let ((,var (histogram-alloc ,@histogram-alloc-args)))
+     (unwind-protect (progn ,@body)
+       (histogram-free ,var))))
+
 
 ;;; the histogram probability distribution struct
 
-(defun histogram-pdf-aclloc (number-of-bins)
+(defun histogram-pdf-alloc (number-of-bins)
   "This function allocates memory for a probability distribution with
 n bins and returns a pointer to a newly initialized histgram-pdf."
   (let* ((n (coerce number-of-bins
@@ -112,3 +117,8 @@ contents of the histogram h."
   "This function frees the probability distribution function p and all
 of the memory associated with it."
   (gsl_histogram_pdf_free (pointer p)))
+
+(defmacro with-histogram-pdf ((var &rest histogram-pdf-alloc-args) &body body)
+  `(let ((,var (histogram-pdf-alloc ,@histogram-pdf-alloc-args)))
+     (unwind-protect (progn ,@body)
+       (histogram-pdf-free ,var))))

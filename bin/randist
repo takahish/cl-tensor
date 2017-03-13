@@ -33,35 +33,33 @@
 ;;; main
 
 (if (> (length sb-ext:*posix-argv*) 1)
-    (let ((dist (nth 1 sb-ext:*posix-argv*))
-          (rng (gsl:rng-alloc)))
-      (unwind-protect
-           (cond
-             ((string= dist "uniform")
-              (print-float-elms (apply #'gsl:rng-uniform
-                                       `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "uniform-pos")
-              (print-float-elms (apply #'gsl:rng-uniform-pos
-                                       `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "uniform-int")
-              (print-int-elms (apply #'gsl:rng-uniform-int
-                                     `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "gaussian")
-              (print-float-elms (apply #'gsl:ran-gaussian
-                                       `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "ugaussian")
-              (print-float-elms (apply #'gsl:ran-ugaussian
-                                       `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "poisson")
-              (print-int-elms (apply #'gsl:ran-poisson
-                                     `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "bernoulli")
-              (print-int-elms (apply #'gsl:ran-bernoulli
-                                     `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             ((string= dist "binomial")
-              (print-int-elms (apply #'gsl:ran-binomial
-                                     `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
-             (t
-              (princ "unsupported distribution")))
-        (gsl:rng-free rng)))
+    (let ((dist (nth 1 sb-ext:*posix-argv*)))
+      (gsl:with-rng (rng)
+        (cond
+          ((string= dist "uniform")
+           (print-float-elms (apply #'gsl:rng-uniform
+                                    `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "uniform-pos")
+           (print-float-elms (apply #'gsl:rng-uniform-pos
+                                    `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "uniform-int")
+           (print-int-elms (apply #'gsl:rng-uniform-int
+                                  `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "gaussian")
+           (print-float-elms (apply #'gsl:ran-gaussian
+                                    `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "ugaussian")
+           (print-float-elms (apply #'gsl:ran-ugaussian
+                                    `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "poisson")
+           (print-int-elms (apply #'gsl:ran-poisson
+                                  `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "bernoulli")
+           (print-int-elms (apply #'gsl:ran-bernoulli
+                                  `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          ((string= dist "binomial")
+           (print-int-elms (apply #'gsl:ran-binomial
+                                  `(,rng ,@(parse-argv (cddr sb-ext:*posix-argv*))))))
+          (t
+           (princ "unsupported distribution")))))
     (princ "invalid argument"))

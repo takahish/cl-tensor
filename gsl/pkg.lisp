@@ -23,6 +23,7 @@
            "VECTOR-FREE"
            "VECTOR-SET-SEQUENCE"
            "MAKE-VECTOR"
+           "WITH-VECTOR"
            ;; gsl/vector.lisp
            "VECTOR-GET"
            "VECTOR-SET"
@@ -61,6 +62,7 @@
            "MATRIX-SET-SEQUENCE"
            "MATRIX-SET-2DARRAY"
            "MAKE-MATRIX"
+           "WITH-MATRIX"
            ;; gsl/matrix.lisp
            "MATRIX-GET"
            "MATRIX-SET"
@@ -108,6 +110,7 @@
            "RNG-ALLOC"
            "RNG-SET"
            "RNG-FREE"
+           "WITH-RNG"
            ;; gsl/rng.lisp
            "RNG-GET"
            "RNG-UNIFORM"
@@ -126,6 +129,7 @@
            "QRNG-ALLOC"
            "QRNG-FREE"
            "QRNG-INIT"
+           "WITH-QRNG"
            ;; gsl/qrng.lisp
            "QRNG-GET"
            "QRNG-NAME"
@@ -241,7 +245,44 @@
            "STATS-MIN-INDEX"
            "STATS-MINMAX-INDEX"
            "STATS-MEDIAN-FROM-SORTED-DATA"
-           "STATS-QUANTILE-FROM-SORTED-DATA"))
+           "STATS-QUANTILE-FROM-SORTED-DATA"
+           ;; gsl/histogram-type.lisp
+           "HISTOGRAM-ALLOC"
+           "HISTOGRAM-SET-RANGES"
+           "HISTOGRAM-SET-RANGES-UNIFORM"
+           "HISTOGRAM-FREE"
+           "WITH-HISTOGRAM"
+           "HISTOGRAM-PDF-ALLOC"
+           "HISTOGRAM-PDF-INIT"
+           "HISTOGRAM-PDF-FREE"
+           "WITH-HISTOGRAM-PDF"
+           ;; gsl/histogram.lisp
+           "HISTOGRAM-MEMCPY"
+           "HISTOGRAM-CLONE"
+           "HISTOGRAM-INCREMENT"
+           "HISTOGRAM-ACCUMULATE"
+           "HISTOGRAM-GET"
+           "HISTOGRAM-GET-RANGE"
+           "HISTOGRAM-MAX"
+           "HISTOGRAM-MIN"
+           "HISTOGRAM-BINS"
+           "HISTOGRAM-RESET"
+           "HISTOGRAM-FIND"
+           "HISTOGRAM-MAX-VAL"
+           "HISTOGRAM-MAX-BIN"
+           "HISTOGRAM-MIN-VAL"
+           "HISTOGRAM-MIN-BIN"
+           "HISTOGRAM-MEAN"
+           "HISTOGRAM-SIGMA"
+           "HISTOGRAM-SUM"
+           "HISTOGRAM-EQUAL-BINS-P"
+           "HISTOGRAM-ADD"
+           "HISTOGRAM-SUB"
+           "HISTOGRAM-MUL"
+           "HISTOGRAM-DIV"
+           "HISTOGRAM-SCALE"
+           "HISTOGRAM-SHIFT"
+           "HISTOGRAM_PDF_SAMPLE"))
 
 (cl:in-package "GSL")
 

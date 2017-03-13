@@ -154,3 +154,8 @@ function which vector-free."
           ((not (null initial-contents))
            (vector-set-sequence v initial-contents n))
           (t v))))
+
+(defmacro with-vector ((var &rest make-vector-args) &body body)
+  `(let ((,var (make-vector ,@make-vector-args)))
+     (unwind-protect (progn ,@body)
+       (vector-free ,var))))

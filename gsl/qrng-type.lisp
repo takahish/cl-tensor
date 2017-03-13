@@ -59,3 +59,8 @@ point. Note that quasi-random sequences do not use a seed and always
 produce the same set of values."
   (gsl_qrng_init (pointer qrng))
   qrng)
+
+(defmacro with-qrng ((var &rest qrng-alloc-args) &body body)
+  `(let ((,var (qrng-alloc ,@qrng-alloc-args)))
+     (unwind-protect (progn ,@body)
+       (qrng-free ,var))))

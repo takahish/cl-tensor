@@ -39,7 +39,7 @@ histograms must be of the same size."
   (gsl_histogram_memcpy (pointer dest) (pointer src))
   dest)
 
-(defun histgram-clone (src)
+(defun histogram-clone (src)
   "This function returns a pointer to a newly created histogram which
 is an exact copy of the histogram src."
   (make-instance 'histogram :pointer (gsl_histogram_clone (pointer src))))
@@ -202,7 +202,7 @@ constant offset, i.e. h'1(i) = h1(i) + offset."
 
 ;;; the histogram probability distribution struct
 
-(defun gsl_histogram_pdf_sample (p r)
+(defun histogram_pdf_sample (p r)
   "This function uses r, a uniform random number between zero and one,
 to compute a single random sample from the probability distribution
 p. The algorithm used to compute the sample s is given by the

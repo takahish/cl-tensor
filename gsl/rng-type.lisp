@@ -123,3 +123,8 @@ from the original implementation is used instead."
 rng."
   (gsl_rng_free (pointer rng))
   result)
+
+(defmacro with-rng ((var &rest rng-alloc-args) &body body)
+  `(let ((,var (rng-alloc ,@rng-alloc-args)))
+     (unwind-protect (progn ,@body)
+       (rng-free ,var))))

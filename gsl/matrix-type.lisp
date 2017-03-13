@@ -195,3 +195,8 @@ functions which matrix-free, or released using free-alien."
                        (= (length (array-dimensions initial-contents)) 2))
                   (matrix-set-2darray m initial-contents n1 n2))))
           (t m))))
+
+(defmacro with-matrix ((var &rest make-matrix-args) &body body)
+  `(let ((,var (make-matrix ,@make-matrix-args)))
+     (unwind-protect (progn ,@body)
+       (matrix-free ,var))))
