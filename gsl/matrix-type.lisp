@@ -25,16 +25,16 @@
 
 ;;; gsl-matrix
 
-;; abstract: scl::matrix-t, gsl-matrix-any
-(defclass gsl-matrix-any (scl::matrix-t) ())
+;; abstract: scl::matrix-t, matrix-any
+(defclass matrix-any (scl::matrix-t) ())
 
-(defclass gsl-matrix-double (gsl-matrix-any) ())
+(defclass matrix-double (matrix-any) ())
 
-(defclass gsl-matrix-float (gsl-matrix-any) ())
+(defclass matrix-float (matrix-any) ())
 
-(defclass gsl-matrix-int (gsl-matrix-any) ())
+(defclass matrix-int (matrix-any) ())
 
-(defclass gsl-matrix-uint (gsl-matrix-any) ())
+(defclass matrix-uint (matrix-any) ())
 
 
 (defun matrix-alloc (n1 n2 &key (element-type :double))
@@ -44,28 +44,28 @@ is allocated for the elements of the matrix, and stored in the block
 component of the matrix struct. The bclok is owned by the matrix, and
 will be deallocated when the matrix is deallocated."
   (cond ((eql element-type :double)
-         (make-instance 'gsl-matrix-double
+         (make-instance 'matrix-double
                         :data (gsl_matrix_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :float)
-         (make-instance 'gsl-matrix-float
+         (make-instance 'matrix-float
                         :data (gsl_matrix_float_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :int)
-         (make-instance 'gsl-matrix-int
+         (make-instance 'matrix-int
                         :data (gsl_matrix_int_alloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :unsigned-int)
-         (make-instance 'gsl-matrix-uint
+         (make-instance 'matrix-uint
                         :data (gsl_matrix_uint_alloc n1 n2)
                         :size1 n1
                         :size2 n2
@@ -77,28 +77,28 @@ will be deallocated when the matrix is deallocated."
   "This function allocates memory for a matrix of size n1 rows by n2
 columns and initializes all the elements of the matrix to zero."
   (cond ((eql element-type :double)
-         (make-instance 'gsl-matrix-double
+         (make-instance 'matrix-double
                         :data (gsl_matrix_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :float)
-         (make-instance 'gsl-matrix-float
+         (make-instance 'matrix-float
                         :data (gsl_matrix_float_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :int)
-         (make-instance 'gsl-matrix-int
+         (make-instance 'matrix-int
                         :data (gsl_matrix_int_calloc n1 n2)
                         :size1 n1
                         :size2 n2
                         :tda n2
                         :owner t))
         ((eql element-type :unsigned-int)
-         (make-instance 'gsl-matrix-uint
+         (make-instance 'matrix-uint
                         :data (gsl_matrix_uint_calloc n1 n2)
                         :size1 n1
                         :size2 n2
@@ -117,13 +117,13 @@ matrix will also be deallocated."))
      (,func (scl::data m))
      result))
 
-(make-matrix-free gsl-matrix-double gsl_matrix_free)
+(make-matrix-free matrix-double gsl_matrix_free)
 
-(make-matrix-free gsl-matrix-float gsl_matrix_float_free)
+(make-matrix-free matrix-float gsl_matrix_float_free)
 
-(make-matrix-free gsl-matrix-int gsl_matrix_int_free)
+(make-matrix-free matrix-int gsl_matrix_int_free)
 
-(make-matrix-free gsl-matrix-uint gsl_matrix_uint_free)
+(make-matrix-free matrix-uint gsl_matrix_uint_free)
 
 (defgeneric matrix-set-sequence (m seq &optional n1 n2)
   (:documentation
@@ -141,13 +141,13 @@ the sequence seq respectively."))
            (,func (scl::data m) i j (elt seq idx))
            (setf idx (1+ idx)))))))
 
-(make-matrix-set-sequence gsl-matrix-double gsl_matrix_set)
+(make-matrix-set-sequence matrix-double gsl_matrix_set)
 
-(make-matrix-set-sequence gsl-matrix-float gsl_matrix_float_set)
+(make-matrix-set-sequence matrix-float gsl_matrix_float_set)
 
-(make-matrix-set-sequence gsl-matrix-int gsl_matrix_int_set)
+(make-matrix-set-sequence matrix-int gsl_matrix_int_set)
 
-(make-matrix-set-sequence gsl-matrix-uint gsl_matrix_uint_set)
+(make-matrix-set-sequence matrix-uint gsl_matrix_uint_set)
 
 (defgeneric matrix-set-2darray (m 2darray &optional n1 n2)
   (:documentation
@@ -163,13 +163,13 @@ the 2 dimensions array respectively."))
          (dotimes (j s2)
            (,func (scl::data m) i j (aref 2darray i j)))))))
 
-(make-matrix-set-2darray gsl-matrix-double gsl_matrix_set)
+(make-matrix-set-2darray matrix-double gsl_matrix_set)
 
-(make-matrix-set-2darray gsl-matrix-float gsl_matrix_float_set)
+(make-matrix-set-2darray matrix-float gsl_matrix_float_set)
 
-(make-matrix-set-2darray gsl-matrix-int gsl_matrix_int_set)
+(make-matrix-set-2darray matrix-int gsl_matrix_int_set)
 
-(make-matrix-set-2darray gsl-matrix-uint gsl_matrix_uint_set)
+(make-matrix-set-2darray matrix-uint gsl_matrix_uint_set)
 
 ;;; Allocate an aline of (struct gsl-matrix) in foeign heap, and return a pointer to it.
 (defun make-matrix (n1 n2 &key (initial-element nil)
@@ -180,8 +180,8 @@ returning a pointer to a newly initialized matrix struct. A new block
 is allocated for the elements of the matrix, and stored in the block
 component of the matrix struct. The block is owned by the matrix, and
 will be deallocated when the matrix is deallocated.  The memory is
-allocated using gsl-matrix-alloc, so it can be passed to foreign
-functions which gsl-matrix-free, or released using free-alien."
+allocated using matrix-alloc, so it can be passed to foreign
+functions which matrix-free, or released using free-alien."
   (let ((m (matrix-calloc n1 n2 :element-type element-type)))
     (cond ((not (null initial-element))
            (matrix-set-all m initial-element))

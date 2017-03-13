@@ -36,13 +36,13 @@ function is used when HAVE_INLINE is defined."))
   `(defmethod matrix-get ((m ,type) i j)
      (,func (scl::data m) i j)))
 
-(make-matrix-get gsl-matrix-double gsl_matrix_get)
+(make-matrix-get matrix-double gsl_matrix_get)
 
-(make-matrix-get gsl-matrix-float gsl_matrix_float_get)
+(make-matrix-get matrix-float gsl_matrix_float_get)
 
-(make-matrix-get gsl-matrix-int gsl_matrix_int_get)
+(make-matrix-get matrix-int gsl_matrix_int_get)
 
-(make-matrix-get gsl-matrix-uint gsl_matrix_uint_get)
+(make-matrix-get matrix-uint gsl_matrix_uint_get)
 
 (defgeneric matrix-set (m i j x)
   (:documentation
@@ -56,13 +56,13 @@ function is used when HAVE_INLINE is defined."))
      (,func (scl::data m) i j x)
      m))
 
-(make-matrix-set gsl-matrix-double gsl_matrix_set)
+(make-matrix-set matrix-double gsl_matrix_set)
 
-(make-matrix-set gsl-matrix-float gsl_matrix_float_set)
+(make-matrix-set matrix-float gsl_matrix_float_set)
 
-(make-matrix-set gsl-matrix-int gsl_matrix_int_set)
+(make-matrix-set matrix-int gsl_matrix_int_set)
 
-(make-matrix-set gsl-matrix-uint gsl_matrix_uint_set)
+(make-matrix-set matrix-uint gsl_matrix_uint_set)
 
 (defgeneric matrix-ptr (m i j)
   (:documentation
@@ -74,13 +74,13 @@ then the error handler is invoked and a null pointer is returned."))
   `(defmethod matrix-ptr ((m ,type) i j)
      (,func (scl::data m) i j)))
 
-(make-matrix-ptr gsl-matrix-double gsl_matrix_ptr)
+(make-matrix-ptr matrix-double gsl_matrix_ptr)
 
-(make-matrix-ptr gsl-matrix-float gsl_matrix_float_ptr)
+(make-matrix-ptr matrix-float gsl_matrix_float_ptr)
 
-(make-matrix-ptr gsl-matrix-int gsl_matrix_int_ptr)
+(make-matrix-ptr matrix-int gsl_matrix_int_ptr)
 
-(make-matrix-ptr gsl-matrix-uint gsl_matrix_uint_ptr)
+(make-matrix-ptr matrix-uint gsl_matrix_uint_ptr)
 
 (defgeneric matrix-set-all (m x)
   (:documentation
@@ -92,13 +92,13 @@ x."))
      (,func (scl::data m) x)
      m))
 
-(make-matrix-set-all gsl-matrix-double gsl_matrix_set_all)
+(make-matrix-set-all matrix-double gsl_matrix_set_all)
 
-(make-matrix-set-all gsl-matrix-float gsl_matrix_float_set_all)
+(make-matrix-set-all matrix-float gsl_matrix_float_set_all)
 
-(make-matrix-set-all gsl-matrix-int gsl_matrix_int_set_all)
+(make-matrix-set-all matrix-int gsl_matrix_int_set_all)
 
-(make-matrix-set-all gsl-matrix-uint gsl_matrix_uint_set_all)
+(make-matrix-set-all matrix-uint gsl_matrix_uint_set_all)
 
 (defgeneric matrix-set-zero (m)
   (:documentation
@@ -109,13 +109,13 @@ x."))
      (,func (scl::data m))
      m))
 
-(make-matrix-set-zero gsl-matrix-double gsl_matrix_set_zero)
+(make-matrix-set-zero matrix-double gsl_matrix_set_zero)
 
-(make-matrix-set-zero gsl-matrix-float gsl_matrix_float_set_zero)
+(make-matrix-set-zero matrix-float gsl_matrix_float_set_zero)
 
-(make-matrix-set-zero gsl-matrix-int gsl_matrix_int_set_zero)
+(make-matrix-set-zero matrix-int gsl_matrix_int_set_zero)
 
-(make-matrix-set-zero gsl-matrix-uint gsl_matrix_uint_set_zero)
+(make-matrix-set-zero matrix-uint gsl_matrix_uint_set_zero)
 
 (defgeneric matrix-set-identity (m)
   (:documentation
@@ -129,13 +129,13 @@ to both square and rectangular matrices."))
      (,func (scl::data m))
      m))
 
-(make-matrix-set-identity gsl-matrix-double gsl_matrix_set_identity)
+(make-matrix-set-identity matrix-double gsl_matrix_set_identity)
 
-(make-matrix-set-identity gsl-matrix-float gsl_matrix_float_set_identity)
+(make-matrix-set-identity matrix-float gsl_matrix_float_set_identity)
 
-(make-matrix-set-identity gsl-matrix-int gsl_matrix_int_set_identity)
+(make-matrix-set-identity matrix-int gsl_matrix_int_set_identity)
 
-(make-matrix-set-identity gsl-matrix-uint gsl_matrix_uint_set_identity)
+(make-matrix-set-identity matrix-uint gsl_matrix_uint_set_identity)
 
 (defgeneric matrix-memcpy (dest src)
   (:documentation
@@ -147,13 +147,13 @@ matrix dest. The two matrices must have the same size."))
      (,func (scl::data dest) (scl::data src))
      dest))
 
-(make-matrix-memcpy gsl-matrix-double gsl_matrix_memcpy)
+(make-matrix-memcpy matrix-double gsl_matrix_memcpy)
 
-(make-matrix-memcpy gsl-matrix-float gsl_matrix_float_memcpy)
+(make-matrix-memcpy matrix-float gsl_matrix_float_memcpy)
 
-(make-matrix-memcpy gsl-matrix-int gsl_matrix_int_memcpy)
+(make-matrix-memcpy matrix-int gsl_matrix_int_memcpy)
 
-(make-matrix-memcpy gsl-matrix-uint gsl_matrix_uint_memcpy)
+(make-matrix-memcpy matrix-uint gsl_matrix_uint_memcpy)
 
 (defgeneric matrix-swap (m1 m2)
   (:documentation
@@ -165,13 +165,13 @@ copying. The two matrices must have the same size."))
      (,func (scl::data m1) (scl::data m2))
      (values m1 m2)))
 
-(make-matrix-swap gsl-matrix-double gsl_matrix_swap)
+(make-matrix-swap matrix-double gsl_matrix_swap)
 
-(make-matrix-swap gsl-matrix-float gsl_matrix_float_swap)
+(make-matrix-swap matrix-float gsl_matrix_float_swap)
 
-(make-matrix-swap gsl-matrix-int gsl_matrix_int_swap)
+(make-matrix-swap matrix-int gsl_matrix_int_swap)
 
-(make-matrix-swap gsl-matrix-uint gsl_matrix_uint_swap)
+(make-matrix-swap matrix-uint gsl_matrix_uint_swap)
 
 (defgeneric matrix-get-row (v m i)
   (:documentation
@@ -184,13 +184,13 @@ length of the column."))
      (,func (scl::data v) (scl::data m) i)
      v))
 
-(make-matrix-get-row gsl-vector-double gsl-matrix-double gsl_matrix_get_row)
+(make-matrix-get-row vector-double matrix-double gsl_matrix_get_row)
 
-(make-matrix-get-row gsl-vector-float gsl-matrix-float gsl_matrix_float_get_row)
+(make-matrix-get-row vector-float matrix-float gsl_matrix_float_get_row)
 
-(make-matrix-get-row gsl-vector-int gsl-matrix-int gsl_matrix_int_get_row)
+(make-matrix-get-row vector-int matrix-int gsl_matrix_int_get_row)
 
-(make-matrix-get-row gsl-vector-uint gsl-matrix-uint gsl_matrix_uint_get_row)
+(make-matrix-get-row vector-uint matrix-uint gsl_matrix_uint_get_row)
 
 (defgeneric matrix-get-col (v m j)
   (:documentation
@@ -203,13 +203,13 @@ the length of the row."))
      (,func (scl::data v) (scl::data m) j)
      v))
 
-(make-matrix-get-col gsl-vector-double gsl-matrix-double gsl_matrix_get_col)
+(make-matrix-get-col vector-double matrix-double gsl_matrix_get_col)
 
-(make-matrix-get-col gsl-vector-float gsl-matrix-float gsl_matrix_float_get_col)
+(make-matrix-get-col vector-float matrix-float gsl_matrix_float_get_col)
 
-(make-matrix-get-col gsl-vector-int gsl-matrix-int gsl_matrix_int_get_col)
+(make-matrix-get-col vector-int matrix-int gsl_matrix_int_get_col)
 
-(make-matrix-get-col gsl-vector-uint gsl-matrix-uint gsl_matrix_uint_get_col)
+(make-matrix-get-col vector-uint matrix-uint gsl_matrix_uint_get_col)
 
 (defgeneric matrix-set-row (m i v)
   (:documentation
@@ -222,13 +222,13 @@ the length of the column."))
      (,func (scl::data m) i (scl::data v))
      m))
 
-(make-matrix-set-row gsl-matrix-double gsl-vector-double gsl_matrix_set_row)
+(make-matrix-set-row matrix-double vector-double gsl_matrix_set_row)
 
-(make-matrix-set-row gsl-matrix-float gsl-vector-float gsl_matrix_float_set_row)
+(make-matrix-set-row matrix-float vector-float gsl_matrix_float_set_row)
 
-(make-matrix-set-row gsl-matrix-int gsl-vector-int gsl_matrix_int_set_row)
+(make-matrix-set-row matrix-int vector-int gsl_matrix_int_set_row)
 
-(make-matrix-set-row gsl-matrix-uint gsl-vector-uint gsl_matrix_uint_set_row)
+(make-matrix-set-row matrix-uint vector-uint gsl_matrix_uint_set_row)
 
 (defgeneric matrix-set-col (m j v)
   (:documentation
@@ -241,13 +241,13 @@ as the length of the row."))
      (,func (scl::data m) j (scl::data v))
      m))
 
-(make-matrix-set-col gsl-matrix-double gsl-vector-double gsl_matrix_set_col)
+(make-matrix-set-col matrix-double vector-double gsl_matrix_set_col)
 
-(make-matrix-set-col gsl-matrix-float gsl-vector-float gsl_matrix_float_set_col)
+(make-matrix-set-col matrix-float vector-float gsl_matrix_float_set_col)
 
-(make-matrix-set-col gsl-matrix-int gsl-vector-int gsl_matrix_int_set_col)
+(make-matrix-set-col matrix-int vector-int gsl_matrix_int_set_col)
 
-(make-matrix-set-col gsl-matrix-uint gsl-vector-uint gsl_matrix_uint_set_col)
+(make-matrix-set-col matrix-uint vector-uint gsl_matrix_uint_set_col)
 
 (defgeneric matrix-swap-rows (m i j)
   (:documentation
@@ -259,13 +259,13 @@ in-place."))
      (,func (scl::data m) i j)
      m))
 
-(make-matrix-swap-rows gsl-matrix-double gsl_matrix_swap_rows)
+(make-matrix-swap-rows matrix-double gsl_matrix_swap_rows)
 
-(make-matrix-swap-rows gsl-matrix-float gsl_matrix_float_swap_rows)
+(make-matrix-swap-rows matrix-float gsl_matrix_float_swap_rows)
 
-(make-matrix-swap-rows gsl-matrix-int gsl_matrix_int_swap_rows)
+(make-matrix-swap-rows matrix-int gsl_matrix_int_swap_rows)
 
-(make-matrix-swap-rows gsl-matrix-uint gsl_matrix_uint_swap_rows)
+(make-matrix-swap-rows matrix-uint gsl_matrix_uint_swap_rows)
 
 (defgeneric matrix-swap-columns (m i j)
   (:documentation
@@ -277,13 +277,13 @@ in-place."))
      (,func (scl::data m) i j)
      m))
 
-(make-matrix-swap-columns gsl-matrix-double gsl_matrix_swap_columns)
+(make-matrix-swap-columns matrix-double gsl_matrix_swap_columns)
 
-(make-matrix-swap-columns gsl-matrix-float gsl_matrix_float_swap_columns)
+(make-matrix-swap-columns matrix-float gsl_matrix_float_swap_columns)
 
-(make-matrix-swap-columns gsl-matrix-int gsl_matrix_int_swap_columns)
+(make-matrix-swap-columns matrix-int gsl_matrix_int_swap_columns)
 
-(make-matrix-swap-columns gsl-matrix-uint gsl_matrix_uint_swap_columns)
+(make-matrix-swap-columns matrix-uint gsl_matrix_uint_swap_columns)
 
 (defgeneric matrix-swap-rowcol (m i j)
   (:documentation
@@ -296,13 +296,13 @@ possible."))
      (,func (scl::data m) i j)
      m))
 
-(make-matrix-swap-rowcol gsl-matrix-double gsl_matrix_swap_rowcol)
+(make-matrix-swap-rowcol matrix-double gsl_matrix_swap_rowcol)
 
-(make-matrix-swap-rowcol gsl-matrix-float gsl_matrix_float_swap_rowcol)
+(make-matrix-swap-rowcol matrix-float gsl_matrix_float_swap_rowcol)
 
-(make-matrix-swap-rowcol gsl-matrix-int gsl_matrix_int_swap_rowcol)
+(make-matrix-swap-rowcol matrix-int gsl_matrix_int_swap_rowcol)
 
-(make-matrix-swap-rowcol gsl-matrix-uint gsl_matrix_uint_swap_rowcol)
+(make-matrix-swap-rowcol matrix-uint gsl_matrix_uint_swap_rowcol)
 
 (defgeneric matrix-transpose-memcpy (dest src)
   (:documentation
@@ -316,13 +316,13 @@ transposed dimensions of the matrix src."))
      (,func (scl::data dest) (scl::data src))
      dest))
 
-(make-matrix-transpose-memcpy gsl-matrix-double gsl_matrix_transpose_memcpy)
+(make-matrix-transpose-memcpy matrix-double gsl_matrix_transpose_memcpy)
 
-(make-matrix-transpose-memcpy gsl-matrix-float gsl_matrix_float_transpose_memcpy)
+(make-matrix-transpose-memcpy matrix-float gsl_matrix_float_transpose_memcpy)
 
-(make-matrix-transpose-memcpy gsl-matrix-int gsl_matrix_int_transpose_memcpy)
+(make-matrix-transpose-memcpy matrix-int gsl_matrix_int_transpose_memcpy)
 
-(make-matrix-transpose-memcpy gsl-matrix-uint gsl_matrix_uint_transpose_memcpy)
+(make-matrix-transpose-memcpy matrix-uint gsl_matrix_uint_transpose_memcpy)
 
 (defgeneric matrix-transpose (m)
   (:documentation
@@ -335,13 +335,13 @@ this operation to be possible."))
      (,func (scl::data m))
      m))
 
-(make-matrix-transpose gsl-matrix-double gsl_matrix_transpose)
+(make-matrix-transpose matrix-double gsl_matrix_transpose)
 
-(make-matrix-transpose gsl-matrix-float gsl_matrix_float_transpose)
+(make-matrix-transpose matrix-float gsl_matrix_float_transpose)
 
-(make-matrix-transpose gsl-matrix-int gsl_matrix_int_transpose)
+(make-matrix-transpose matrix-int gsl_matrix_int_transpose)
 
-(make-matrix-transpose gsl-matrix-uint gsl_matrix_uint_transpose)
+(make-matrix-transpose matrix-uint gsl_matrix_uint_transpose)
 
 (defgeneric matrix-add (a b)
   (:documentation
@@ -355,13 +355,13 @@ dimensions."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-matrix-add gsl-matrix-double gsl_matrix_add)
+(make-matrix-add matrix-double gsl_matrix_add)
 
-(make-matrix-add gsl-matrix-float gsl_matrix_float_add)
+(make-matrix-add matrix-float gsl_matrix_float_add)
 
-(make-matrix-add gsl-matrix-int gsl_matrix_int_add)
+(make-matrix-add matrix-int gsl_matrix_int_add)
 
-(make-matrix-add gsl-matrix-uint gsl_matrix_uint_add)
+(make-matrix-add matrix-uint gsl_matrix_uint_add)
 
 (defgeneric matrix-sub (a b)
   (:documentation
@@ -374,13 +374,13 @@ remains unchanged."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-matrix-sub gsl-matrix-double gsl_matrix_sub)
+(make-matrix-sub matrix-double gsl_matrix_sub)
 
-(make-matrix-sub gsl-matrix-float gsl_matrix_float_sub)
+(make-matrix-sub matrix-float gsl_matrix_float_sub)
 
-(make-matrix-sub gsl-matrix-int gsl_matrix_int_sub)
+(make-matrix-sub matrix-int gsl_matrix_int_sub)
 
-(make-matrix-sub gsl-matrix-uint gsl_matrix_uint_sub)
+(make-matrix-sub matrix-uint gsl_matrix_uint_sub)
 
 (defgeneric matrix-mul-elements (a b)
   (:documentation
@@ -393,13 +393,13 @@ remains unchanged. The two matrices must have the same dimensions."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-matrix-mul-elements gsl-matrix-double gsl_matrix_mul_elements)
+(make-matrix-mul-elements matrix-double gsl_matrix_mul_elements)
 
-(make-matrix-mul-elements gsl-matrix-float gsl_matrix_float_mul_elements)
+(make-matrix-mul-elements matrix-float gsl_matrix_float_mul_elements)
 
-(make-matrix-mul-elements gsl-matrix-int gsl_matrix_int_mul_elements)
+(make-matrix-mul-elements matrix-int gsl_matrix_int_mul_elements)
 
-(make-matrix-mul-elements gsl-matrix-uint gsl_matrix_uint_mul_elements)
+(make-matrix-mul-elements matrix-uint gsl_matrix_uint_mul_elements)
 
 (defgeneric matrix-div-elements (a b)
   (:documentation
@@ -412,13 +412,13 @@ remains unchanged. The two matrices must have the same dimensions."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-matrix-div-elements gsl-matrix-double gsl_matrix_div_elements)
+(make-matrix-div-elements matrix-double gsl_matrix_div_elements)
 
-(make-matrix-div-elements gsl-matrix-float gsl_matrix_float_div_elements)
+(make-matrix-div-elements matrix-float gsl_matrix_float_div_elements)
 
-(make-matrix-div-elements gsl-matrix-int gsl_matrix_int_div_elements)
+(make-matrix-div-elements matrix-int gsl_matrix_int_div_elements)
 
-(make-matrix-div-elements gsl-matrix-uint gsl_matrix_uint_div_elements)
+(make-matrix-div-elements matrix-uint gsl_matrix_uint_div_elements)
 
 (defgeneric matrix-scale (a x)
   (:documentation
@@ -430,13 +430,13 @@ factor x. The result a(i,j) <- a(i,j) * x is stored in a."))
      (,func (scl::data a) x)
      a))
 
-(make-matrix-scale gsl-matrix-double gsl_matrix_scale)
+(make-matrix-scale matrix-double gsl_matrix_scale)
 
-(make-matrix-scale gsl-matrix-float gsl_matrix_float_scale)
+(make-matrix-scale matrix-float gsl_matrix_float_scale)
 
-(make-matrix-scale gsl-matrix-int gsl_matrix_int_scale)
+(make-matrix-scale matrix-int gsl_matrix_int_scale)
 
-(make-matrix-scale gsl-matrix-uint gsl_matrix_uint_scale)
+(make-matrix-scale matrix-uint gsl_matrix_uint_scale)
 
 (defgeneric matrix-add-constant (a x)
   (:documentation
@@ -448,13 +448,13 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
      (,func (scl::data a) x)
      a))
 
-(make-matrix-add-constant gsl-matrix-double gsl_matrix_add_constant)
+(make-matrix-add-constant matrix-double gsl_matrix_add_constant)
 
-(make-matrix-add-constant gsl-matrix-float gsl_matrix_float_add_constant)
+(make-matrix-add-constant matrix-float gsl_matrix_float_add_constant)
 
-(make-matrix-add-constant gsl-matrix-int gsl_matrix_int_add_constant)
+(make-matrix-add-constant matrix-int gsl_matrix_int_add_constant)
 
-(make-matrix-add-constant gsl-matrix-uint gsl_matrix_uint_add_constant)
+(make-matrix-add-constant matrix-uint gsl_matrix_uint_add_constant)
 
 (defgeneric matrix-max (m)
   (:documentation
@@ -464,13 +464,13 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
   `(defmethod matrix-max ((m ,type))
      (,func (scl::data m))))
 
-(make-matrix-max gsl-matrix-double gsl_matrix_max)
+(make-matrix-max matrix-double gsl_matrix_max)
 
-(make-matrix-max gsl-matrix-float gsl_matrix_float_max)
+(make-matrix-max matrix-float gsl_matrix_float_max)
 
-(make-matrix-max gsl-matrix-int gsl_matrix_int_max)
+(make-matrix-max matrix-int gsl_matrix_int_max)
 
-(make-matrix-max gsl-matrix-uint gsl_matrix_uint_max)
+(make-matrix-max matrix-uint gsl_matrix_uint_max)
 
 (defgeneric matrix-min (m)
   (:documentation
@@ -480,13 +480,13 @@ matrix a. The result a(i,j) <- a(i,j) + x is stored in a."))
   `(defmethod matrix-min ((m ,type))
      (,func (scl::data m))))
 
-(make-matrix-min gsl-matrix-double gsl_matrix_min)
+(make-matrix-min matrix-double gsl_matrix_min)
 
-(make-matrix-min gsl-matrix-float gsl_matrix_float_min)
+(make-matrix-min matrix-float gsl_matrix_float_min)
 
-(make-matrix-min gsl-matrix-int gsl_matrix_int_min)
+(make-matrix-min matrix-int gsl_matrix_int_min)
 
-(make-matrix-min gsl-matrix-uint gsl_matrix_uint_min)
+(make-matrix-min matrix-uint gsl_matrix_uint_min)
 
 (defgeneric matrix-minmax (m)
   (:documentation
@@ -501,13 +501,13 @@ m, storing them in min-out and max-out."))
        (values (cffi:mem-ref min-out ,element-type)
                (cffi:mem-ref max-out ,element-type)))))
 
-(make-matrix-minmax gsl-matrix-double :double gsl_matrix_minmax)
+(make-matrix-minmax matrix-double :double gsl_matrix_minmax)
 
-(make-matrix-minmax gsl-matrix-float :float gsl_matrix_float_minmax)
+(make-matrix-minmax matrix-float :float gsl_matrix_float_minmax)
 
-(make-matrix-minmax gsl-matrix-int :int gsl_matrix_int_minmax)
+(make-matrix-minmax matrix-int :int gsl_matrix_int_minmax)
 
-(make-matrix-minmax gsl-matrix-uint :unsigned-int gsl_matrix_uint_minmax)
+(make-matrix-minmax matrix-uint :unsigned-int gsl_matrix_uint_minmax)
 
 (defgeneric matrix-max-index (m)
   (:documentation
@@ -524,13 +524,13 @@ searching in row-major order."))
        (values (cffi:mem-ref imax :unsigned-int)
                (cffi:mem-ref jmax :unsigned-int)))))
 
-(make-matrix-max-index gsl-matrix-double gsl_matrix_max_index)
+(make-matrix-max-index matrix-double gsl_matrix_max_index)
 
-(make-matrix-max-index gsl-matrix-float gsl_matrix_float_max_index)
+(make-matrix-max-index matrix-float gsl_matrix_float_max_index)
 
-(make-matrix-max-index gsl-matrix-int gsl_matrix_int_max_index)
+(make-matrix-max-index matrix-int gsl_matrix_int_max_index)
 
-(make-matrix-max-index gsl-matrix-uint gsl_matrix_uint_max_index)
+(make-matrix-max-index matrix-uint gsl_matrix_uint_max_index)
 
 (defgeneric matrix-min-index (m)
   (:documentation
@@ -547,13 +547,13 @@ in row-major order."))
        (values (cffi:mem-ref imin :unsigned-int)
                (cffi:mem-ref jmin :unsigned-int)))))
 
-(make-matrix-min-index gsl-matrix-double gsl_matrix_min_index)
+(make-matrix-min-index matrix-double gsl_matrix_min_index)
 
-(make-matrix-min-index gsl-matrix-float gsl_matrix_float_min_index)
+(make-matrix-min-index matrix-float gsl_matrix_float_min_index)
 
-(make-matrix-min-index gsl-matrix-int gsl_matrix_int_min_index)
+(make-matrix-min-index matrix-int gsl_matrix_int_min_index)
 
-(make-matrix-min-index gsl-matrix-uint gsl_matrix_uint_min_index)
+(make-matrix-min-index matrix-uint gsl_matrix_uint_min_index)
 
 (defgeneric matrix-minmax-index (m)
   (:documentation
@@ -575,13 +575,13 @@ row-major order."))
                (cffi:mem-ref imax :unsigned-int)
                (cffi:mem-ref jmax :unsigned-int)))))
 
-(make-matrix-minmax-index gsl-matrix-double gsl_matrix_minmax_index)
+(make-matrix-minmax-index matrix-double gsl_matrix_minmax_index)
 
-(make-matrix-minmax-index gsl-matrix-float gsl_matrix_float_minmax_index)
+(make-matrix-minmax-index matrix-float gsl_matrix_float_minmax_index)
 
-(make-matrix-minmax-index gsl-matrix-int gsl_matrix_int_minmax_index)
+(make-matrix-minmax-index matrix-int gsl_matrix_int_minmax_index)
 
-(make-matrix-minmax-index gsl-matrix-uint gsl_matrix_uint_minmax_index)
+(make-matrix-minmax-index matrix-uint gsl_matrix_uint_minmax_index)
 
 (defgeneric matrix-isnull (m)
   (:documentation
@@ -592,13 +592,13 @@ zero, and nil otherwise."))
   `(defmethod matrix-isnull ((m ,type))
      (= (,func (scl::data m)) 1)))
 
-(make-matrix-isnull gsl-matrix-double gsl_matrix_isnull)
+(make-matrix-isnull matrix-double gsl_matrix_isnull)
 
-(make-matrix-isnull gsl-matrix-float gsl_matrix_float_isnull)
+(make-matrix-isnull matrix-float gsl_matrix_float_isnull)
 
-(make-matrix-isnull gsl-matrix-int gsl_matrix_int_isnull)
+(make-matrix-isnull matrix-int gsl_matrix_int_isnull)
 
-(make-matrix-isnull gsl-matrix-uint gsl_matrix_uint_isnull)
+(make-matrix-isnull matrix-uint gsl_matrix_uint_isnull)
 
 (defgeneric matrix-ispos (m)
   (:documentation
@@ -609,13 +609,13 @@ strictly positive, and nil otherwise."))
   `(defmethod matrix-ispos ((m ,type))
      (= (,func (scl::data m)) 1)))
 
-(make-matrix-ispos gsl-matrix-double gsl_matrix_ispos)
+(make-matrix-ispos matrix-double gsl_matrix_ispos)
 
-(make-matrix-ispos gsl-matrix-float gsl_matrix_float_ispos)
+(make-matrix-ispos matrix-float gsl_matrix_float_ispos)
 
-(make-matrix-ispos gsl-matrix-int gsl_matrix_int_ispos)
+(make-matrix-ispos matrix-int gsl_matrix_int_ispos)
 
-(make-matrix-ispos gsl-matrix-uint gsl_matrix_uint_ispos)
+(make-matrix-ispos matrix-uint gsl_matrix_uint_ispos)
 
 (defgeneric matrix-isneg (m)
   (:documentation
@@ -626,13 +626,13 @@ strictly negative, and nil otherwise."))
   `(defmethod matrix-isneg ((m ,type))
      (= (,func (scl::data m)) 1)))
 
-(make-matrix-isneg gsl-matrix-double gsl_matrix_isneg)
+(make-matrix-isneg matrix-double gsl_matrix_isneg)
 
-(make-matrix-isneg gsl-matrix-float gsl_matrix_float_isneg)
+(make-matrix-isneg matrix-float gsl_matrix_float_isneg)
 
-(make-matrix-isneg gsl-matrix-int gsl_matrix_int_isneg)
+(make-matrix-isneg matrix-int gsl_matrix_int_isneg)
 
-(make-matrix-isneg gsl-matrix-uint gsl_matrix_uint_isneg)
+(make-matrix-isneg matrix-uint gsl_matrix_uint_isneg)
 
 (defgeneric matrix-isnonneg (m)
   (:documentation
@@ -643,13 +643,13 @@ non-negative, and nil otherwise."))
   `(defmethod matrix-isnonneg ((m ,type))
      (= (,func (scl::data m)) 1)))
 
-(make-matrix-isnonneg gsl-matrix-double gsl_matrix_isnonneg)
+(make-matrix-isnonneg matrix-double gsl_matrix_isnonneg)
 
-(make-matrix-isnonneg gsl-matrix-float gsl_matrix_float_isnonneg)
+(make-matrix-isnonneg matrix-float gsl_matrix_float_isnonneg)
 
-(make-matrix-isnonneg gsl-matrix-int gsl_matrix_int_isnonneg)
+(make-matrix-isnonneg matrix-int gsl_matrix_int_isnonneg)
 
-(make-matrix-isnonneg gsl-matrix-uint gsl_matrix_uint_isnonneg)
+(make-matrix-isnonneg matrix-uint gsl_matrix_uint_isnonneg)
 
 (defgeneric matrix-equal (a b)
   (:documentation
@@ -660,13 +660,13 @@ comparison of element values) and nil otherwise."))
   `(defmethod matrix-equal ((a ,type) (b ,type))
      (= (,func (scl::data a) (scl::data b)) 1)))
 
-(make-matrix-equal gsl-matrix-double gsl_matrix_equal)
+(make-matrix-equal matrix-double gsl_matrix_equal)
 
-(make-matrix-equal gsl-matrix-float gsl_matrix_float_equal)
+(make-matrix-equal matrix-float gsl_matrix_float_equal)
 
-(make-matrix-equal gsl-matrix-int gsl_matrix_int_equal)
+(make-matrix-equal matrix-int gsl_matrix_int_equal)
 
-(make-matrix-equal gsl-matrix-uint gsl_matrix_uint_equal)
+(make-matrix-equal matrix-uint gsl_matrix_uint_equal)
 
 (defgeneric matrix-read (m &optional str n1 n2)
   (:documentation
@@ -685,13 +685,13 @@ determine how many bytes to read."))
          (dotimes (j s2)
            (,func (scl::data m) i j (read str)))))))
 
-(make-matrix-read gsl-matrix-double gsl_matrix_set)
+(make-matrix-read matrix-double gsl_matrix_set)
 
-(make-matrix-read gsl-matrix-float gsl_matrix_float_set)
+(make-matrix-read matrix-float gsl_matrix_float_set)
 
-(make-matrix-read gsl-matrix-int gsl_matrix_int_set)
+(make-matrix-read matrix-int gsl_matrix_int_set)
 
-(make-matrix-read gsl-matrix-uint gsl_matrix_uint_set)
+(make-matrix-read matrix-uint gsl_matrix_uint_set)
 
 (defgeneric matrix-write (m &optional str n1 n2)
   (:documentation
@@ -710,43 +710,43 @@ stream."))
                (format str "~S~%" (,func (scl::data m) i j))
                (format str "~S~C" (,func (scl::data m) i j) #\tab)))))))
 
-(make-matrix-write gsl-matrix-double gsl_matrix_get)
+(make-matrix-write matrix-double gsl_matrix_get)
 
-(make-matrix-write gsl-matrix-float gsl_matrix_float_get)
+(make-matrix-write matrix-float gsl_matrix_float_get)
 
-(make-matrix-write gsl-matrix-int gsl_matrix_int_get)
+(make-matrix-write matrix-int gsl_matrix_int_get)
 
-(make-matrix-write gsl-matrix-uint gsl_matrix_uint_get)
+(make-matrix-write matrix-uint gsl_matrix_uint_get)
 
-(defvar *print-object-gsl-matrix-size1* 10)
+(defvar *print-object-matrix-size1* 10)
 
-(defvar *print-object-gsl-matrix-size2* 10)
+(defvar *print-object-matrix-size2* 10)
 
 (defun print-gsl-matrix (m stream)
   (format stream "; ~A x ~A matrix~%" (scl::size1 m) (scl::size2 m))
-  (cond ((and (<= (scl::size1 m) *print-object-gsl-matrix-size1*)
-              (<= (scl::size2 m) *print-object-gsl-matrix-size2*))
+  (cond ((and (<= (scl::size1 m) *print-object-matrix-size1*)
+              (<= (scl::size2 m) *print-object-matrix-size2*))
          (matrix-write m stream))
-        ((and (> (scl::size1 m) *print-object-gsl-matrix-size1*)
-              (<= (scl::size2 m) *print-object-gsl-matrix-size2*))
-         (matrix-write m stream *print-object-gsl-matrix-size1* (scl::size2 m))
+        ((and (> (scl::size1 m) *print-object-matrix-size1*)
+              (<= (scl::size2 m) *print-object-matrix-size2*))
+         (matrix-write m stream *print-object-matrix-size1* (scl::size2 m))
          (format stream "; omitted ~A rows~%"
-                 (- (scl::size1 m) *print-object-gsl-matrix-size1*)))
-        ((and (<= (scl::size1 m) *print-object-gsl-matrix-size1*)
-              (> (scl::size2 m) *print-object-gsl-matrix-size2*))
-         (matrix-write m stream (scl::size1 m) *print-object-gsl-matrix-size2*)
+                 (- (scl::size1 m) *print-object-matrix-size1*)))
+        ((and (<= (scl::size1 m) *print-object-matrix-size1*)
+              (> (scl::size2 m) *print-object-matrix-size2*))
+         (matrix-write m stream (scl::size1 m) *print-object-matrix-size2*)
          (format stream "; omitted ~A columns~%"
-                 (- (scl::size2 m) *print-object-gsl-matrix-size2*)))
-        ((and (> (scl::size1 m) *print-object-gsl-matrix-size1*)
-              (> (scl::size2 m) *print-object-gsl-matrix-size2*))
-         (matrix-write m stream *print-object-gsl-matrix-size1*
-                       *print-object-gsl-matrix-size2*)
+                 (- (scl::size2 m) *print-object-matrix-size2*)))
+        ((and (> (scl::size1 m) *print-object-matrix-size1*)
+              (> (scl::size2 m) *print-object-matrix-size2*))
+         (matrix-write m stream *print-object-matrix-size1*
+                       *print-object-matrix-size2*)
          (format stream "; omitted ~A rows and ~A columns~%"
-                 (- (scl::size1 m) *print-object-gsl-matrix-size1*)
-                 (- (scl::size2 m) *print-object-gsl-matrix-size2*)))))
+                 (- (scl::size1 m) *print-object-matrix-size1*)
+                 (- (scl::size2 m) *print-object-matrix-size2*)))))
 
-;; gsl-matrix-any print-object
-(defmethod print-object ((m gsl-matrix-any) stream)
+;; matrix-any print-object
+(defmethod print-object ((m matrix-any) stream)
   (print-gsl-matrix m stream)
   (call-next-method))
 
@@ -765,18 +765,18 @@ matrix m. The two matrices must have the same size."))
              (,sfunc (scl::data dest) i j
                      (aref (scl::data src) (+ (* i (scl::tda src)) j))))))))
 
-(make-matrix-copy-from-scl-matrix gsl-matrix-double
+(make-matrix-copy-from-scl-matrix matrix-double
                                   scl::matrix-double
                                   gsl_matrix_set)
 
-(make-matrix-copy-from-scl-matrix gsl-matrix-float
+(make-matrix-copy-from-scl-matrix matrix-float
                                   scl::matrix-float
                                   gsl_matrix_float_set)
 
-(make-matrix-copy-from-scl-matrix gsl-matrix-int
+(make-matrix-copy-from-scl-matrix matrix-int
                                   scl::matrix-int
                                   gsl_matrix_int_set)
 
-(make-matrix-copy-from-scl-matrix gsl-matrix-uint
+(make-matrix-copy-from-scl-matrix matrix-uint
                                   scl::matrix-uint
                                   gsl_matrix_uint_set)

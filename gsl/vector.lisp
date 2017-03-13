@@ -35,13 +35,13 @@ invoked and 0 is returned."))
   `(defmethod vector-get ((v ,type) i)
      (,func (scl::data v) i)))
 
-(make-vector-get gsl-vector-double gsl_vector_get)
+(make-vector-get vector-double gsl_vector_get)
 
-(make-vector-get gsl-vector-float gsl_vector_float_get)
+(make-vector-get vector-float gsl_vector_float_get)
 
-(make-vector-get gsl-vector-int gsl_vector_int_get)
+(make-vector-get vector-int gsl_vector_int_get)
 
-(make-vector-get gsl-vector-uint gsl_vector_uint_get)
+(make-vector-get vector-uint gsl_vector_uint_get)
 
 (defgeneric vector-set (v i x)
   (:documentation
@@ -54,13 +54,13 @@ handler is invoked."))
      (,func (scl::data v) i x)
      v))
 
-(make-vector-set gsl-vector-double gsl_vector_set)
+(make-vector-set vector-double gsl_vector_set)
 
-(make-vector-set gsl-vector-float gsl_vector_float_set)
+(make-vector-set vector-float gsl_vector_float_set)
 
-(make-vector-set gsl-vector-int gsl_vector_int_set)
+(make-vector-set vector-int gsl_vector_int_set)
 
-(make-vector-set gsl-vector-uint gsl_vector_uint_set)
+(make-vector-set vector-uint gsl_vector_uint_set)
 
 (defgeneric vector-ptr (v i)
   (:documentation
@@ -72,13 +72,13 @@ handler is invoked and a null pointer is returned."))
   `(defmethod vector-ptr ((v ,type) i)
      (,func (scl::data v) i)))
 
-(make-vector-ptr gsl-vector-double gsl_vector_ptr)
+(make-vector-ptr vector-double gsl_vector_ptr)
 
-(make-vector-ptr gsl-vector-float gsl_vector_float_ptr)
+(make-vector-ptr vector-float gsl_vector_float_ptr)
 
-(make-vector-ptr gsl-vector-int gsl_vector_int_ptr)
+(make-vector-ptr vector-int gsl_vector_int_ptr)
 
-(make-vector-ptr gsl-vector-uint gsl_vector_uint_ptr)
+(make-vector-ptr vector-uint gsl_vector_uint_ptr)
 
 (defgeneric vector-set-all (v x)
   (:documentation
@@ -90,13 +90,13 @@ x."))
      (,func (scl::data v) x)
      v))
 
-(make-vector-set-all gsl-vector-double gsl_vector_set_all)
+(make-vector-set-all vector-double gsl_vector_set_all)
 
-(make-vector-set-all gsl-vector-float gsl_vector_float_set_all)
+(make-vector-set-all vector-float gsl_vector_float_set_all)
 
-(make-vector-set-all gsl-vector-int gsl_vector_int_set_all)
+(make-vector-set-all vector-int gsl_vector_int_set_all)
 
-(make-vector-set-all gsl-vector-uint gsl_vector_uint_set_all)
+(make-vector-set-all vector-uint gsl_vector_uint_set_all)
 
 (defgeneric vector-set-zero (v)
   (:documentation
@@ -107,13 +107,13 @@ x."))
      (,func (scl::data v))
      v))
 
-(make-vector-set-zero gsl-vector-double gsl_vector_set_zero)
+(make-vector-set-zero vector-double gsl_vector_set_zero)
 
-(make-vector-set-zero gsl-vector-float gsl_vector_float_set_zero)
+(make-vector-set-zero vector-float gsl_vector_float_set_zero)
 
-(make-vector-set-zero gsl-vector-int gsl_vector_int_set_zero)
+(make-vector-set-zero vector-int gsl_vector_int_set_zero)
 
-(make-vector-set-zero gsl-vector-uint gsl_vector_uint_set_zero)
+(make-vector-set-zero vector-uint gsl_vector_uint_set_zero)
 
 (defgeneric vector-set-basis (v i)
   (:documentation
@@ -126,13 +126,13 @@ one."))
      (,func (scl::data v) i)
      v))
 
-(make-vector-set-basis gsl-vector-double gsl_vector_set_basis)
+(make-vector-set-basis vector-double gsl_vector_set_basis)
 
-(make-vector-set-basis gsl-vector-float gsl_vector_float_set_basis)
+(make-vector-set-basis vector-float gsl_vector_float_set_basis)
 
-(make-vector-set-basis gsl-vector-int gsl_vector_int_set_basis)
+(make-vector-set-basis vector-int gsl_vector_int_set_basis)
 
-(make-vector-set-basis gsl-vector-uint gsl_vector_uint_set_basis)
+(make-vector-set-basis vector-uint gsl_vector_uint_set_basis)
 
 (defgeneric vector-memcpy (dest src)
   (:documentation
@@ -144,13 +144,13 @@ vector dest. The two vectors must have the same length."))
      (,func (scl::data dest) (scl::data src))
      dest))
 
-(make-vector-memcpy gsl-vector-double gsl_vector_memcpy)
+(make-vector-memcpy vector-double gsl_vector_memcpy)
 
-(make-vector-memcpy gsl-vector-float gsl_vector_float_memcpy)
+(make-vector-memcpy vector-float gsl_vector_float_memcpy)
 
-(make-vector-memcpy gsl-vector-int gsl_vector_int_memcpy)
+(make-vector-memcpy vector-int gsl_vector_int_memcpy)
 
-(make-vector-memcpy gsl-vector-uint gsl_vector_uint_memcpy)
+(make-vector-memcpy vector-uint gsl_vector_uint_memcpy)
 
 (defgeneric vector-swap (v w)
   (:documentation
@@ -162,13 +162,13 @@ copying. The two vectors must have the same length."))
      (,func (scl::data v) (scl::data w))
      (values v w)))
 
-(make-vector-swap gsl-vector-double gsl_vector_swap)
+(make-vector-swap vector-double gsl_vector_swap)
 
-(make-vector-swap gsl-vector-float gsl_vector_float_swap)
+(make-vector-swap vector-float gsl_vector_float_swap)
 
-(make-vector-swap gsl-vector-int gsl_vector_int_swap)
+(make-vector-swap vector-int gsl_vector_int_swap)
 
-(make-vector-swap gsl-vector-uint gsl_vector_uint_swap)
+(make-vector-swap vector-uint gsl_vector_uint_swap)
 
 (defgeneric vector-swap-elements (v i j)
   (:documentation
@@ -180,13 +180,13 @@ in-place."))
      (,func (scl::data v) i j)
      v))
 
-(make-vector-swap-elements gsl-vector-double gsl_vector_swap_elements)
+(make-vector-swap-elements vector-double gsl_vector_swap_elements)
 
-(make-vector-swap-elements gsl-vector-float gsl_vector_float_swap_elements)
+(make-vector-swap-elements vector-float gsl_vector_float_swap_elements)
 
-(make-vector-swap-elements gsl-vector-int gsl_vector_int_swap_elements)
+(make-vector-swap-elements vector-int gsl_vector_int_swap_elements)
 
-(make-vector-swap-elements gsl-vector-uint gsl_vector_uint_swap_elements)
+(make-vector-swap-elements vector-uint gsl_vector_uint_swap_elements)
 
 (defgeneric vector-reverse (v)
   (:documentation
@@ -197,13 +197,13 @@ in-place."))
      (,func (scl::data v))
      v))
 
-(make-vector-reverse gsl-vector-double gsl_vector_reverse)
+(make-vector-reverse vector-double gsl_vector_reverse)
 
-(make-vector-reverse gsl-vector-float gsl_vector_float_reverse)
+(make-vector-reverse vector-float gsl_vector_float_reverse)
 
-(make-vector-reverse gsl-vector-int gsl_vector_int_reverse)
+(make-vector-reverse vector-int gsl_vector_int_reverse)
 
-(make-vector-reverse gsl-vector-uint gsl_vector_uint_reverse)
+(make-vector-reverse vector-uint gsl_vector_uint_reverse)
 
 (defgeneric vector-add (a b)
   (:documentation
@@ -216,13 +216,13 @@ unchanged. The two vectors must have the same length."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-vector-add gsl-vector-double gsl_vector_add)
+(make-vector-add vector-double gsl_vector_add)
 
-(make-vector-add gsl-vector-float gsl_vector_float_add)
+(make-vector-add vector-float gsl_vector_float_add)
 
-(make-vector-add gsl-vector-int gsl_vector_int_add)
+(make-vector-add vector-int gsl_vector_int_add)
 
-(make-vector-add gsl-vector-uint gsl_vector_uint_add)
+(make-vector-add vector-uint gsl_vector_uint_add)
 
 (defgeneric vector-sub (a b)
   (:documentation
@@ -235,13 +235,13 @@ unchanged. The two vectors must have the same length."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-vector-sub gsl-vector-double gsl_vector_sub)
+(make-vector-sub vector-double gsl_vector_sub)
 
-(make-vector-sub gsl-vector-float gsl_vector_float_sub)
+(make-vector-sub vector-float gsl_vector_float_sub)
 
-(make-vector-sub gsl-vector-int gsl_vector_int_sub)
+(make-vector-sub vector-int gsl_vector_int_sub)
 
-(make-vector-sub gsl-vector-uint gsl_vector_uint_sub)
+(make-vector-sub vector-uint gsl_vector_uint_sub)
 
 (defgeneric vector-mul (a b)
   (:documentation
@@ -254,13 +254,13 @@ unchanged. The two vectors must have the same length."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-vector-mul gsl-vector-double gsl_vector_mul)
+(make-vector-mul vector-double gsl_vector_mul)
 
-(make-vector-mul gsl-vector-float gsl_vector_float_mul)
+(make-vector-mul vector-float gsl_vector_float_mul)
 
-(make-vector-mul gsl-vector-int gsl_vector_int_mul)
+(make-vector-mul vector-int gsl_vector_int_mul)
 
-(make-vector-mul gsl-vector-uint gsl_vector_uint_mul)
+(make-vector-mul vector-uint gsl_vector_uint_mul)
 
 (defgeneric vector-div (a b)
   (:documentation
@@ -273,13 +273,13 @@ unchanged. The two vectors must have the same length."))
      (,func (scl::data a) (scl::data b))
      a))
 
-(make-vector-div gsl-vector-double gsl_vector_div)
+(make-vector-div vector-double gsl_vector_div)
 
-(make-vector-div gsl-vector-float gsl_vector_float_div)
+(make-vector-div vector-float gsl_vector_float_div)
 
-(make-vector-div gsl-vector-int gsl_vector_int_div)
+(make-vector-div vector-int gsl_vector_int_div)
 
-(make-vector-div gsl-vector-uint gsl_vector_uint_div)
+(make-vector-div vector-uint gsl_vector_uint_div)
 
 (defgeneric vector-scale (a x)
   (:documentation
@@ -291,13 +291,13 @@ factor x. The result a_i <- x * a_i is stored in a."))
      (,func (scl::data a) x)
      a))
 
-(make-vector-scale gsl-vector-double gsl_vector_scale)
+(make-vector-scale vector-double gsl_vector_scale)
 
-(make-vector-scale gsl-vector-float gsl_vector_float_scale)
+(make-vector-scale vector-float gsl_vector_float_scale)
 
-(make-vector-scale gsl-vector-int gsl_vector_int_scale)
+(make-vector-scale vector-int gsl_vector_int_scale)
 
-(make-vector-scale gsl-vector-uint gsl_vector_uint_scale)
+(make-vector-scale vector-uint gsl_vector_uint_scale)
 
 (defgeneric vector-add-constant (a x)
   (:documentation
@@ -309,13 +309,13 @@ vector a. The result a_i <- a_i + x is stored in a."))
      (,func (scl::data a) x)
      a))
 
-(make-vector-add-constant gsl-vector-double gsl_vector_add_constant)
+(make-vector-add-constant vector-double gsl_vector_add_constant)
 
-(make-vector-add-constant gsl-vector-float gsl_vector_float_add_constant)
+(make-vector-add-constant vector-float gsl_vector_float_add_constant)
 
-(make-vector-add-constant gsl-vector-int gsl_vector_int_add_constant)
+(make-vector-add-constant vector-int gsl_vector_int_add_constant)
 
-(make-vector-add-constant gsl-vector-uint gsl_vector_uint_add_constant)
+(make-vector-add-constant vector-uint gsl_vector_uint_add_constant)
 
 (defgeneric vector-max (v)
   (:documentation
@@ -325,13 +325,13 @@ vector a. The result a_i <- a_i + x is stored in a."))
   `(defmethod vector-max ((v ,type))
      (,func (scl::data v))))
 
-(make-vector-max gsl-vector-double gsl_vector_max)
+(make-vector-max vector-double gsl_vector_max)
 
-(make-vector-max gsl-vector-float gsl_vector_float_max)
+(make-vector-max vector-float gsl_vector_float_max)
 
-(make-vector-max gsl-vector-int gsl_vector_int_max)
+(make-vector-max vector-int gsl_vector_int_max)
 
-(make-vector-max gsl-vector-uint gsl_vector_uint_max)
+(make-vector-max vector-uint gsl_vector_uint_max)
 
 (defgeneric vector-min (v)
   (:documentation
@@ -341,13 +341,13 @@ vector a. The result a_i <- a_i + x is stored in a."))
   `(defmethod vector-min ((v ,type))
      (,func (scl::data v))))
 
-(make-vector-min gsl-vector-double gsl_vector_min)
+(make-vector-min vector-double gsl_vector_min)
 
-(make-vector-min gsl-vector-float gsl_vector_float_min)
+(make-vector-min vector-float gsl_vector_float_min)
 
-(make-vector-min gsl-vector-int gsl_vector_int_min)
+(make-vector-min vector-int gsl_vector_int_min)
 
-(make-vector-min gsl-vector-uint gsl_vector_uint_min)
+(make-vector-min vector-uint gsl_vector_uint_min)
 
 (defgeneric vector-minmax (v)
   (:documentation
@@ -361,13 +361,13 @@ vector a. The result a_i <- a_i + x is stored in a."))
        (values (cffi:mem-ref min-out ,element-type)
                (cffi:mem-ref max-out ,element-type)))))
 
-(make-vector-minmax gsl-vector-double :double gsl_vector_minmax)
+(make-vector-minmax vector-double :double gsl_vector_minmax)
 
-(make-vector-minmax gsl-vector-float :float gsl_vector_float_minmax)
+(make-vector-minmax vector-float :float gsl_vector_float_minmax)
 
-(make-vector-minmax gsl-vector-int :int gsl_vector_int_minmax)
+(make-vector-minmax vector-int :int gsl_vector_int_minmax)
 
-(make-vector-minmax gsl-vector-uint :unsigned-int gsl_vector_uint_minmax)
+(make-vector-minmax vector-uint :unsigned-int gsl_vector_uint_minmax)
 
 (defgeneric vector-max-index (v)
   (:documentation
@@ -379,13 +379,13 @@ is returned."))
   `(defmethod vector-max-index ((v ,type))
      (,func (scl::data v))))
 
-(make-vector-max-index gsl-vector-double gsl_vector_max_index)
+(make-vector-max-index vector-double gsl_vector_max_index)
 
-(make-vector-max-index gsl-vector-float gsl_vector_float_max_index)
+(make-vector-max-index vector-float gsl_vector_float_max_index)
 
-(make-vector-max-index gsl-vector-int gsl_vector_int_max_index)
+(make-vector-max-index vector-int gsl_vector_int_max_index)
 
-(make-vector-max-index gsl-vector-uint gsl_vector_uint_max_index)
+(make-vector-max-index vector-uint gsl_vector_uint_max_index)
 
 (defgeneric vector-min-index (v)
   (:documentation
@@ -398,13 +398,13 @@ returned."))
   `(defmethod vector-min-index ((v ,type))
      (,func (scl::data v))))
 
-(make-vector-min-index gsl-vector-double gsl_vector_min_index)
+(make-vector-min-index vector-double gsl_vector_min_index)
 
-(make-vector-min-index gsl-vector-float gsl_vector_float_min_index)
+(make-vector-min-index vector-float gsl_vector_float_min_index)
 
-(make-vector-min-index gsl-vector-int gsl_vector_int_min_index)
+(make-vector-min-index vector-int gsl_vector_int_min_index)
 
-(make-vector-min-index gsl-vector-uint gsl_vector_uint_min_index)
+(make-vector-min-index vector-uint gsl_vector_uint_min_index)
 
 (defgeneric vector-minmax-index (v)
   (:documentation
@@ -419,13 +419,13 @@ values in the vector v."))
        (values (cffi:mem-ref imin :unsigned-int)
                (cffi:mem-ref imax :unsigned-int)))))
 
-(make-vector-minmax-index gsl-vector-double gsl_vector_minmax_index)
+(make-vector-minmax-index vector-double gsl_vector_minmax_index)
 
-(make-vector-minmax-index gsl-vector-float gsl_vector_float_minmax_index)
+(make-vector-minmax-index vector-float gsl_vector_float_minmax_index)
 
-(make-vector-minmax-index gsl-vector-int gsl_vector_int_minmax_index)
+(make-vector-minmax-index vector-int gsl_vector_int_minmax_index)
 
-(make-vector-minmax-index gsl-vector-uint gsl_vector_uint_minmax_index)
+(make-vector-minmax-index vector-uint gsl_vector_uint_minmax_index)
 
 (defgeneric vector-isnull (v)
   (:documentation
@@ -436,13 +436,13 @@ zero, and nil otherwise."))
   `(defmethod vector-isnull ((v ,type))
      (= (,func (scl::data v)) 1)))
 
-(make-vector-isnull gsl-vector-double gsl_vector_isnull)
+(make-vector-isnull vector-double gsl_vector_isnull)
 
-(make-vector-isnull gsl-vector-float gsl_vector_float_isnull)
+(make-vector-isnull vector-float gsl_vector_float_isnull)
 
-(make-vector-isnull gsl-vector-int gsl_vector_int_isnull)
+(make-vector-isnull vector-int gsl_vector_int_isnull)
 
-(make-vector-isnull gsl-vector-uint gsl_vector_uint_isnull)
+(make-vector-isnull vector-uint gsl_vector_uint_isnull)
 
 (defgeneric vector-ispos (v)
   (:documentation
@@ -453,13 +453,13 @@ strictly positive, and nil otherwise."))
   `(defmethod vector-ispos ((v ,type))
      (= (,func (scl::data v)) 1)))
 
-(make-vector-ispos gsl-vector-double gsl_vector_ispos)
+(make-vector-ispos vector-double gsl_vector_ispos)
 
-(make-vector-ispos gsl-vector-float gsl_vector_float_ispos)
+(make-vector-ispos vector-float gsl_vector_float_ispos)
 
-(make-vector-ispos gsl-vector-int gsl_vector_int_ispos)
+(make-vector-ispos vector-int gsl_vector_int_ispos)
 
-(make-vector-ispos gsl-vector-uint gsl_vector_uint_ispos)
+(make-vector-ispos vector-uint gsl_vector_uint_ispos)
 
 (defgeneric vector-isneg (v)
   (:documentation
@@ -470,13 +470,13 @@ strictly negative, and nil otherwise."))
   `(defmethod vector-isneg ((v ,type))
      (= (,func (scl::data v)) 1)))
 
-(make-vector-isneg gsl-vector-double gsl_vector_isneg)
+(make-vector-isneg vector-double gsl_vector_isneg)
 
-(make-vector-isneg gsl-vector-float gsl_vector_float_isneg)
+(make-vector-isneg vector-float gsl_vector_float_isneg)
 
-(make-vector-isneg gsl-vector-int gsl_vector_int_isneg)
+(make-vector-isneg vector-int gsl_vector_int_isneg)
 
-(make-vector-isneg gsl-vector-uint gsl_vector_uint_isneg)
+(make-vector-isneg vector-uint gsl_vector_uint_isneg)
 
 (defgeneric vector-isnonneg (v)
   (:documentation
@@ -487,13 +487,13 @@ non-negative, and nil otherwise."))
   `(defmethod vector-isnonneg ((v ,type))
      (= (,func (scl::data v)) 1)))
 
-(make-vector-isnonneg gsl-vector-double gsl_vector_isnonneg)
+(make-vector-isnonneg vector-double gsl_vector_isnonneg)
 
-(make-vector-isnonneg gsl-vector-float gsl_vector_float_isnonneg)
+(make-vector-isnonneg vector-float gsl_vector_float_isnonneg)
 
-(make-vector-isnonneg gsl-vector-int gsl_vector_int_isnonneg)
+(make-vector-isnonneg vector-int gsl_vector_int_isnonneg)
 
-(make-vector-isnonneg gsl-vector-uint gsl_vector_uint_isnonneg)
+(make-vector-isnonneg vector-uint gsl_vector_uint_isnonneg)
 
 (defgeneric vector-equal (u v)
   (:documentation
@@ -504,13 +504,13 @@ otherwise."))
   `(defmethod vector-equal ((u ,type) (v ,type))
      (= (,func (scl::data u) (scl::data v)) 1)))
 
-(make-vector-equal gsl-vector-double gsl_vector_equal)
+(make-vector-equal vector-double gsl_vector_equal)
 
-(make-vector-equal gsl-vector-float gsl_vector_float_equal)
+(make-vector-equal vector-float gsl_vector_float_equal)
 
-(make-vector-equal gsl-vector-int gsl_vector_int_equal)
+(make-vector-equal vector-int gsl_vector_int_equal)
 
-(make-vector-equal gsl-vector-uint gsl_vector_uint_equal)
+(make-vector-equal vector-uint gsl_vector_uint_equal)
 
 (defgeneric vector-read (v &optional str n)
   (:documentation
@@ -525,13 +525,13 @@ read."))
      (dotimes (i (if (null n) (scl::size v) n) v)
        (,sfunc (scl::data v) i (read str)))))
 
-(make-vector-read gsl-vector-double gsl_vector_set)
+(make-vector-read vector-double gsl_vector_set)
 
-(make-vector-read gsl-vector-float gsl_vector_float_set)
+(make-vector-read vector-float gsl_vector_float_set)
 
-(make-vector-read gsl-vector-int gsl_vector_int_set)
+(make-vector-read vector-int gsl_vector_int_set)
 
-(make-vector-read gsl-vector-uint gsl_vector_uint_set)
+(make-vector-read vector-uint gsl_vector_uint_set)
 
 (defgeneric vector-write (v &optional str n)
   (:documentation
@@ -545,27 +545,27 @@ the stream str."))
        (dotimes (i s v)
          (format str "~S~%" (,gfunc (scl::data v) i))))))
 
-(make-vector-write gsl-vector-double gsl_vector_get)
+(make-vector-write vector-double gsl_vector_get)
 
-(make-vector-write gsl-vector-float gsl_vector_float_get)
+(make-vector-write vector-float gsl_vector_float_get)
 
-(make-vector-write gsl-vector-int gsl_vector_int_get)
+(make-vector-write vector-int gsl_vector_int_get)
 
-(make-vector-write gsl-vector-uint gsl_vector_uint_get)
+(make-vector-write vector-uint gsl_vector_uint_get)
 
-(defvar *print-object-gsl-vector-size* 10)
+(defvar *print-object-vector-size* 10)
 
 (defun print-gsl-vector (v stream)
   (format stream "; ~A vector~%" (scl::size v))
-  (if (<= (scl::size v) *print-object-gsl-vector-size*)
+  (if (<= (scl::size v) *print-object-vector-size*)
       (vector-write v stream)
       (progn
-        (vector-write v stream *print-object-gsl-vector-size*)
+        (vector-write v stream *print-object-vector-size*)
         (format stream "; omitted ~A entries~%"
-                (- (scl::size v) *print-object-gsl-vector-size*)))))
+                (- (scl::size v) *print-object-vector-size*)))))
 
-;; gsl-vector-any print-object
-(defmethod print-object ((v gsl-vector-any) stream)
+;; vector-any print-object
+(defmethod print-object ((v vector-any) stream)
   (print-gsl-vector v stream)
   (call-next-method))
 
@@ -581,18 +581,18 @@ vector dest. The two vectors must have the same length."))
          (dotimes (i (scl::size src) dest)
            (,sfunc (scl::data dest) i (aref (scl::data src) i))))))
 
-(make-vector-copy-from-scl-vector gsl-vector-double
+(make-vector-copy-from-scl-vector vector-double
                                   scl::vector-double
                                   gsl_vector_set)
 
-(make-vector-copy-from-scl-vector gsl-vector-float
+(make-vector-copy-from-scl-vector vector-float
                                   scl::vector-float
                                   gsl_vector_float_set)
 
-(make-vector-copy-from-scl-vector gsl-vector-int
+(make-vector-copy-from-scl-vector vector-int
                                   scl::vector-int
                                   gsl_vector_int_set)
 
-(make-vector-copy-from-scl-vector gsl-vector-uint
+(make-vector-copy-from-scl-vector vector-uint
                                   scl::vector-uint
                                   gsl_vector_uint_set)

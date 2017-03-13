@@ -25,16 +25,16 @@
 
 ;;; gsl-vector
 
-;; abstract: scl::vector-t, gsl-vector-any
-(defclass gsl-vector-any (scl::vector-t) ())
+;; abstract: scl::vector-t, vector-any
+(defclass vector-any (scl::vector-t) ())
 
-(defclass gsl-vector-double (gsl-vector-any) ())
+(defclass vector-double (vector-any) ())
 
-(defclass gsl-vector-float (gsl-vector-any) ())
+(defclass vector-float (vector-any) ())
 
-(defclass gsl-vector-int (gsl-vector-any) ())
+(defclass vector-int (vector-any) ())
 
-(defclass gsl-vector-uint (gsl-vector-any) ())
+(defclass vector-uint (vector-any) ())
 
 
 (defun vector-alloc (n &key (element-type :double))
@@ -45,25 +45,25 @@ vector struct. The block is owned by the vector, and will be
 deallocated when the vector is deallocated."
   (cond
     ((eql element-type :double)
-     (make-instance 'gsl-vector-double
+     (make-instance 'vector-double
                     :data (gsl_vector_alloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :float)
-     (make-instance 'gsl-vector-float
+     (make-instance 'vector-float
                     :data (gsl_vector_float_alloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :int)
-     (make-instance 'gsl-vector-int
+     (make-instance 'vector-int
                     :data (gsl_vector_int_alloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :unsigned-int)
-     (make-instance 'gsl-vector-uint
+     (make-instance 'vector-uint
                     :data (gsl_vector_uint_alloc n)
                     :size n
                     :stride 1))
@@ -74,25 +74,25 @@ deallocated when the vector is deallocated."
 initializes all the elements of the vector to zero."
   (cond
     ((eql element-type :double)
-     (make-instance 'gsl-vector-double
+     (make-instance 'vector-double
                     :data (gsl_vector_calloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :float)
-     (make-instance 'gsl-vector-float
+     (make-instance 'vector-float
                     :data (gsl_vector_float_calloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :int)
-     (make-instance 'gsl-vector-int
+     (make-instance 'vector-int
                     :data (gsl_vector_int_calloc n)
                     :size n
                     :stride 1
                     :owner t))
     ((eql element-type :unsigned-int)
-     (make-instance 'gsl-vector-uint
+     (make-instance 'vector-uint
                     :data (gsl_vector_uint_calloc n)
                     :size n
                     :stride 1
@@ -102,7 +102,7 @@ initializes all the elements of the vector to zero."
 (defgeneric vector-free (v &optional result)
   (:documentation
    "This function frees a previously allocated vector v. If the vector
-was created using gsl-vector-alloc then the block underlying the
+was created using vector-alloc then the block underlying the
 vector will also be deallocated. If the vector has been created from
 another object then the memory is still owned by that object and will
 not be deallocated."))
@@ -112,13 +112,13 @@ not be deallocated."))
      (,func (scl::data v))
      result))
 
-(make-vector-free gsl-vector-double gsl_vector_free)
+(make-vector-free vector-double gsl_vector_free)
 
-(make-vector-free gsl-vector-float gsl_vector_float_free)
+(make-vector-free vector-float gsl_vector_float_free)
 
-(make-vector-free gsl-vector-int gsl_vector_int_free)
+(make-vector-free vector-int gsl_vector_int_free)
 
-(make-vector-free gsl-vector-uint gsl_vector_uint_free)
+(make-vector-free vector-uint gsl_vector_uint_free)
 
 (defgeneric vector-set-sequence (v seq &optional n)
   (:documentation
@@ -130,13 +130,13 @@ the sequence seq respectively."))
      (dotimes (i (if (null n) (scl::size v) n) v)
        (,sfunc (scl::data v) i (elt seq i)))))
 
-(make-vector-set-sequence gsl-vector-double gsl_vector_set)
+(make-vector-set-sequence vector-double gsl_vector_set)
 
-(make-vector-set-sequence gsl-vector-float gsl_vector_float_set)
+(make-vector-set-sequence vector-float gsl_vector_float_set)
 
-(make-vector-set-sequence gsl-vector-int gsl_vector_int_set)
+(make-vector-set-sequence vector-int gsl_vector_int_set)
 
-(make-vector-set-sequence gsl-vector-uint gsl_vector_uint_set)
+(make-vector-set-sequence vector-uint gsl_vector_uint_set)
 
 (defun make-vector (n &key (initial-element nil)
                         (initial-contents nil)

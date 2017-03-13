@@ -108,13 +108,13 @@ order."))
                      (cffi:callback ,func))
        v)))
 
-(make-sort-asc-gsl-vector gsl-vector-double :double <-double)
+(make-sort-asc-gsl-vector vector-double :double <-double)
 
-(make-sort-asc-gsl-vector gsl-vector-float :float <-float)
+(make-sort-asc-gsl-vector vector-float :float <-float)
 
-(make-sort-asc-gsl-vector gsl-vector-int :int <-int)
+(make-sort-asc-gsl-vector vector-int :int <-int)
 
-(make-sort-asc-gsl-vector gsl-vector-uint :unsigned-int <-uint)
+(make-sort-asc-gsl-vector vector-uint :unsigned-int <-uint)
 
 (defgeneric sort-desc (v &optional n)
   (:documentation
@@ -146,10 +146,10 @@ order."))
                      (cffi:callback ,func))
        v)))
 
-(make-sort-desc-gsl-vector gsl-vector-double :double >-double)
+(make-sort-desc-gsl-vector vector-double :double >-double)
 
-(make-sort-desc-gsl-vector gsl-vector-float :float >-float)
+(make-sort-desc-gsl-vector vector-float :float >-float)
 
-(make-sort-desc-gsl-vector gsl-vector-int :int >-int)
+(make-sort-desc-gsl-vector vector-int :int >-int)
 
-(make-sort-desc-gsl-vector gsl-vector-uint :unsigned-int >-uint)
+(make-sort-desc-gsl-vector vector-uint :unsigned-int >-uint)
