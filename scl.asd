@@ -12,4 +12,3 @@
                    (:file "vector")
                    (:file "matrix-type")
                    (:file "matrix")))))
-
