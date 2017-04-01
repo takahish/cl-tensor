@@ -553,7 +553,9 @@ the stream str."))
 
 (make-vector-write vector-uint gsl_vector_uint_get)
 
-(defvar *print-object-vector-size* 10)
+(defparameter *print-object-vector* nil)
+
+(defparameter *print-object-vector-size* 10)
 
 (defun print-gsl-vector (v stream)
   (format stream "; ~A vector~%" (scl::size v))
@@ -566,7 +568,8 @@ the stream str."))
 
 ;; vector-any print-object
 (defmethod print-object ((v vector-any) stream)
-  (print-gsl-vector v stream)
+  (if (not (null *print-object-vector*))
+      (print-gsl-vector v stream))
   (call-next-method))
 
 (defgeneric vector-copy-from-scl-vector (dest src)

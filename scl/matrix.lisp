@@ -964,9 +964,11 @@ stream."))
 
 (make-matrix-write :uint)
 
-(defvar *print-object-matrix-size1* 10)
+(defparameter *print-object-matrix* nil)
 
-(defvar *print-object-matrix-size2* 10)
+(defparameter *print-object-matrix-size1* 10)
+
+(defparameter *print-object-matrix-size2* 10)
 
 (defun print-matrix (m stream)
   (format stream "; ~A x ~A matrix~%" (size1 m) (size2 m))
@@ -990,10 +992,12 @@ stream."))
 
 ;; matrix-any print-object
 (defmethod print-object ((m matrix-any) stream)
-  (print-matrix m stream)
+  (if (not (null *print-object-matrix*))
+      (print-matrix m stream))
   (call-next-method))
 
 ;; matrix-any-view print-object
 (defmethod print-object ((view matrix-any-view) stream)
-  (print-matrix (shared-matrix view) stream)
+  (if (not (null *print-object-matrix*))
+      (print-matrix (shared-matrix view) stream))
   (call-next-method))

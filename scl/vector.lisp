@@ -473,7 +473,9 @@ the stream str."))
 
 (make-vector-write :uint)
 
-(defvar *print-object-vector-size* 10)
+(defparameter *print-object-vector* nil)
+
+(defparameter *print-object-vector-size* 10)
 
 (defun print-vector (v stream)
   (format stream "; ~A vector~%" (size v))
@@ -486,12 +488,14 @@ the stream str."))
 
 ;; vector-any print-object
 (defmethod print-object ((v vector-any) stream)
-  (print-vector v stream)
+  (if (not (null *print-object-vector*))
+      (print-vector v stream))
   (call-next-method))
 
 ;; vector-any-view print-object
 (defmethod print-object ((view vector-any-view) stream)
-  (print-vector (shared-vector view) stream)
+  (if (not (null *print-object-vector*))
+      (print-vector (shared-vector view) stream))
   (call-next-method))
 
 (defgeneric vector-map (func a &optional n)

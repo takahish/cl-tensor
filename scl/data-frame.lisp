@@ -89,9 +89,11 @@ stream stream."
             (format stream "~S~%" (matrix-get (data df) i j))
             (format stream "~S~C" (matrix-get (data df) i j) #\tab))))))
 
-(defvar *print-object-data-frame-size1* 10)
+(defparameter *print-object-data-frame* t)
 
-(defvar *print-object-data-frame-size2* 10)
+(defparameter *print-object-data-frame-size1* 10)
+
+(defparameter *print-object-data-frame-size2* 10)
 
 (defun print-data-frame (df stream)
   (format stream "; ~A x ~A data-frame~%" (size1 df) (size2 df))
@@ -118,7 +120,8 @@ stream stream."
 
 ;; data-frame-any print-object
 (defmethod print-object ((df data-frame-any) stream)
-  (print-data-frame df stream)
+  (if (not (null *print-object-data-frame*))
+      (print-data-frame df stream))
   (call-next-method))
 
 (defun file-row-count (path)

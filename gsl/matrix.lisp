@@ -718,9 +718,11 @@ stream."))
 
 (make-matrix-write matrix-uint gsl_matrix_uint_get)
 
-(defvar *print-object-matrix-size1* 10)
+(defparameter *print-object-matrix* nil)
 
-(defvar *print-object-matrix-size2* 10)
+(defparameter *print-object-matrix-size1* 10)
+
+(defparameter *print-object-matrix-size2* 10)
 
 (defun print-gsl-matrix (m stream)
   (format stream "; ~A x ~A matrix~%" (scl::size1 m) (scl::size2 m))
@@ -747,7 +749,8 @@ stream."))
 
 ;; matrix-any print-object
 (defmethod print-object ((m matrix-any) stream)
-  (print-gsl-matrix m stream)
+  (if (not (null *print-object-matrix*))
+      (print-gsl-matrix m stream))
   (call-next-method))
 
 (defgeneric matrix-copy-from-scl-matrix (m sm)
