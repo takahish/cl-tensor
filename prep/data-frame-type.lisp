@@ -15,7 +15,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:in-package "SCL")
+(cl:in-package "PREP")
 
 
 ;;; data-frame
@@ -32,10 +32,10 @@
 (defun make-default-names-list (n2)
   (mapcar #'(lambda (x)
               (intern (concatenate 'string "V" (write-to-string x))))
-          (range (1+ n2) :min 1)))
+          (scl:range (1+ n2) :min 1)))
 
 (defun make-default-index-list (n1)
-  (range (1+ n1) :min 1))
+  (scl:range (1+ n1) :min 1))
 
 (defun make-data-frame (n1 n2 &key (initial-element nil) (initial-contents nil)
                                 (names nil) (index nil))
@@ -44,21 +44,21 @@
     (cond
       ((not (null initial-element))
        (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2 :initial-element initial-element)
+                      :data (scl:make-matrix n1 n2 :initial-element initial-element)
                       :size1 n1
                       :size2 n2
                       :index (make-array n1 :initial-contents idx)
                       :names (make-array n2 :initial-contents nms)))
       ((not (null initial-contents))
        (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2 :initial-contents (flatten initial-contents))
+                      :data (scl:make-matrix n1 n2 :initial-contents (scl:flatten initial-contents))
                       :size1 n1
                       :size2 n2
                       :index (make-array n1 :initial-contents idx)
                       :names (make-array n2 :initial-contents nms)))
       (t
        (make-instance 'data-frame-any
-                      :data (make-matrix n1 n2)
+                      :data (scl:make-matrix n1 n2)
                       :size1 n1
                       :size2 n2
                       :index (make-array n1 :initial-contents idx)

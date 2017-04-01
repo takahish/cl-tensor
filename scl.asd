@@ -11,7 +11,5 @@
                    (:file "vector-type")
                    (:file "vector")
                    (:file "matrix-type")
-                   (:file "matrix")
-                   (:file "data-frame-type")
-                   (:file "data-frame")))))
+                   (:file "matrix")))))
 

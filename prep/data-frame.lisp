@@ -15,7 +15,7 @@
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program. If not, see http://www.gnu.org/licenses/.
 
-(cl:in-package "SCL")
+(cl:in-package "PREP")
 
 
 ;;; function
@@ -33,37 +33,37 @@ names of data-frame df."
 (defun data-frame-row (df index)
   "This function returns a vector view of the row of index of the
 data-frame df."
-  (matrix-row (data df) (position index (index df))))
+  (scl:matrix-row (data df) (position index (index df))))
 
 (defun data-frame-column (df name)
   "This function returns a vector view of the column of name of the
 data-frame df."
-  (matrix-column (data df) (position name (names df))))
+  (scl:matrix-column (data df) (position name (names df))))
 
 (defun data-frame-get-row (df index)
   "This function returns a vector of the row of index of the
 data-frame df."
-  (let ((row (make-vector (size2 (data df)))))
-    (matrix-get-row row (data df) (position index (index df)))
+  (let ((row (scl:make-vector (size2 (data df)))))
+    (scl:matrix-get-row row (data df) (position index (index df)))
     row))
 
 (defun data-frame-set-row (df index row)
   "This function opies the elements of the row into the row of index
 of the data-frame df."
-  (matrix-set-row (data df) (position index (index df)) row)
+  (scl:matrix-set-row (data df) (position index (index df)) row)
   df)
 
 (defun data-frame-get-col (df name)
   "This function returns a vector of the column of name of data-frame
 df."
-  (let ((col (make-vector (size1 (data df)))))
-    (matrix-get-col col (data df)  (position name (names df)))
+  (let ((col (scl:make-vector (size1 (data df)))))
+    (scl:matrix-get-col col (data df)  (position name (names df)))
     col))
 
 (defun data-frame-set-col (df name col)
   "This function copies the elements of the column into the column of
 name of data-frame df."
-  (matrix-set-col (data df) (position name (names df)) col)
+  (scl:matrix-set-col (data df) (position name (names df)) col)
   df)
 
 (defun data-frame-read (df &optional (stream *standard-output*))
@@ -71,7 +71,7 @@ name of data-frame df."
 stream in binary format. The data-frame df must be preallocated with
 the correct dimensions since the function uses the size of df to
 determine how many bytes to read."
-  (matrix-read (data df) stream))
+  (scl:matrix-read (data df) stream))
 
 (defun data-frame-write (df &optional (stream *standard-output*) (n1 nil) (n2 nil))
   "This function writes the elements of the data-frame df to the
@@ -86,8 +86,8 @@ stream stream."
       (format stream "~S~C" (aref (index df) i) #\tab)
       (dotimes (j s2)
         (if (= j (1- s2))
-            (format stream "~S~%" (matrix-get (data df) i j))
-            (format stream "~S~C" (matrix-get (data df) i j) #\tab))))))
+            (format stream "~S~%" (scl:matrix-get (data df) i j))
+            (format stream "~S~C" (scl:matrix-get (data df) i j) #\tab))))))
 
 (defparameter *print-object-data-frame* t)
 
@@ -146,5 +146,5 @@ stream stream."
          (n2 (file-column-count path #\Tab))
          (df (make-data-frame n1 n2)))
     (with-open-file (stream path :direction :input)
-      (matrix-read (data df) stream n1 n2))
+      (scl:matrix-read (data df) stream n1 n2))
     df))

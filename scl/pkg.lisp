@@ -20,7 +20,9 @@
   (:export ;; scl/util.lisp
            "LAST1"
            "FLATTEN"
+           "RANGE"
            "WHILE"
+           "WITH-GENSYMS"
            ;; scl/vector-type.lisp
            "MAKE-VECTOR"
            ;; scl/vector.lisp
@@ -102,16 +104,4 @@
            "MATRIX-ISNONNEG"
            "MATRIX-EQUAL"
            "MATRIX-READ"
-           "MATRIX-WRITE"
-           ;; scl/data-frame-type.lisp
-           "MAKE-DATA-FRAME"
-           ;; scl/data-frame.lisp
-           "DATA-FRAME-SET-NAMES"
-           "DATA-FRAME-SET-INDEX"
-           "DATA-FRAME-ROW"
-           "DATA-FRAME-COLUMN"
-           "DATA-FRAME-GET-ROW"
-           "DATA-FRAME-SET-ROW"
-           "DATA-FRAME-GET-COL"
-           "DATA-FRAME-SET-COL"
-           "DATA-FRAME-READ-TSV"))
+           "MATRIX-WRITE"))
