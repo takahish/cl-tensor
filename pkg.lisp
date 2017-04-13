@@ -33,6 +33,7 @@
            "WITH-GENSYMS"
            ;; vector-type.lisp
            "MAKE-VECTOR"
+           "SHARED-VECTOR" ; accessor of vector-view
            ;; vector.lisp
            "VECTOR-COERCE"
            "VECTOR-GET"
@@ -70,6 +71,7 @@
            "VECTOR-REMOVE-IF"
            ;; matrix-type.lisp
            "MAKE-MATRIX"
+           "SHARED-MATRIX" ; accessor of matrix-view
            ;; matrix.lisp
            "MATRIX-COERCE"
            "MATRIX-GET"
@@ -79,6 +81,7 @@
            "MATRIX-SET-IDENTITY"
            "MATRIX-SUBMATRIX"
            "MATRIX-VIEW-VECTOR"
+           "MATRIX-VIEW-ARRAY"
            "MATRIX-ROW"
            "MATRIX-COLUMN"
            "MATRIX-SUBROW"
