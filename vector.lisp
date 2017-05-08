@@ -23,10 +23,10 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-(cl:in-package "EIGEN")
+(cl:in-package "TENSOR")
 
 
-;;; function
+;;; basic functions
 
 (defgeneric vector-coerce (v element-type)
   (:documentation
@@ -40,6 +40,7 @@ element-type."))
       (setf (aref (data alt) (* i (stride alt)))
             (coerce (aref (data v) (* i (stride v))) etype)))))
 
+
 (defgeneric vector-get (v i)
   (:documentation
    "This function retruns the i-th element of a vector v. If i lies
@@ -49,6 +50,7 @@ invoked."))
 (defmethod vector-get ((v vector-any) i)
   ;; aref delegate range check.
   (aref (data v) (* i (stride v))))
+
 
 (defgeneric vector-set (v i x)
   (:documentation
@@ -61,6 +63,7 @@ handler is invoked."))
   (setf (aref (data v) (* i (stride v))) x)
   v)
 
+
 (defgeneric vector-set-all (v x)
   (:documentation
    "This function sets all the elements of the vector v to the value x."))
@@ -68,6 +71,7 @@ handler is invoked."))
 (defmethod vector-set-all ((v vector-any) x)
   (dotimes (i (size v) v)
     (setf (aref (data v) (* i (stride v))) x)))
+
 
 (defgeneric vector-set-zero (v)
   (:documentation
@@ -89,6 +93,7 @@ handler is invoked."))
 (make-vector-set-zero :int)
 
 (make-vector-set-zero :uint)
+
 
 (defgeneric vector-set-basis (v i)
   (:documentation
@@ -115,6 +120,7 @@ the vector v to zero except for the i-th element which is set to one."))
 (make-vector-set-basis :int)
 
 (make-vector-set-basis :uint)
+
 
 (defgeneric vector-subvector (v offset n)
   (:documentation
@@ -158,6 +164,7 @@ elements."))
 
 (make-vector-subvector :uint)
 
+
 (defun vector-view-array (base n &key (element-type :any))
   "This function return a vector view of an array. The start of the
 new vector is given by base and has n elements."
@@ -176,6 +183,7 @@ new vector is given by base and has n elements."
        (setf (shared-vector view) v)
        view))))
 
+
 (defgeneric vector-copy (dest src)
   (:documentation
    "This function copies the elements of the vector src into the
@@ -187,6 +195,7 @@ vector dest. The two vectors must have the same length."))
       (dotimes (j (size src) dest)
         (setf (aref (data dest) (* (stride dest) j))
               (aref (data src) (* (stride src) j))))))
+
 
 (defgeneric vector-swap-elements (v i j)
   (:documentation
@@ -201,6 +210,7 @@ in-place."))
         v)
       v))
 
+
 (defgeneric vector-reverse (v)
   (:documentation
    "This function reverses the order of the elements of the vector v."))
@@ -209,6 +219,7 @@ in-place."))
   ;; identity wrap up nreaverse, because STYLE-WARNING has occurred.
   (identity (nreverse (data v)))
   v)
+
 
 (defgeneric vector-add (a b)
   (:documentation
@@ -224,6 +235,7 @@ unchanged. The two vectors must have the same length."))
               (+ (aref (data a) (* i (stride a)))
                  (aref (data b) (* i (stride b))))))))
 
+
 (defgeneric vector-sub (a b)
   (:documentation
    "This function subtracts the elements of vector b from the elements
@@ -237,6 +249,7 @@ unchanged. The two vectors must have the same length."))
         (setf (aref (data a) (* i (stride a)))
               (- (aref (data a) (* i (stride a)))
                  (aref (data b) (* i (stride b))))))))
+
 
 (defgeneric vector-mul (a b)
   (:documentation
@@ -252,6 +265,7 @@ unchanged. The two vectors must have the same length."))
               (* (aref (data a) (* i (stride a)))
                  (aref (data b) (* i (stride b))))))))
 
+
 (defgeneric vector-div (a b)
   (:documentation
    "This function divides the elements of vector a by the elements of
@@ -266,6 +280,7 @@ unchanged. The two vectors must have the same length."))
               (/ (aref (data a) (* i (stride a)))
                  (aref (data b) (* i (stride b))))))))
 
+
 (defgeneric vector-scale (a x)
   (:documentation
    "This function multiplies the elements of vector a by the constant
@@ -275,6 +290,7 @@ factor x. The result ai <- xai is stored in a."))
   (dotimes (i (size a) a)
     (setf (aref (data a) (* i (stride a)))
           (* (aref (data a) (* i (stride a))) x))))
+
 
 (defgeneric vector-add-constant (a x)
   (:documentation
@@ -286,12 +302,14 @@ vector a. The result ai <- ai + x is stored in a."))
     (setf (aref (data a) (* i (stride a)))
           (+ (aref (data a) (* i (stride a))) x))))
 
+
 (defgeneric vector-max (v)
   (:documentation
    "This function returns the maximum value in the vector v."))
 
 (defmethod vector-max ((v vector-any))
   (reduce #'max (data v)))
+
 
 (defgeneric vector-min (v)
   (:documentation
@@ -300,12 +318,14 @@ vector a. The result ai <- ai + x is stored in a."))
 (defmethod vector-min ((v vector-any))
   (reduce #'min (data v)))
 
+
 (defgeneric vector-minmax (v)
   (:documentation
    "This function returns the minimum and maximum values in the vector v."))
 
 (defmethod vector-minmax ((v vector-any))
   (values (reduce #'min (data v)) (reduce #'max (data v))))
+
 
 (defgeneric vector-max-index (v)
   (:documentation
@@ -316,6 +336,7 @@ index is returned."))
 (defmethod vector-max-index ((v vector-any))
   (position (reduce #'max (data v)) (data v)))
 
+
 (defgeneric vector-min-index (v)
   (:documentation
    "This function returns the index of the minimum value in the vector
@@ -324,6 +345,7 @@ index is returned."))
 
 (defmethod vector-min-index ((v vector-any))
   (position (reduce #'min (data v)) (data v)))
+
 
 (defgeneric vector-minmax-index (v)
   (:documentation
@@ -334,6 +356,7 @@ maximum elements then the lowest indices are returned."))
 (defmethod vector-minmax-index ((v vector-any))
   (values (position (reduce #'min (data v)) (data v))
           (position (reduce #'max (data v)) (data v))))
+
 
 ;; numeric element-type only
 (defgeneric vector-isnull (v)
@@ -357,6 +380,7 @@ zero, and NIL otherwise."))
 
 (make-vector-isnull :uint)
 
+
 ;; numeric element-type only
 (defgeneric vector-ispos (v)
   (:documentation
@@ -378,6 +402,7 @@ strictly positive, and NIL otherwise."))
 (make-vector-ispos :int)
 
 (make-vector-ispos :uint)
+
 
 ;; numeric variable type only
 (defgeneric vector-isneg (v)
@@ -401,6 +426,7 @@ strictly negative, and NIL otherwise."))
 
 (make-vector-isneg :uint)
 
+
 ;; numeric variable type only
 (defgeneric vector-isnonneg (v)
   (:documentation
@@ -422,6 +448,7 @@ non-negative respectively, and NIL otherwise."))
 (make-vector-isnonneg :int)
 
 (make-vector-isnonneg :uint)
+
 
 ;; numeric variable type only
 (defgeneric vector-equal (u v)
@@ -447,6 +474,7 @@ comparison of element values) and NIL otherwise."))
 
 (make-vector-equal :uint)
 
+
 (defgeneric vector-read (a &optional str n)
   (:documentation
    "This function reads into the array a from the open stream str. The
@@ -457,6 +485,7 @@ function uses the size of a to determine how many values to read."))
                         &optional (stream *standard-input*) (n nil))
   (dotimes (i (if (null n) (size a) n) a)
     (vector-set a i (read stream))))
+
 
 (defgeneric vector-write (v &optional str n)
   (:documentation
@@ -480,6 +509,7 @@ the stream str."))
 (make-vector-write :int)
 
 (make-vector-write :uint)
+
 
 (defparameter *print-object-vector* nil)
 
@@ -506,6 +536,7 @@ the stream str."))
       (print-vector (shared-vector view) stream))
   (call-next-method))
 
+
 (defgeneric vector-map (func a &optional n)
   (:documentation
    "Apply function to successive elements of array."))
@@ -513,6 +544,7 @@ the stream str."))
 (defmethod vector-map (func (a vector-any) &optional (n nil))
   (dotimes (i (if (null n) (size a) n) a)
     (vector-set a i (funcall func (vector-get a i)))))
+
 
 (defgeneric vector-reduce (func init a &optional n)
   (:documentation
@@ -522,6 +554,7 @@ the stream str."))
   (let ((acc init))
     (dotimes (i (if (null n) (size a) n) acc)
       (setf acc (funcall func acc (vector-get a i))))))
+
 
 (defgeneric vector-count-if (item v &key test)
   (:documentation
@@ -533,6 +566,7 @@ item, which defaults to eql."))
     (dotimes (i (size v) count)
       (if (funcall test item (aref (data v) (* (stride v) i)))
           (incf count)))))
+
 
 (defgeneric vector-remove-if (item v &key test)
   (:documentation

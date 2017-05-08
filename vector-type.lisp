@@ -23,7 +23,7 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-(cl:in-package "EIGEN")
+(cl:in-package "TENSOR")
 
 
 ;;; element-type
@@ -38,6 +38,7 @@
 (defun vector-element-type (element-type)
   (cdr (assoc element-type *vector-element-type*)))
 
+
 (defvar *vector-element-nil*
   '((:any . nil)
     (:double . 0.0d0)
@@ -47,6 +48,7 @@
 
 (defun vector-element-nil (element-type)
   (cdr (assoc element-type *vector-element-nil*)))
+
 
 (defvar *vector-element-t*
   '((:any . t)
@@ -92,6 +94,7 @@
 
 (defclass vector-uint (vector-any) ())
 
+
 (defvar *vector-type*
   '((:any . vector-any)
     (:double . vector-double)
@@ -101,6 +104,7 @@
 
 (defun vector-type (element-type)
   (cdr (assoc element-type *vector-type*)))
+
 
 (defun make-vector (n &key (element-type :any)
                         (initial-element nil) (initial-contents nil))
@@ -145,6 +149,7 @@
 (defclass vector-int-view (vector-any-view) ())
 
 (defclass vector-uint-view (vector-any-view) ())
+
 
 (defvar *vector-view-type*
   '((:any . vector-any-view)

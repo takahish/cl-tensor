@@ -23,7 +23,7 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-(cl:defpackage "EIGEN"
+(cl:defpackage "TENSOR"
   (:use "CL")
   (:export ;; util.lisp
            "LAST1"
@@ -116,6 +116,27 @@
            "MATRIX-EQUAL"
            "MATRIX-READ"
            "MATRIX-WRITE"
+           ;; permutation-type.lisp
+           "MAKE-PERMUTATION"
+           "PERMUTATION-INIT"
+           ;; permutation.lisp
+           "PERMUTATION-COPY"
+           "PERMUTATION-GET"
+           "PERMUTATION-SWAP"
+           "PERMUTATION-VALID"
+           "PERMUTATION-REVERSE"
+           "PERMUTATION-INVERSE"
+           "PERMUTATION-NEXT"
+           "PERMUTATION-PREV"
+           "PERMUTATION-MUL"
+           "PERMUTE-VECTOR"
+           "PERMUTE-VECTOR-INVERSE"
+           "PERMUTE-MATRIX"
+           "PERMUTATION-LINEAR-TO-CANONICAL"
+           "PERMUTATION-CANONICAL-TO-LINEAR"
+           "PERMUTATION-INVERSIONS"
+           "PERMUTATION-LINEAR-CYCLES"
+           "PERMUTATION-CANONICAL-CYCLES"
            ;; blas/blas.lisp
            "BLAS-DOT"
            "BLAS-NRM2"
@@ -142,7 +163,8 @@
            "BLAS-SYRK"
            "BLAS-SYR2K"))
 
-(cl:in-package "EIGEN")
+
+(cl:in-package "TENSOR")
 
 (cffi:define-foreign-library libcblas
   (:darwin "libcblas.dylib")

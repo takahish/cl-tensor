@@ -1,6 +1,6 @@
-;;;; util.lisp
+;;;; permutation-type.lisp
 
-;;;; Copyright (C) 2016, 2017 Takahiro Ishikawa
+;;;; Copyright (C) 2017 Takahiro Ishikawa
 ;;;;
 ;;;; Permission is hereby granted, free of charge, to any person
 ;;;; obtaining a copy of this software and associated documentation
@@ -26,32 +26,37 @@
 (cl:in-package "TENSOR")
 
 
-(defun last1 (lst)
-  (car (last lst)))
+;;; element-type
+
+(defvar *permutation-element-type*
+  `(unsigned-byte ,(* (cffi:foreign-type-size :int) 8)))
 
 
-(defun flatten (x)
-  (labels ((rec (x acc)
-             (cond ((null x) acc)
-                   ((atom x) (cons x acc))
-                   (t (rec (car x) (rec (cdr x) acc))))))
-    (rec x nil)))
+;;; permutation
+
+;; abstract: permutation-t
+(defclass permutation-t ()
+  ((size :accessor size :initarg :size)
+   (data :accessor data :initarg :data)))
+
+(defclass permutation (permutation-t) ())
 
 
-(defun range (max &key (min 0) (step 1))
-  (labels ((rec (x acc)
-             (if (= x max)
-                 (nreverse acc)
-                 (rec (+ x step) (cons x acc)))))
-    (rec min nil)))
+(defun make-permutation (n)
+  (if (<= n 0)
+      (error "permutation length n must be positive integer")
+      (make-instance 'permutation
+                     :size n
+                     :data (make-array n
+                                       :element-type *permutation-element-type*
+                                       :initial-contents (range n)))))
 
 
-(defmacro while (test &body body)
-  `(do ()
-     ((not ,test))
-     ,@body))
+(defgeneric permutation-init (p)
+  (:documentation
+   "This function initializes the permutation p to the identity,
+i.e. (0, 1, 2, . . . , n − 1)."))
 
-
-(defmacro with-gensyms (syms &body body)
-  `(let ,(mapcar #'(lambda (s) `(,s (gensym))) syms)
-     ,@body))
+(defmethod permutation-init ((p permutation))
+  (dotimes (i (size p) p)
+    (setf (aref (data p) i) i)))

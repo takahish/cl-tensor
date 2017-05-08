@@ -32,7 +32,7 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-(cl:in-package "EIGEN")
+(cl:in-package "TENSOR")
 
 
 (defvar *blas-order*
@@ -78,6 +78,7 @@ and y."))
 
 (make-blas-dot :float cblas_sdot)
 
+
 (defgeneric blas-nrm2 (x)
   (:documentation
    "This function computes the Euclidean norm ||x||2 of the vector
@@ -93,6 +94,7 @@ x."))
 
 (make-blas-nrm2 :float cblas_snrm2)
 
+
 (defgeneric blas-asum (x)
   (:documentation
    "This function computes the absolute sum |xi| of the elements of the
@@ -107,6 +109,7 @@ vector x."))
 (make-blas-asum :double cblas_dasum)
 
 (make-blas-asum :float cblas_sasum)
+
 
 (defgeneric blas-iamax (x)
   (:documentation
@@ -125,6 +128,7 @@ index of the first occurrence is returned."))
 
 (make-blas-iamax :float cblas_isamax)
 
+
 (defgeneric blas-swap (x y)
   (:documentation
    "This function exchanges the elements of the vectors x and y."))
@@ -140,10 +144,10 @@ index of the first occurrence is returned."))
                       *y (stride y))
                (values x y)))))))
 
-
 (make-blas-swap :double cblas_dswap)
 
 (make-blas-swap :float cblas_sswap)
+
 
 (defgeneric blas-copy (src dest)
   (:documentation
@@ -164,6 +168,7 @@ vector dest."))
 (make-blas-copy :double cblas_dcopy)
 
 (make-blas-copy :float cblas_scopy)
+
 
 (defgeneric blas-axpy (alpha x y)
   (:documentation
@@ -186,6 +191,7 @@ and y."))
 
 (make-blas-axpy :float cblas_saxpy)
 
+
 (defgeneric blas-scal (alpha x)
   (:documentation
    "This function rescales the vector x by the multiplicative factor
@@ -204,6 +210,7 @@ alpha."))
 
 (make-blas-scal :float cblas_sscal)
 
+
 (defun blas-rotg (a b c s)
   "This function computes a Givens rotation (c, s) which zeroes the
 vector (a, b)."
@@ -220,6 +227,7 @@ vector (a, b)."
             (cffi:mem-ref *b :double)
             (cffi:mem-ref *c :double)
             (cffi:mem-ref *s :double))))
+
 
 (defgeneric blas-rot (x y c s)
   (:documentation
@@ -243,6 +251,7 @@ cy) to the vectors x, y."))
 
 (make-blas-rot :float cblas_srot)
 
+
 (defun blas-rotmg (d1 d2 b1 b2 p)
   "This function computes a modified Givens transformation. The
 modified Givens transformation is defined in the original Level-1 blas
@@ -262,6 +271,7 @@ specification, given in the ref- erences."
             (cffi:mem-ref *d2 :double)
             (cffi:mem-ref *b1 :double)
             (cffi:mem-ref *p :double))))
+
 
 (defgeneric blas-rotm (x y p)
   (:documentation
@@ -326,6 +336,7 @@ specification, given in the ref- erences."
 
 (make-blas-gemv :float cblas_sgemv)
 
+
 (defgeneric trmv (a x &key trans uplo diag)
   (:documentation
    "This function computes the matrix-vector product x = op(A) * x for
@@ -369,6 +380,7 @@ are taken as unity and are not referenced."))
 
 (make-blas-trmv :float cblas_strmv)
 
+
 (defgeneric blas-trsv (a x &key trans uplo diag)
   (:documentation
    "This function computes inv(op(A))x for x, where op(A) = A, AT, AH
@@ -411,6 +423,7 @@ matrix A are taken as unity and are not referenced."))
 
 (make-blas-trsv :float cblas_strsv)
 
+
 (defgeneric blas-symv (a x y &key uplo alpha beta)
   (:documentation
    "Ths function computes the matrix-vector product and sum y = alpha
@@ -451,6 +464,7 @@ used."))
 
 (make-blas-symv :float cblas_ssymv)
 
+
 (defgeneric blas-ger (x y a &key alpha)
   (:documentation
    "This function computes the rank-1 update A = alpha * x * yT + A of
@@ -479,6 +493,7 @@ the matrix A."))
 (make-blas-ger :double cblas_dger)
 
 (make-blas-ger :float cblas_sger)
+
 
 (defgeneric blas-syr (x a &key uplo alpha)
   (:documentation
@@ -514,6 +529,7 @@ is :lower then the lower triangle and diagonal of A are used."))
 (make-blas-syr :double cblas_dsyr)
 
 (make-blas-syr :float cblas_ssyr)
+
 
 (defgeneric blas-syr2 (x y a &key uplo alpha)
   (:documentation
@@ -593,6 +609,7 @@ transb."))
 
 (make-blas-gemm :float cblas_sgemm)
 
+
 (defgeneric blas-symm (a b c &key side uplo alpha beta)
   (:documentation
    "These functions compute the matrix-matrix product and sum C =
@@ -640,6 +657,7 @@ used."))
 
 (make-blas-symm :float cblas_ssymm)
 
+
 (defgeneric blas-trmm (a b &key side uplo trans diag alpha)
   (:documentation
    "This function computes the matrix-matirx product B = alpha * op(A)
@@ -683,6 +701,7 @@ as unity and are not referenced."))
 (make-blas-trmm :double cblas_dtrmm)
 
 (make-blas-trmm :float cblas_strmm)
+
 
 (defgeneric blas-trsm (a b &key side uplo trans diag alpha)
   (:documentation
@@ -729,6 +748,7 @@ not referenced."))
 
 (make-blas-trsm :float cblas_strsm)
 
+
 (defgeneric blas-syrk (a c &key uplo trans alpha beta)
   (:documentation
    "This function computes a rank-k update of the symmetric matrix C,
@@ -769,6 +789,7 @@ used."))
 (make-blas-syrk :double cblas_dsyrk)
 
 (make-blas-syrk :float cblas_ssyrk)
+
 
 (defgeneric blas-syr2k (a b c &key uplo trans alpha beta)
   (:documentation

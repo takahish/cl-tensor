@@ -1,4 +1,4 @@
-(defsystem "eigen"
+(defsystem "tensor"
     :description "a common lisp library for linear algebra"
     :version "0.1"
     :author "Takahiro Ishikawa <takahish.nil@gmail.com>"
@@ -10,6 +10,8 @@
                  (:file "vector")
                  (:file "matrix-type")
                  (:file "matrix")
+                 (:file "permutation-type")
+                 (:file "permutation")
                  (:module "blas"
                   :components
                   ((:module "if"

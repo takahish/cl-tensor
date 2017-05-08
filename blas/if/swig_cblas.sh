@@ -30,4 +30,4 @@ output=${swig_interface}.lisp
 swig -cffi -generate-typedef -noswig-lisp ${swig_interface}.i
 
 sed -i '.ORG' \
-    -e $'1s/^/;;; blas\/if\/cblas.lisp\\\n\\\n(cl:in-package "EIGEN")\\\n\\\n/' ${output}
+    -e $'1s/^/;;; blas\/if\/cblas.lisp\\\n\\\n(cl:in-package "TENSOR")\\\n\\\n/' ${output}

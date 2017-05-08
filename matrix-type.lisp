@@ -23,7 +23,7 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-(cl:in-package "EIGEN")
+(cl:in-package "TENSOR")
 
 
 ;;; element-type
@@ -38,6 +38,7 @@
 (defun matrix-element-type (element-type)
   (cdr (assoc element-type *matrix-element-type*)))
 
+
 (defvar *matrix-element-nil*
   '((:any . nil)
     (:double . 0.0d0)
@@ -47,6 +48,7 @@
 
 (defun matrix-element-nil (element-type)
   (cdr (assoc element-type *matrix-element-nil*)))
+
 
 (defvar *matrix-element-t*
   '((:any . t)
@@ -92,6 +94,7 @@
 
 (defclass matrix-uint (matrix-any) ())
 
+
 (defvar *matrix-type*
   '((:any . matrix-any)
     (:double . matrix-double)
@@ -101,6 +104,7 @@
 
 (defun matrix-type (element-type)
   (cdr (assoc element-type *matrix-type*)))
+
 
 (defun make-matrix (n1 n2 &key (element-type :any)
                             (initial-element nil) (initial-contents nil))
@@ -148,6 +152,7 @@
 (defclass matrix-int-view (matrix-any-view) ())
 
 (defclass matrix-uint-view (matrix-any-view) ())
+
 
 (defvar *matrix-view-type*
   '((:any . matrix-any-view)
