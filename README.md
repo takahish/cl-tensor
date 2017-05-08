@@ -1,6 +1,6 @@
-# cl-eigen
+# cl-tensor
 
-cl-eigen is a common lisp library for linear algebra: matrices,
+cl-tensor is a common lisp library for linear algebra: matrices,
 vectors, numerical solvers, and related.
 
 ## dependencies
